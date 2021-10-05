@@ -1,4 +1,92 @@
-function successmessage=SamplePeakDetection(filepath,outputfile,file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,Spectralon_tail,ChunkMaxSize,FWMH_threshold,intensity_threshold)
+function successmessage=SamplePeakDetection(filepath,outputfile,file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,Spectralon_tail,FWMH_threshold,intensity_threshold)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% file:SamplePeakDetection.m
+% ***Description***:
+% This function serves automatically search for peaks in .mat files in 1.5
+% minute chunks. The user must specify the sample type in order to ensure
+% the correct thresholds are used. This algorithm is set up for mouse data,
+% blood data, bead data, and cell data. Please read the input carefully as
+% there are many ways to use this code!
+% Written By: Nilay Vora (nvora01@tufts.edu)
+% Date Written: 10/01/2021
+% Modifying Author:
+% Date Modified:
+% Latest Revision: 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Function details
+% Inputs:
+%   filepath = Location of all main folder where all subfolders are
+%   outputfile = Base name of all output files
+%   file_range = Which files do you want to analyze in a specific day
+%   Window_Low = Low frequency cutoff of Butterworth filter window
+%   Window_High = High frequency cutoff of Butterworth filter window
+%   Fs = Sample frequency used during acquisition
+%   analysisvals = Which detection methods do you want to use
+%   sample_type = (sting) Sample type (i.e. 'Cells','Blood','Beads',
+%                  'Animal','LNP_DiD','LNP_DIL') 
+%   exp_num = Expected number of events in 1.5 minute chunk
+%   std_threshold = Cluster cutoff value
+%   Spectralon_tail= Tail format of Spectralon file
+%   FWMH_threshold = Minimum peak width allowe do be detected
+%   intensity_threshold= Minimum peak intensity for detection
+% Outputs:
+%   successmessage = a string that indicates the completion of the code
+%
+% Usage SamplePeakDetection(filepath,outputfile,file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,Spectralon_tail,FWMH_threshold,intensity_threshold)
+% Example:
+% filepath = 'U:\Nilay\IVFC\Acquired Data\Blood Data\NV_092821_Blood_LNPs';
+% outputfile= 'NEW_peak_values_09_28_21';
+% file_range= [1:3]; 
+% Window_Low= 50; % removes frequencies below 50/30000 Hz
+% Window_High= 6000; % removes frequencies above 6000/30000 Hz
+% Fs=60e3; %60,000 samples per second
+% analysisvals=[1:2]; %For LNPs we only want RFLR and scattering, for cells
+%                     we may want [1:4] (RFLR, FLR total, Scat, FLR+Scat)
+%                     for beads [1:3] (FLR,SCAT,FLR+SCAT)
+% sample_type= 'LNP_DiD';
+% exp_num=[]; %used the default value of 6000/9
+% std_threshold=3; 3*sigma(x) is used to detect a cluster event 
+% Spectralon_tail= '_1'; %in most cases there is a tail value, if there is 
+%                         none leave blank;   
+% FWMH_threshold=0; Usually kept at 0 and is inactive
+% intensity_threshold= 0.1; Currently only used for FLR analysis!
+% output=SamplePeakDetection(filepath,outputfile,file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,Spectralon_tail,FWMH_threshold,intensity_threshold)
+%% Checking inputs
+if isempty(sample_type)
+    disp('Sample Type is not specified, please chose one of the options below');
+    prompt = 'What Sample are you analyzing: Cells,Blood,Beads,Animal,LNP_DiD,LNP_DIL?';
+    sample_type = input(prompt,'s');
+end
+switch 
+end
+if nargin < 12
+outputfile= 'NEW_peak_values_09_28_21';
+file_range= [1:3]; 
+Window_Low= 50; % removes frequencies below 50/30000 Hz
+Window_High= 6000; % removes frequencies above 6000/30000 Hz
+Fs=60e3; %60,000 samples per second
+analysisvals=[1:2]; %For LNPs we only want RFLR and scattering, for cells
+                    %we may want [1:4] (RFLR, FLR total, Scat, FLR+Scat)
+                    %for beads [1:3] (FLR,SCAT,FLR+SCAT)
+sample_type= 'LNP_DiD';
+exp_num=[]; %used the default value of 6000/9
+std_threshold=3; %3*sigma(x) is used to detect a cluster event 
+Spectralon_tail= '_1'; %in most cases there is a tail value, if there is 
+                       %none leave blank;   
+FWMH_threshold=0; %Usually kept at 0 and is inactive
+intensity_threshold= 0.1; %Currently only used for FLR analysis!
+end
+
+if nargin < 11
+    Window_Low=50;
+    Window_High=6000;
+end
+
+if nargin < 10
+    Window_High=6000;
+end
+
+
 %% Finding Folders with Files
 mainFolder='U:\Nilay\IVFC\Acquired Data\Blood Data\NV_092821_Blood_Cell';
 num_files=[];
@@ -49,7 +137,7 @@ for f=[1:4]
     all_file_num_Store=zeros(1,1);
     
     disp(['Current evaluation based on ',types{f},' Data']);
-    for i=5:7%length(subdirinfo)
+    for i=5:7
         disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
         tic
         if~isempty(subdirinfo{i})
@@ -61,26 +149,9 @@ for f=[1:4]
             spec=textscan(fid,'%f %f %f %f %f %f %f %f','Delimiter',',');
             spec=cell2mat(spec);
             fclose(fid);
-            %            cd(scatpath)
-            %             if i==1;
-            %                 spec_file=dir('*AVG.csv');
-            %                 spec=load(spec_file(1).name);
-            %             end
-            
-            %spec=load(subdirinfo{1}.name); %spec=eval(subdirinfo{1}.name(1:16)end-4));
             %%
             cd(subdirinfo{i}.folder)
             data_type=subdirinfo{i}.name(1:end-4);
-            %         if i>=5
-            %             num_chunks =4;
-            %             %         elseif i==7 || i==8;
-            %             %             num_chunks =1;
-            %             %         elseif i==5;
-            %             %             num_chunks =1;
-            %         else
-            %                          num_chunks =7;
-            %         end
-            
             dirinfo2 = dir();
             dirinfo2(~[dirinfo2.isdir]) = [];  %remove non-directories
             subdirinfo2 = cell(length(dirinfo2));
@@ -131,26 +202,10 @@ for f=[1:4]
                 %% Loading data
                 disp([num2str(ii),' of ',num2str(num_chunks)])
                 load([data_type,'_',num2str(ii),'_raw']) % variable =M %
-                %             spec=load('NV_022620_Calibration_Spectralon_Avg.csv');
                 if isempty(M)
                     
                 else
                     %% Filtering %%
-                    %                     M_filt(:,1)=(M(:,1)-mean(M(:,1)))./abs(spec(1));
-                    %                     M_filt(:,2)=(M(:,2)-mean(M(:,2)))./abs(spec(2));
-                    %                     M_filt(:,3)=(M(:,3)-mean(M(:,3)))./abs(spec(3));
-                    %                     M_filt(:,1)=(M(:,1)-mean(M(:,1)));
-                    %                     M_filt(:,2)=(M(:,2)-mean(M(:,2)));
-                    %                     M_filt(:,3)=(M(:,3)-mean(M(:,3)));
-                    %                     M_filt(:,4)=(M(:,4)-mean(M(:,4)));
-                    %                     M_filt(:,5)=(M(:,5)-mean(M(:,5)));
-                    %
-                    % M_filt(:,1)=(M(:,1)-mean(M(1:114000,1)));
-                    % M_filt(:,2)=(M(:,2)-mean(M(1:114000,2)));
-                    % M_filt(:,3)=(M(:,3)-mean(M(1:114000,3)));
-                    % M_filt(:,4)=(M(:,4)-mean(M(1:114000,4)));
-                    % M_filt(:,5)=(M(:,5)-mean(M(1:114000,5)));
-                    %
                     M_filt(:,1)=filtfilt(b,a,M(:,1))./abs(spec(1));
                     M_filt(:,2)=filtfilt(b,a,M(:,2))./abs(spec(2));
                     M_filt(:,3)=filtfilt(b,a,M(:,3))./abs(spec(3));
@@ -203,35 +258,8 @@ for f=[1:4]
                     cum_std(ii) = std(cumulative);
                     cum_avg(ii) = mean(cumulative);
                     cum_min(ii)=min(cumulative);
-                    %                     if ii>1
-                    %                         if cum_min(ii-1)+1.5>min(cumulative) && cum_min(ii-1)-1.5<min(cumulative)
-                    %                         else
-                    %                             diff=cum_min(ii-1)-cum_min(ii);
-                    %                             cumulative=cumulative+diff;
-                    %                             cum_std(ii) = std(cumulative);
-                    %                             cum_avg(ii) = mean(cumulative);
-                    %                             cum_min(ii)=min(cumulative);
-                    %                             if  flr_detect_1==0 && flr_detect_2==0;
-                    %                                 cumulative_det=cumulative;
-                    %                             elseif  flr_detect_1==1 && flr_detect_2==1;
-                    %                                 cumulative_det=cumulative+SN_Green;
-                    %                             end
-                    %                         end
-                    %                     end
                     cum_det_std(ii)=std(cumulative_det);
-                    %                 figure(i-3)
-                    %                 subplot(2,1,1);
-                    %                 plot(1.5*(ii-1)+(0:length(cumulative)-1)./60000/60,cumulative)
-                    %                 hold on
-                    %                 title('Cumulative Data')
-                    %                 xlabel('Time(min)')
-                    %
-                    %                 subplot(2,1,2);
-                    %                 plot(1.5*(ii-1)+(0:length(cumulative_det)-1)./60000/60,cumulative_det)
-                    %                 hold on
-                    %                 title('Cumulative Deterministic Data')
-                    %                 xlabel('Time(min)')
-                    %                 clear SN_405 SN_488 SN_633 SN_Red SN_Green
+
                     %% Peak Finding %%
                     %MINPEAKDISTANCE= specified how many points past the peak the next peak must be. Based on observations typical peak is 5 so choose 10
                     %NPEAKS= 3 times the expected number per chunk.  This is to protect against possibility that expected number varies from chunk to chunk
@@ -312,9 +340,6 @@ for f=[1:4]
                     
                     clear p_store l_store save_lcos locs_clusters pt1 pt2 ranges pstore2
                     %% Catch Clusters
-                    %endpt=find(cumulative(1:end-1)>5*cum_std(ii) & cumulative(2:end) < 5*cum_std(ii));
-                    %startpt=find(cumulative(1:end-1)<5*cum_std(ii) & cumulative(2:end)> 5*cum_std(ii));
-                    
                     endpt=find(cumulative_det(1:end-1)>3*cum_det_std(ii) & cumulative_det(2:end) < 3*cum_det_std(ii));
                     startpt=find(cumulative_det(1:end-1)<3*cum_det_std(ii) & cumulative_det(2:end)> 3*cum_det_std(ii));
                     
@@ -498,8 +523,6 @@ for f=[1:4]
                     toc
                 end
             end
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %% TEMP MODIFICATION %%
             all_peaks_Store=[all_peaks_Store,all_peaks];
             all_locs_Store=[all_locs_Store,all_locs];
             all_chunks_Store=[all_chunks_Store,all_chunks];
@@ -548,7 +571,6 @@ for f=[1:4]
             all_fwhm_405=zeros(1,1); all_fwhm_488=zeros(1,1); all_fwhm_633=zeros(1,1); all_fwhm_fl1=zeros(1,1); all_fwhm_fl2=zeros(1,1);
             all_peak_area_405=zeros(1,1); all_peak_area_488=zeros(1,1); all_peak_area_633=zeros(1,1); all_peak_area_fl1=zeros(1,1); all_peak_area_fl2=zeros(1,1);
             all_file_num=zeros(1,1);
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         end
     end
     if ~isempty(peak_values_Store)
@@ -566,78 +588,15 @@ for f=[1:4]
         peak_values(:,19)=all_fwhm_fl2_Store; peak_values(:,20)=all_peak_area_fl2_Store;
         peak_values(:,21)=all_file_num_Store;
         % Sorting peaks
-        peak_values=sortrows(peak_values,-8);
-        %     if length(peak_values)>exp_num*7*num_chunks
-        %         peak_values=peak_values(1:exp_num*7*num_chunks,:);
-        %     end
-        
         peak_values=sortrows(peak_values,6);
         delrow=find(peak_values(:,21)==0);
         peak_values(delrow,:)=[];
-        % for i=1:num_chunks
-        %     load([data_type,'_',num2str(i),'_raw']) % variable =M %
-        %     locs=find(peak_values(:,6)==i);
-        %     %% Filtering %%
-        %     M_filt(:,1)=filtfilt(b,a,M(:,1))./spec(1);
-        %     M_filt(:,2)=filtfilt(b,a,M(:,2))./spec(2);
-        %     M_filt(:,3)=filtfilt(b,a,M(:,3))./spec(3);
-        %     M_filt(:,4)=filtfilt(b,a,M(:,4));
-        %     M_filt(:,5)=filtfilt(b,a,M(:,5));
-        %
-        %         %% Normalizing by standard deviation
-        %     SN_405=(M_filt(:,1)-mean(M_filt(:,1)))./sigmas_final(1);
-        %     SN_488=(M_filt(:,2)-mean(M_filt(:,2)))./sigmas_final(2);
-        %     SN_633=(M_filt(:,3)-mean(M_filt(:,3)))./sigmas_final(3);
-        %     SN_Red=(M_filt(:,4)-mean(M_filt(:,4)))./sigmas_final(4);
-        %     SN_Green=(M_filt(:,5)-mean(M_filt(:,5)))./sigmas_final(5);
-        %
-        %     if flr_detect_1==1 && flr_detect_2==1; %ALL Channels
-        %         cumulative_det=SN_405+SN_488+SN_633+SN_Red+SN_Green;
-        %         cumulative=SN_405+SN_488+SN_633;
-        %     elseif flr_detect_1==1 && flr_detect_2==0; %Scattering and FL1
-        %         cumulative_det=SN_405+SN_488+SN_633+SN_Red;
-        %         cumulative=SN_405+SN_488+SN_633;
-        %     elseif flr_detect_1==0 && flr_detect_2==1; %Scattering and FL2
-        %         cumulative_det=SN_405+SN_488+SN_633+SN_Green;
-        %         cumulative=SN_405+SN_488+SN_633;
-        %     else % ONLY SCATTERING
-        %         cumulative=SN_405+SN_488+SN_633;
-        %         cumulative_det=SN_405+SN_488+SN_633;
-        %     end
-        %
-        %     if isempty(locs)==0
-        %         plocs=(peak_values(locs(1):locs(end),7));
-        %         Fs = 60000;            % Sampling frequency
-        %         T = 1/Fs;             % Sampling period
-        %         L = length(M);             % Length of signal
-        %         t = 1.5*(i-1)+(0:L-1)*T/60;        % Time vector
-        %
-        %         for ii=1:length(plocs)
-        %             t_peak(ii)=t(plocs(ii));
-        %             p_value(ii)=cumulative_det(plocs(ii));
-        %         end
-        %         figure(6)
-        %         plot(t,cumulative_det,'b-',t_peak,p_value,'m.','MarkerSize',20)
-        %         hold on
-        %     else
-        %        Fs = 60000;            % Sampling frequency
-        %        T = 1/Fs;             % Sampling period
-        %        L = length(M);             % Length of signal
-        %        t = 1.5*(i-1)+(0:L-1)*T/60;
-        %         figure(6)% Time vector
-        %         plot(t,cumulative_det,'b-')
-        %         hold on
-        %
-        %     end
-        %     clear M M_filt
         
-        % end
         clear cumulative
         
         % - - - - - - %
         %   S A V E   %
         % - - - - - - %
-        %cd(scatpath)
         
         cd(mainFolder)
         
@@ -648,20 +607,6 @@ for f=[1:4]
         cumulative.stdev = mean(cum_std);
         save(strcat(data_type, '_', 'cumulative_peak_data'), 'cumulative');
         
-        % Save normalized standard deviation values
-        %     for i = 1 : 3
-        %
-        %         sigmas(i) = sigmas_final(i) / spec(i);
-        %
-        %     end
-        %
-        %     for i = 4 : 5
-        %
-        %         sigmas(i) = sigmas_final(i);
-        %
-        %     end
-        %
-        %     save(strcat(data_type, '_sigmas_normalized'), 'sigmas');
     else
         disp('Skipped')
     end
