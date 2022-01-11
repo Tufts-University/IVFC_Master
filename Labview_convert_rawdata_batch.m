@@ -32,14 +32,10 @@ if nargin < 2
     Fs=60e3;
     Window_Low=50;
     Window_High=6000;
-end
-
-if nargin < 3
+elseif nargin < 3
     Window_Low=50;
     Window_High=6000;
-end
-
-if nargin < 4
+elseif nargin < 4
     Window_High=6000;
 end
 %% Finding Folders with Files
