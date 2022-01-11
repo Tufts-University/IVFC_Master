@@ -20,7 +20,7 @@ function [successmessage] = Labview_convert_rawdata_batch(filepath,Fs,Window_Low
 % Outputs:
 %   successmessage = a string that indicates the completion of the code
 %
-% Usage Labview_convert_rawdata_batch(filepath,Fs,Window)
+% Usage Labview_convert_rawdata_batch(filepath,Fs,Window_Low,Window_High)
 % Example:
 % filepath = 'U:\Nilay\IVFC\Acquired Data\Blood Data\NV_092821_Blood_LNPs';
 % Fs=60e3 %60,000 samples per second
