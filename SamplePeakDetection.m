@@ -428,7 +428,11 @@ for f=analysisvals
             elseif f==2
                 flr_detect_1 = 0; % Red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
-                fileN=[fileName,'_NoScatAll'];
+                if sample_type=='Blood' %#ok<BDSCA> 
+                    fileN=[fileName,'_NoScatAll'];
+                else
+                    fileN=[fileName,'_NoScat'];
+                end
             elseif f==3
                 flr_detect_1 = 1; % Red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
@@ -691,7 +695,11 @@ for f=analysisvals
                         % Get rid of zeros
                     end
                     %% Preparing for next iteration of loop
-                    idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
+                    if sample_type=='Beads' %#ok<BDSCA> 
+                         idx=find(fwhm>0 & sum(peak_data,2)>2);
+                    else
+                        idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
+                    end
                     if isempty(idx)==0
                         if f==4||f==2
                             idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold);

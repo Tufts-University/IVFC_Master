@@ -48,10 +48,10 @@ dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
 for k=1:size(dirinfo,1)
     if ispc
         folders=[dirinfo(k).folder,'\',dirinfo(k).name];
-        addpath(folders)
+        addpath(genpath(folders))
     elseif ismac
         folders=[dirinfo(k).folder,'/',dirinfo(k).name];
-        addpath(folders)
+        addpath(genpath(folders))
     end
 end
 cd(currentpath)
@@ -61,7 +61,7 @@ num_files=size(files,1); % number of files listed above
 % List the legend elements
 legend_el=cell(1,size(files,1));
 for j=1:size(files,1)
-    v=str2double(strip(strsplit(files{1},'_'),'m'));
+    v=str2double(strip(strsplit(files{j},'_'),'m'));
     v=v(~isnan(v));
     legend_el{j}=[num2str(v(1)),'/',num2str(v(2))];
 end
@@ -108,7 +108,7 @@ for i=1:5
     ax = gca; % get the axis handle
     % set all color and transparency for the bars:
     set(ax.Children,{'FaceColor'},mat2cell(lines(num_files),ones(num_files,1)))
-    set(ax.Children,{'FaceAlpha'},repmat({0.7},num_files,1))
+    set(ax.Children,{'FaceAlpha'},repmat({0.5},num_files,1))
     % plot all the curves:
     plot(squeeze(fits(:,1,:)),squeeze(fits(:,2,:)),'LineWidth',3)
     hold off
