@@ -29,9 +29,8 @@ function successmessage=BeadSorting(filepath,file_range)
 clc
 %% Find Folders
 mainFolder=filepath;
-num_files=[];
 cd(mainFolder)
-pv=[];
+
 
 dirinfo = dir();
 dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
@@ -47,7 +46,7 @@ end
 
 subdirinfo =  subdirinfo(~cellfun('isempty',subdirinfo));
 
-types={'RFLR';'Cumulative';'Scattering Only';'FLR Only'};
+
 %% Main Loop: Split the Cells from Beads
 for i=file_range
     disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
@@ -60,10 +59,9 @@ for i=file_range
         chunks=unique(peak_values(:,6));
         for j=min(chunks):max(chunks)
             disp(['Chunk # ',num2str(j),' of ',num2str(max(chunks))]);
-            a=find(pv1(:,6)==j);
+            a=pv1(:,6)==j;
             loc=pv1(a,7);
-            wid=pv1(a,9);
-            load([subdirinfo{i}(1).name(1:end-8),'NoScatAll.mat'])
+            load([subdirinfo{i}(1).name(1:end-8),'NoScatAll.mat'],'peak_values')
             pv2=peak_values;
             a2=find(pv2(:,6)==j);
             loc2=pv2(a2,7);
@@ -72,9 +70,9 @@ for i=file_range
                 l2=loc2(k);
                 match=find(loc>=l2-wid2(k).*1.5 & loc<=l2+wid2(k).*1.5,1);
                 if ~isempty(match)
-                    del=[del;pv2(a2(k),:)];
+                    del=[del;pv2(a2(k),:)]; %#ok<AGROW> 
                 else
-                    truepeaks=[truepeaks;pv2(a2(k),:)];
+                    truepeaks=[truepeaks;pv2(a2(k),:)]; %#ok<AGROW> 
                 end
             end
         end
@@ -92,10 +90,10 @@ for i=file_range
     disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
     if~isempty(subdirinfo{i}(1))
         cd(subdirinfo{i}(1).folder)
-        load([subdirinfo{i}(1).name(1:end-8),'NoScatBeads.mat'])
-        pv1=[pv1;peak_values];
-        load([subdirinfo{i}(1).name(1:end-8),'NoScatCell.mat'])
-        pv2=[pv2;peak_values];
+        load([subdirinfo{i}(1).name(1:end-8),'NoScatBeads.mat'],'peak_values')
+        pv1=[pv1;peak_values]; %#ok<AGROW> 
+        load([subdirinfo{i}(1).name(1:end-8),'NoScatCell.mat'],'peak_values')
+        pv2=[pv2;peak_values]; %#ok<AGROW> 
     end
 end
 cd(mainFolder)
