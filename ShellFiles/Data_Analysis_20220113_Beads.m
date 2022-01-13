@@ -14,8 +14,8 @@ filepath = 'U:\Nilay\IVFC\Acquired Data\Bead Calibration Data\2022\NV_011322_Cal
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-% output=Labview_convert_rawdata_batch(filepath,Fs,Window_Low,Window_High);
-% disp(output)
+output=Labview_convert_rawdata_batch(filepath,Fs,Window_Low,Window_High);
+disp(output)
 close all
 
 %Peak Detection
