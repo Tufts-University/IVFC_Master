@@ -1,4 +1,7 @@
-function successmessage=SamplePeakDetection(filepath,outputfile,file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,Spectralon_tail,FWMH_threshold,intensity_threshold)
+function successmessage=SamplePeakDetection(filepath,outputfile,...
+    file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,...
+    exp_num,std_threshold,Spectralon_tail,FWMH_threshold,...
+    intensity_threshold,bead_flag)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % file:SamplePeakDetection.m
 % ***Description***:
@@ -10,9 +13,9 @@ function successmessage=SamplePeakDetection(filepath,outputfile,file_range,Windo
 % Written By: Nilay Vora (nvora01@tufts.edu)
 % Date Written: 10/01/2021
 % Modifying Author:Nilay Vora
-% Date Modified: 01/12/2022
-% Latest Revision: Hard Coded parameters for detection of beads when doing
-% calibration (see line 432-436 and 699-703).
+% Date Modified: 01/13/2022
+% Latest Revision: Added a new flag to seperate bead peaks from cell peaks
+% in mixed blood samples.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Function details
 % Inputs:
@@ -30,6 +33,7 @@ function successmessage=SamplePeakDetection(filepath,outputfile,file_range,Windo
 %   Spectralon_tail= Tail format of Spectralon file
 %   FWMH_threshold = Minimum peak width allowe do be detected
 %   intensity_threshold= Minimum peak intensity for detection
+%   bead_flag=Indicator that seperated beads from cell peaks in blood data
 % Outputs:
 %   successmessage = a string that indicates the completion of the code
 %
@@ -53,9 +57,10 @@ function successmessage=SamplePeakDetection(filepath,outputfile,file_range,Windo
 %                         none leave blank;
 % FWMH_threshold=0; Usually kept at 0 and is inactive
 % intensity_threshold= 0.1; Currently only used for FLR analysis!
+% bead_flag=0;
 % output=SamplePeakDetection(filepath,outputfile,file_range,Window_Low,...
 % Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
-% Spectralon_tail,FWMH_threshold,intensity_threshold)
+% Spectralon_tail,FWMH_threshold,intensity_threshold,0)
 
 %% Checking inputs
 if isempty(sample_type)
@@ -84,6 +89,11 @@ end
 if isempty(filepath)
     disp('Using Current Directory');
     filepath=pwd;
+end
+if isempty(bead_flag) && strcmp(sample_type,'Blood')==0
+    bead_flag=0;
+else
+    bead_flag=1;
 end
 %% Modifying Evaluation Parameters
 switch sample_type
@@ -870,5 +880,9 @@ for f=analysisvals
     else
         disp('Skipped')
     end
+end
+if bead_flag==1
+    successmessage=BeadSorting(filepath,file_range);
+    disp(successmessage)
 end
 successmessage='Completed Peak Detection';
