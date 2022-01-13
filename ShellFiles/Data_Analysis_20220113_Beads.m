@@ -10,7 +10,7 @@ clc
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'Z:\Nilay\IVFC\Acquired Data\Bead Calibration Data\2022\NV_011322_Calibration';
+filepath = 'U:\Nilay\IVFC\Acquired Data\Bead Calibration Data\2022\NV_011322_Calibration';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
