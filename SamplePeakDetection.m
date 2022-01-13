@@ -9,9 +9,10 @@ function successmessage=SamplePeakDetection(filepath,outputfile,file_range,Windo
 % there are many ways to use this code!
 % Written By: Nilay Vora (nvora01@tufts.edu)
 % Date Written: 10/01/2021
-% Modifying Author:
-% Date Modified:
-% Latest Revision:
+% Modifying Author:Nilay Vora
+% Date Modified: 01/12/2022
+% Latest Revision: Hard Coded parameters for detection of beads when doing
+% calibration (see line 432-436 and 699-703).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Function details
 % Inputs:
