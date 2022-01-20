@@ -9,8 +9,9 @@ function successmessage=BeadSorting(filepath,file_range)
 % Written By: Nilay Vora (nvora01@tufts.edu)
 % Date Written: 01/13/2022
 % Modifying Author:Nilay Vora
-% Date Modified: 
-% Latest Revision:
+% Date Modified: 01/19/2022
+% Latest Revision: Manually modified indexing due to error in lines 49-52,
+% not sure if this is the right correction.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Function details
 % Inputs:
@@ -46,7 +47,9 @@ end
 
 subdirinfo =  subdirinfo(~cellfun('isempty',subdirinfo));
 
-
+if file_range(1)~=1
+    file_range=file_range-(file_range(1)-1);
+end
 %% Main Loop: Split the Cells from Beads
 for i=file_range
     disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
