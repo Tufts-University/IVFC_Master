@@ -90,7 +90,7 @@ if isempty(filepath)
     disp('Using Current Directory');
     filepath=pwd;
 end
-if isempty(bead_flag) && strcmp(sample_type,'Blood')==0
+if isempty(bead_flag) || strcmp(sample_type,'Blood')==0 
     bead_flag=0;
 else
     bead_flag=1;

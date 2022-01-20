@@ -12,7 +12,7 @@ clc
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'Z:\Nilay\IVFC\Acquired Data\Bead Calibration Data\2022\NV_011922_Calibration';
+filepath = 'U:\Nilay\IVFC\Acquired Data\Bead Calibration Data\2022\NV_011922_Calibration';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -21,13 +21,13 @@ disp(output)
 close all
 
 %Peak Detection
-outputfile= 'NEW_peak_values_01_19_22';
+outputfile= 'NEW2_peak_values_01_19_22';
 file_range= (1:2);
 analysisvals=(1:3);
 sample_type= 'Beads';
 exp_num=[];
 std_threshold=4;
-Spectralon_tail= '';
+Spectralon_tail= '_1';
 FWMH_threshold=0;
 intensity_threshold= 0.75;
 bead_flag=0;
@@ -44,6 +44,6 @@ files={'NEW_peak_values_11_22_21';...
     'NEW_peak_values_12_20_21';...
     'NEW_peak_values_01_12_22';...
     'NEW_peak_values_01_13_22';...
-    'NEW_peak_values_01_19_22'};
+    'NEW2_peak_values_01_19_22'};
 output= DailyCalibrationScript(files);
 disp(output)
