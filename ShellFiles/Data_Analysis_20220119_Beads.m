@@ -5,7 +5,12 @@
 %% Experiment Note
 % Experiencing some issues with the anova plots, the distributions keep
 % changing, I suspect this is an error in the code. Will have to look and
-% correct
+% correct. 
+
+% Looked into error, there seems to be some issues with spectralon
+% placement, as well as reconstitution of beads has changed the
+% distributions, this observed pattern is consistent with previous
+% timepoints where we added new beads to liquid samples.
 %% Initialization
 clear
 clc
