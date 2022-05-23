@@ -2,7 +2,7 @@ function successmessage=SamplePeakDetection(filepath,outputfile,...
     file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,...
     exp_num,std_threshold,Spectralon_tail,FWMH_threshold,...
     intensity_threshold,bead_flag)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % file:SamplePeakDetection.m
 % ***Description***:
 % This function serves automatically search for peaks in .mat files in 1.5
@@ -13,9 +13,10 @@ function successmessage=SamplePeakDetection(filepath,outputfile,...
 % Written By: Nilay Vora (nvora01@tufts.edu)
 % Date Written: 10/01/2021
 % Modifying Author:Nilay Vora
-% Date Modified: 01/13/2022
+% Date Modified: 05/23/2022
 % Latest Revision: Added a new flag to seperate bead peaks from cell peaks
-% in mixed blood samples.
+% in mixed blood samples (01/13/22). Modified FWHM Measure Script for more
+% accurate quatification of peak widths (05/23/22)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Function details
 % Inputs:
@@ -692,17 +693,17 @@ for f=analysisvals
                         end
                         peak_height_cum=cumulative(locs(m)); % locs(m)
                         %405
-                        [fwhm_405(m),peak_area_405(m)]=NV_101719_fwhm_measure(data_fwhm(:,1),peak_height(1));
+                        [fwhm_405(m),peak_area_405(m)]=NV_052322_fwhm_measure(data_fwhm(:,1),peak_height(1));
                         %488
-                        [fwhm_488(m),peak_area_488(m)]=NV_101719_fwhm_measure(data_fwhm(:,2),peak_height(2));
+                        [fwhm_488(m),peak_area_488(m)]=NV_052322_fwhm_measure(data_fwhm(:,2),peak_height(2));
                         %633
-                        [fwhm_633(m),peak_area_633(m)]=NV_101719_fwhm_measure(data_fwhm(:,3),peak_height(3));
+                        [fwhm_633(m),peak_area_633(m)]=NV_052322_fwhm_measure(data_fwhm(:,3),peak_height(3));
                         %Fl1
-                        [fwhm_fl1(m),peak_area_fl1(m)]=NV_101719_fwhm_measure(data_fwhm(:,4),peak_height(4));
+                        [fwhm_fl1(m),peak_area_fl1(m)]=NV_052322_fwhm_measure(data_fwhm(:,4),peak_height(4));
                         %Fl2
-                        [fwhm_fl2(m),peak_area_fl2(m)]=NV_101719_fwhm_measure(data_fwhm(:,5),peak_height(5));
+                        [fwhm_fl2(m),peak_area_fl2(m)]=NV_052322_fwhm_measure(data_fwhm(:,5),peak_height(5));
                         %cum
-                        [fwhm(m),peak_area(m)]=NV_101719_fwhm_measure(data_fwhm_cum,peak_height_cum); %#ok<AGROW>
+                        [fwhm(m),peak_area(m)]=NV_052322_fwhm_measure(data_fwhm_cum,peak_height_cum); %#ok<AGROW>
                         % Get rid of zeros
                     end
                     %% Preparing for next iteration of loop
