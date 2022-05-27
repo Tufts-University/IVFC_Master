@@ -705,7 +705,7 @@ for f=analysisvals
                         %Fl1
                         [fwhm_fl1(m),peak_area_fl1(m)]=NV_101719_fwhm_measure(data_fwhm(:,4),peak_height(4));
                         %Fl2
-                        [fwhm_fl2(m),peak_area_fl2(m)]=NV_052322_fwhm_measure(data_fwhm(:,5),peak_height(5));
+                        [fwhm_fl2(m),peak_area_fl2(m)]=NV_101719_fwhm_measure(data_fwhm(:,5),peak_height(5));
                         %cum
                         [fwhm(m),peak_area(m)]=NV_101719_fwhm_measure(data_fwhm_cum,peak_height_cum); %#ok<AGROW>
                         % Get rid of zeros
