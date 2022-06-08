@@ -416,7 +416,7 @@ for f=analysisvals
             if subdirinfo{1}.name(end-10)=='l'
                 spec_file =[subdirinfo{1}.name(1:end-10),'_Spectralon_Avg',Spectralon_tail,'.csv'];
             else
-                spec_file =[subdirinfo{1}.name(1:end-11),'_Spectralon_Avg',Spectralon_tail,'.csv'];
+                spec_file =[subdirinfo{1}.name(1:end-4),'_Spectralon_Avg',Spectralon_tail,'.csv'];
             end
             % Spectralon loading
             cd(mainFolder)
@@ -427,7 +427,7 @@ for f=analysisvals
             % Find all raw files
             cd(scatpath)
             %data_type=subdirinfo{i}.name(1:end-4);
-            data_type=subdirinfo{i}.name(1:end-10);
+            data_type=subdirinfo{i}.name(1:end-4);
             dirinfo2 = dir();
             dirinfo2(~[dirinfo2.isdir]) = [];  %remove non-directories
             subdirinfo2 = cell(length(dirinfo2));
@@ -444,7 +444,7 @@ for f=analysisvals
             elseif f==2
                 flr_detect_1 = 0; % Red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
-                if sample_type=='Blood' && bead_flag==1 %#ok<BDSCA>
+                if sample_type=='Blood' & bead_flag==1 %#ok<BDSCA>
                     fileN=[fileName,'_NoScatAll'];
                 else
                     fileN=[fileName,'_NoScat'];
