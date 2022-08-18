@@ -1,4 +1,4 @@
-function successmessage=SamplePeakDetection(filepath,outputfile,...
+function successmessage=SamplePeakDetection2(filepath,outputfile,...
     file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,...
     exp_num,std_threshold,Spectralon_tail,FWMH_threshold,...
     intensity_threshold,bead_flag)
@@ -447,7 +447,7 @@ for f=analysisvals
             elseif f==2
                 flr_detect_1 = 0; % Red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
-                if sample_type=='Blood' & bead_flag==1 %#ok<BDSCA> %% TEMP CHANGE
+                if sample_type=='Blood' & bead_flag==1 %#ok<AND2,BDSCA> %% TEMP CHANGE
                     fileN=[fileName,'_NoScatAll'];
                 else
                     fileN=[fileName,'_NoScat'];

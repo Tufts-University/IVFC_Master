@@ -1,20 +1,20 @@
-%% 041322_DataAnalysis
+%% 070722_DataAnalysis
 % Owner: Nilay Vora
 % Data Type: Blood Cell Data from Obese
-% Flow Date: 04/13/2022
+% Flow Date: 07/07/2022
 %% Experiment Note
-% 8 Week Diet Mice: Obese mouse number is 250, 172, 171
+% 18 Week Diet Mice: Obese mouse number is 216,219,217
 %% Initialization
 clear
 clc
 %% Calling Script
-%% Obese Mouse Loop
+%% Lean Mouse Loop
 for i =1:3
     % Labview Conversion
     if i==1
-        filepath = 'T:\Nilay\IVFC\Acquired Data\SydneyMice\NV_041322_ObeseCancer';
+        filepath = 'T:\Nilay\IVFC\Acquired Data\SydneyMice\NV_070722_ObeseCancer';
     else
-        filepath = ['T:\Nilay\IVFC\Acquired Data\SydneyMice\NV_041322_ObeseCancer',num2str(i)];
+        filepath = ['T:\Nilay\IVFC\Acquired Data\SydneyMice\NV_070722_ObeseCancer',num2str(i)];
     end
     Fs=60e3;
     Window_Low= 50;
@@ -28,7 +28,7 @@ for i =1:3
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
     %Peak Detection
-    outputfile= 'NEW_peak_values_04_13_22';
+    outputfile= 'NEW_peak_values_07_07_22';
     file_range= (1:length(dirinfo));
     clear dirinfo
     analysisvals=(1:4);
