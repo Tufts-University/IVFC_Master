@@ -681,16 +681,16 @@ for f=analysisvals
                     clusterpts(bad_peaks,:)=[]; %#ok<AGROW>
                     clear bad_peaks % reduces memory footprint
                     %% Set cluster range for interrogation based on closeness
-                    close_peaks = find(clusterpts(2:end,1)-clusterpts(1:end-1,2)<5);
-                    check_ranges = [clusterpts(:,1)-5, clusterpts(:,2)+5];
+                    close_peaks = find(clusterpts(2:end,1)-clusterpts(1:end-1,2)<10);
+                    check_ranges = [clusterpts(:,1)-10, clusterpts(:,2)+10];
                     for pts = 1:size(close_peaks,1)
                         check_ranges(close_peaks(pts),2) = clusterpts(close_peaks(pts)+1,1);
                         check_ranges(close_peaks(pts)+1,1) = clusterpts(close_peaks(pts),2);
                     end
                     close_peaks = find(clusterpts(2:end,2)-clusterpts(1:end-1,1)<10);
                     for pts = 1:size(close_peaks,1)
-                        check_ranges(close_peaks(pts),1) = clusterpts(close_peaks(pts)-1,2);
-                        check_ranges(close_peaks(pts)-1,2) = clusterpts(close_peaks(pts),1);
+                        check_ranges(close_peaks(pts),2) = clusterpts(close_peaks(pts)+1,1);
+                        check_ranges(close_peaks(pts)+1,1) = clusterpts(close_peaks(pts),2);
                     end
                     %% FWHM finding & Grabbing True Maximums
                     %FWHMs are found from the filtered peaks
@@ -729,7 +729,7 @@ for f=analysisvals
                     end
                     %% Preparing for next iteration of loop
                     if sample_type=='Beads' %#ok<BDSCA> 
-                        idx=find(fwhm>0 & sum(peak_data,2)>2);
+                         idx=find(fwhm>0 & sum(peak_data,2)>2);
                     else
                         idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
                     end

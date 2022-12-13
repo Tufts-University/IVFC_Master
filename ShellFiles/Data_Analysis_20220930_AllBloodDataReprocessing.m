@@ -1,7 +1,7 @@
-%% 05/23/22_DataAnalysis
+%% 09/30/22_DataAnalysis
 % Owner: Nilay Vora
 % Data Type: Full Dataset Retraining
-% Run Date: 05/23/2022 
+% Run Date: 09/30/2022 
 %% Initialization
 clear
 clc
@@ -19,7 +19,7 @@ for i=1:length(T)
     filepath=cd;
     Fs=60e3;
     Window_Low= 50;
-    Window_High= 10000;
+    Window_High= 6000;
     date=exp_name(5:10);
     date = strread(date,'%2s');
     %% Peak Detection
@@ -28,7 +28,7 @@ for i=1:length(T)
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
     file_range= (1:length(dirinfo));
-    analysisvals=[2,4];
+    analysisvals=[1];
     sample_type= 'Blood';
     exp_num=round(6000/9);
     std_threshold=3;
@@ -43,11 +43,11 @@ for i=1:length(T)
     intensity_threshold= 0.1;
     if i>=6 && i<=13
         bead_flag=0;
-        analysisvals=[2];
+        analysisvals=[1];
     else
         bead_flag=1;
     end
-    output=SamplePeakDetection2(filepath,outputfile,file_range,Window_Low,...
+    output=SamplePeakDetection_PCA(filepath,outputfile,file_range,Window_Low,...
         Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
         Spectralon_tail,FWMH_threshold,intensity_threshold,bead_flag);
     disp(output)

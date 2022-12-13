@@ -6,7 +6,8 @@ function[fwhm,peak_area]=NV_052322_fwhm_measure(data_fwhm,peak_height)
 % poor labeling.
 %% Grab FWHMs
 % step left
-[~,locs2]=findpeaks(data_fwhm,'NPeaks',3,'SortStr','descend');
+%[~,locs2]=findpeaks(data_fwhm,'NPeaks',3,'SortStr','descend');
+[~,locs2]=findpeaks(data_fwhm,'SortStr','descend');
 locs2=sort(locs2,'ascend');
 peaks=data_fwhm(locs2);
 locs2(peaks<0.15.*peak_height)=[];

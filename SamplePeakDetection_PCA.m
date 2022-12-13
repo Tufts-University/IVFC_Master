@@ -1,8 +1,8 @@
-function successmessage=SamplePeakDetection2(filepath,outputfile,...
+function successmessage=SamplePeakDetection_PCA(filepath,outputfile,...
     file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,...
     exp_num,std_threshold,Spectralon_tail,FWMH_threshold,...
     intensity_threshold,bead_flag)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % file:SamplePeakDetection.m
 % ***Description***:
 % This function serves automatically search for peaks in .mat files in 1.5
@@ -13,10 +13,13 @@ function successmessage=SamplePeakDetection2(filepath,outputfile,...
 % Written By: Nilay Vora (nvora01@tufts.edu)
 % Date Written: 10/01/2021
 % Modifying Author:Nilay Vora
-% Date Modified: 05/23/2022
+% Date Modified: 01/13/2022
 % Latest Revision: Added a new flag to seperate bead peaks from cell peaks
-% in mixed blood samples (01/13/22). Modified FWHM Measure Script for more
-% accurate quatification of peak widths (05/23/22)
+% in mixed blood samples.
+% Modifying Author:Nilay Vora
+% Date Modified: 06/06/2022
+% Latest Revision: Changed the Green FLR FWHM measure script for peak
+% equalization
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Function details
 % Inputs:
@@ -91,276 +94,278 @@ if isempty(filepath)
     disp('Using Current Directory');
     filepath=pwd;
 end
-if isempty(bead_flag) %|| strcmp(sample_type,'Blood')==0 
+if isempty(bead_flag) || strcmp(sample_type,'Blood')==0
     bead_flag=0;
+else
+    bead_flag=1;
 end
 %% Modifying Evaluation Parameters
-switch sample_type
-    case 'Cells'
-        if nargin==13
-        else
-            if nargin < 13
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 12
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 11
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 10
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 9
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 7
-                analysisvals=(1:3); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 6
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:3); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 5
-                Window_High= 6000; % removes frequencies above 6000/30000 Hz
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:3); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 4
-                Window_Low= 50; % removes frequencies below 50/30000 Hz
-                Window_High= 6000; % removes frequencies above 6000/30000 Hz
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:3); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            end
-        end
-    case 'Blood'
-        if nargin==13
-        else
-            if nargin < 13
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 12
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 11
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 10
-                std_threshold=3; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 9
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=3; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 7
-                analysisvals=(1:4); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=3; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 6
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:4); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=3; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 5
-                Window_High= 6000; % removes frequencies above 6000/30000 Hz
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:4); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=3; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 4
-                Window_Low= 50; % removes frequencies below 50/30000 Hz
-                Window_High= 6000; % removes frequencies above 6000/30000 Hz
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:4); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=3; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            end
-        end
-    case 'Beads'
-        if nargin==13
-        else
-            if nargin < 13
-                intensity_threshold= 0.25; %Currently only used for FLR analysis!
-            elseif nargin < 12
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.25; %Currently only used for FLR analysis!
-            elseif nargin < 11
-                Spectralon_tail= ''; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.25; %Currently only used for FLR analysis!
-            elseif nargin < 10
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= ''; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.25; %Currently only used for FLR analysis!
-            elseif nargin < 9
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= ''; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.25; %Currently only used for FLR analysis!
-            elseif nargin < 7
-                analysisvals=(1:3); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= ''; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.25; %Currently only used for FLR analysis!
-            elseif nargin < 6
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:3); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= ''; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.25; %Currently only used for FLR analysis!
-            elseif nargin < 5
-                Window_High= 6000; % removes frequencies above 6000/30000 Hz
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:3); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= ''; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.25; %Currently only used for FLR analysis!
-            elseif nargin < 4
-                Window_Low= 50; % removes frequencies below 50/30000 Hz
-                Window_High= 6000; % removes frequencies above 6000/30000 Hz
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:3); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=4; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= ''; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.25; %Currently only used for FLR analysis!
-            end
-        end
-    case 'Animal'
-        if nargin==13
-        else
-            if nargin < 13
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 12
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 11
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 10
-                std_threshold=5; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 9
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=5; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 7
-                analysisvals=(1:4); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=5; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 6
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:4); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=5; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 5
-                Window_High= 6000; % removes frequencies above 6000/30000 Hz
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:4); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=5; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            elseif nargin < 4
-                Window_Low= 50; % removes frequencies below 50/30000 Hz
-                Window_High= 6000; % removes frequencies above 6000/30000 Hz
-                Fs=60e3; %60,000 samples per second
-                analysisvals=(1:4); % Assumes Cells in blood with beads
-                exp_num=6000/9; %Expected number of clusters
-                std_threshold=5; %3*sigma(x) is used to detect a cluster event
-                Spectralon_tail= '_1'; %in most cases there is a tail value, if there
-                % is none leave blank;
-                FWMH_threshold=0; %Usually kept at 0 and is inactive
-                intensity_threshold= 0.1; %Currently only used for FLR analysis!
-            end
-        end
-end
+% switch sample_type
+%     case 'Cells'
+%         if nargin==13
+%         else
+%             if nargin < 13
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 12
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 11
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 10
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 9
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 7
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 6
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 5
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 4
+%                 Window_Low= 50; % removes frequencies below 50/30000 Hz
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             end
+%         end
+%     case 'Blood'
+%         if nargin==13
+%         else
+%             if nargin < 13
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 12
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 11
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 10
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 9
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 7
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 6
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 5
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 4
+%                 Window_Low= 50; % removes frequencies below 50/30000 Hz
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             end
+%         end
+%     case 'Beads'
+%         if nargin==13
+%         else
+%             if nargin < 13
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 12
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 11
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 10
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 9
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 7
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 6
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 5
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 4
+%                 Window_Low= 50; % removes frequencies below 50/30000 Hz
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             end
+%         end
+%     case 'Animal'
+%         if nargin==13
+%         else
+%             if nargin < 13
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 12
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 11
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 10
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 9
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 7
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 6
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 5
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 4
+%                 Window_Low= 50; % removes frequencies below 50/30000 Hz
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             end
+%         end
+% end
 %% Main Code
 % Finding Folders with Files
 mainFolder=filepath;
@@ -373,17 +378,14 @@ dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
 dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
 [~,c]=natsortfiles({dirinfo.name});
 subdirinfo = cell(length(dirinfo));
-% 
-% for K = 1 : length(dirinfo)
-%     thisdir = dirinfo(c(K)).name;
-%     subdirinfo{K} = dir(fullfile(thisdir, '*.csv'));
-% end
+
 for K = 1 : length(dirinfo)
     thisdir = dirinfo(c(K)).name;
     subdirinfo{K} = dir(fullfile(thisdir, '*_1_raw.mat'));
 end
 
 subdirinfo =  subdirinfo(~cellfun('isempty',subdirinfo));
+
 Wn=[Window_Low Window_High]./(Fs/2);%Cutoff frequencies divided by Nyquist frequency
 [b,a]=butter(2,Wn);
 types={'Scattering Only';'FLR Only';'Cumulative';'RFLR'};
@@ -414,35 +416,10 @@ for f=analysisvals
         disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
         tic
         if~isempty(subdirinfo{i})
-            scatpath=subdirinfo{i}.folder;
-            %spec_file =[subdirinfo{1}.name(1:end-4),'_Spectralon_Avg',Spectralon_tail,'.csv'];
-            if subdirinfo{1}.name(end-10)=='l'
-                spec_file =[subdirinfo{1}.name(1:end-10),'_Spectralon_Avg',Spectralon_tail,'.csv'];
-            else
-                spec_file =[subdirinfo{1}.name(1:end-11),'_Spectralon_Avg',Spectralon_tail,'.csv'];
-            end
-            % Spectralon loading
-            cd(mainFolder)
-            folders = strsplit(mainFolder,'\');
-            folders(6) = [];
-            folders = strjoin(folders,'\');
-            spec_path = [folders,'\',spec_file];
-            fid=fopen(spec_path);
-            spec=textscan(fid,'%f %f %f %f %f %f %f %f','Delimiter',',');
-            spec=cell2mat(spec);
-            fclose(fid);
-            % Find all raw files
-            cd(scatpath)
-            %data_type=subdirinfo{i}.name(1:end-4);
             data_type=subdirinfo{i}.name(1:end-10);
-            dirinfo2 = dir();
-            dirinfo2(~[dirinfo2.isdir]) = [];  %remove non-directories
-            subdirinfo2 = cell(length(dirinfo2));
-            for K = 1 : length(dirinfo2)
-                thisdir2 = dirinfo2(K).name;
-                subdirinfo2{K} = dir(fullfile(thisdir2, '*_raw.mat'));
-            end
-            num_chunks=length(subdirinfo2{1});
+            cd(subdirinfo{i}.folder)
+            dirinfo2 = dir('*_raw.mat');
+            num_chunks=length(dirinfo2);
             % Select detection scheme
             if f==1
                 flr_detect_1 = 0; % Red Fluorescence
@@ -451,7 +428,7 @@ for f=analysisvals
             elseif f==2
                 flr_detect_1 = 0; % Red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
-                if sample_type=='Blood' & bead_flag==1 %#ok<AND2,BDSCA> %% TEMP CHANGE
+                if strcmp(sample_type,'Blood') && bead_flag==1 %#ok<BDSCA>
                     fileN=[fileName,'_NoScatAll'];
                 else
                     fileN=[fileName,'_NoScat'];
@@ -466,8 +443,7 @@ for f=analysisvals
                 fileN=[fileName,'_RFLR'];
             end
             % Load Standard Deviations
-            load([folders,'\',data_type,'\',data_type,'_sigmas.mat'],'sigmas_final'); % variable is sigmas_final
-            %% Determine expected cell count
+           %% Determine expected cell count
             exp_num=floor(exp_num); %dimensionless number of cells.
 
             for ii=1:num_chunks
@@ -477,29 +453,40 @@ for f=analysisvals
                 if isempty(M)
 
                 else
-                    %% Filtering %%
-                    M_filt(:,1)=filtfilt(b,a,M(:,1))./abs(spec(1));
-                    M_filt(:,2)=filtfilt(b,a,M(:,2))./abs(spec(2));
-                    M_filt(:,3)=filtfilt(b,a,M(:,3))./abs(spec(3));
-                    M_filt(:,4)=filtfilt(b,a,M(:,4));
-                    M_filt(:,5)=filtfilt(b,a,M(:,5));
-
-                    M_filt(:,1)=(M_filt(:,1)-mean(M_filt(:,1)));
-                    M_filt(:,2)=(M_filt(:,2)-mean(M_filt(:,2)));
-                    M_filt(:,3)=(M_filt(:,3)-mean(M_filt(:,3)));
-                    M_filt(:,4)=(M_filt(:,4)-mean(M_filt(:,4)));
-                    M_filt(:,5)=(M_filt(:,5)-mean(M_filt(:,5)));
-                    clear M
-                    %% Normalizing by standard deviation
-
-                    SN_405=(M_filt(:,1)-mean(M_filt(:,1)))./sigmas_final(1);
-                    SN_488=(M_filt(:,2)-mean(M_filt(:,2)))./sigmas_final(2);
-                    SN_633=(M_filt(:,3)-mean(M_filt(:,3)))./sigmas_final(3);
-                    SN_Red=(M_filt(:,4)-mean(M_filt(:,4)));
-                    SN_Green=(M_filt(:,5)-mean(M_filt(:,5)));
-                    Norm=1;
-                    SN_Green=SN_Green.*Norm;
-                    SN_Red=SN_Red.*Norm;
+                    %% Remove Clumps
+                    cum=sum(M(:,1:3),2);
+                    cum_std=std(cum);
+                    stop = 0;
+                    while 1
+                        if cum_std<1.75 || stop == 3
+                            break
+                        end
+                        for o=1:3
+                            mean_clump=movmean(M(:,o),[250,250]);
+                            %         clumps=zeros([length(M),1]);
+                            %         clumps(mean_clump>5*std(mean_clump))=mean_clump(mean_clump>5*std(mean_clump));
+                            M(:,o)=M(:,o)-mean_clump+mean(mean_clump);
+                            %M(M(:,i)<-2*std(M(:,i)),i)=0;
+                        end
+                        disp('I ran')
+                        cum=sum(M(:,1:3),2);
+                        cum_std=std(cum);
+                        stop = stop + 1;
+                    end
+                    %%%%%%%%%%%%%%%%%%%% 11/22 Edit %%%%%%%%%%%%%%%%%%%%%%%
+                    %% Load Bead data if available:
+                    % Check for bead file:
+                    bead_file = dir('*Beads.mat');
+                    if ~isempty(bead_file)
+                        %M = bead_removal(ii, M, bead_file(1).name);
+                    end
+                    %% Normalization
+                    M2 = (M-min(M))./(max(M)-min(M));
+                    %% Sensor cleaning
+                    [~,~,~,tsquared,~,~] = pca(M2(:,1:3));
+                    %% Normalization of the data set
+                    %norm = (tsquared -min(tsquared))/(max(tsquared)-min(tsquared));
+                    norm = tsquared;
 
                     if flr_detect_1==1 && flr_detect_2==1 %ALL Channels
                         cumulative_det=SN_405+SN_488+SN_633+SN_Green;
@@ -511,8 +498,8 @@ for f=analysisvals
                         cumulative_det=SN_Green+SN_Red;
                         cumulative=SN_405+SN_488+SN_633;
                     else % ONLY SCATTERING
-                        cumulative=SN_405+SN_488+SN_633;
-                        cumulative_det=SN_405+SN_488+SN_633;
+                        cumulative=norm;
+                        cumulative_det=norm;
                     end
                     if f==1||f==3
                         for row=1:length(cumulative)
@@ -556,8 +543,8 @@ for f=analysisvals
                     clear dist_left_edge dist_right_edge
 
                     %% Catch Clusters(round 1)
-                    endpt1=find(cumulative_det(1:end-1)>1*cum_det_std(ii) & cumulative_det(2:end) < 1*cum_det_std(ii));
-                    startpt1=find(cumulative_det(1:end-1)<1*cum_det_std(ii) & cumulative_det(2:end)> 1*cum_det_std(ii));
+                    endpt1=find(cumulative_det(1:end-1)>10 & cumulative_det(2:end) < 10);
+                    startpt1=find(cumulative_det(1:end-1)<10 & cumulative_det(2:end)> 10);
                     if length(startpt1)==length(endpt1)
                         ranges=[startpt1,endpt1];
                     elseif length(startpt1)>length(endpt1)
@@ -604,8 +591,8 @@ for f=analysisvals
 
                     clear p_store l_store save_lcos locs_clusters pt1 pt2 ranges pstore2
                     %% Catch Clusters
-                    endpt=find(cumulative_det(1:end-1)>std_threshold*cum_det_std(ii) & cumulative_det(2:end) < std_threshold*cum_det_std(ii));
-                    startpt=find(cumulative_det(1:end-1)<std_threshold*cum_det_std(ii) & cumulative_det(2:end)> std_threshold*cum_det_std(ii));
+                    endpt=find(cumulative_det(1:end-1)>10 & cumulative_det(2:end) < 10);
+                    startpt=find(cumulative_det(1:end-1)<10 & cumulative_det(2:end)> 10);
 
                     if length(startpt)==length(endpt)
                         ranges=[startpt,endpt];
@@ -681,8 +668,8 @@ for f=analysisvals
                     clusterpts(bad_peaks,:)=[]; %#ok<AGROW>
                     clear bad_peaks % reduces memory footprint
                     %% Set cluster range for interrogation based on closeness
-                    close_peaks = find(clusterpts(2:end,1)-clusterpts(1:end-1,2)<5);
-                    check_ranges = [clusterpts(:,1)-5, clusterpts(:,2)+5];
+                    close_peaks = find(clusterpts(2:end,1)-clusterpts(1:end-1,2)<10);
+                    check_ranges = [clusterpts(:,1)-10, clusterpts(:,2)+10];
                     for pts = 1:size(close_peaks,1)
                         check_ranges(close_peaks(pts),2) = clusterpts(close_peaks(pts)+1,1);
                         check_ranges(close_peaks(pts)+1,1) = clusterpts(close_peaks(pts),2);
@@ -700,16 +687,16 @@ for f=analysisvals
                     peak_data=zeros(length(locs),5);
                     for m=1:length(peaks)
                         %% Grab True Maximums
-                        data_range=M_filt(check_ranges(m,1):check_ranges(m,2),:); %grabs full cluster width by 5 matrix around peak
+                        data_range=M2(check_ranges(m,1):check_ranges(m,2),:); %grabs full cluster width by 5 matrix around peak
                         peak_data(m,:)=max(data_range); %grabs maximum which could be slightly different from channel to channel in time
                         clear data_range
                         %% Grab FWHMs
-                        peak_height=M_filt(locs(m),:);% locs(m)
+                        peak_height=M2(locs(m),:);% locs(m)
                         if clusterpts(m,2)+10>5400000
-                            data_fwhm=M_filt(check_ranges(m,1):end,:);
+                            data_fwhm=M2(check_ranges(m,1):end,:);
                             data_fwhm_cum=cumulative(clusterpts(m,1)-10:end);
                         else
-                            data_fwhm=M_filt(check_ranges(m,1):check_ranges(m,2),:);
+                            data_fwhm=M2(check_ranges(m,1):check_ranges(m,2),:);
                             data_fwhm_cum=cumulative(check_ranges(m,1):check_ranges(m,2));
                         end
                         peak_height_cum=cumulative(locs(m)); % locs(m)
@@ -728,14 +715,14 @@ for f=analysisvals
                         % Get rid of zeros
                     end
                     %% Preparing for next iteration of loop
-                    if sample_type=='Beads' %#ok<BDSCA> 
+                    if sample_type=='Beads' %#ok<BDSCA>
                         idx=find(fwhm>0 & sum(peak_data,2)>2);
                     else
                         idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
                     end
                     if isempty(idx)==0
                         if f==4||f==2
-                            idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold & peak_area_fl2(idx)>=5);
+                            idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold);
                             if isempty(idx2)==0
                                 peaks=peaks(idx(idx2(:)));
                                 locs=locs(idx(idx2(:)));
@@ -809,7 +796,7 @@ for f=analysisvals
                             all_file_num=[all_file_num;File_num];%#ok<AGROW>
                         end
                     end
-                    clear M_filt peaks locs cumulative peak_data
+                    clear M2 peaks locs cumulative peak_data tsquared
                     clear fwhm fwhm_405 fwhm_488 fwhm_633 fwhm_fl1 fwhm_fl2
                     clear peak_area peak_area_405 peak_area_488 peak_area_633 peak_area_fl1 peak_area_fl2 File_num
                     toc
@@ -903,8 +890,8 @@ for f=analysisvals
         disp('Skipped')
     end
 end
-if bead_flag==1
-    successmessage=BeadSorting(filepath,file_range);
-    disp(successmessage)
-end
+% if bead_flag==1
+%     successmessage=BeadSorting(filepath,file_range);
+%     disp(successmessage)
+% end
 successmessage='Completed Peak Detection';
