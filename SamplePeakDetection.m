@@ -443,7 +443,7 @@ for f=analysisvals
             elseif f==2
                 flr_detect_1 = 0; % Red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
-                if sample_type=='Blood' && bead_flag==1 %#ok<BDSCA>
+                if strcmp('Blood',sample_type) && bead_flag==1 %#ok<BDSCA>
                     fileN=[fileName,'_NoScatAll'];
                 else
                     fileN=[fileName,'_NoScat'];
