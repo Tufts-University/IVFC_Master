@@ -711,7 +711,7 @@ for f=analysisvals
                     end
                     %% Preparing for next iteration of loop
                     if sample_type=='Beads' %#ok<BDSCA> 
-                         idx=find(fwhm>0 & sum(peak_data,2)>2);
+                         idx=find(fwhm>0 & sum(peak_data,2)>1.5);
                     else
                         idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
                     end
