@@ -1,16 +1,15 @@
-%% 01/10/23 DataAnalysis
+%% 01/11/23 DataAnalysis
 % Owner: Nilay Vora
 % Data Type: Calibration Measuremnts
-% Flow Date: 01/10/2023
+% Flow Date: 01/11/2023
 %% Experiment Note
-% Great Flow
 %% Initialization
 clear
 clc
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Nilay\IVFC\Acquired Data\Bead Calibration Data\2023\NV_011023_Calibration';
+filepath = 'T:\Nilay\IVFC\Acquired Data\Bead Calibration Data\2023\NV_011123_Calibration';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -19,7 +18,7 @@ disp(output)
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_01_10_23';
+outputfile= 'NEW_peak_values_01_11_23';
 file_range= (1:2);
 analysisvals=(1:3);
 sample_type= 'Beads';
@@ -42,6 +41,7 @@ files={'NEW_peak_values_06_07_22';...
     'NEW_peak_values_09_24_22';...
     'NEW_peak_values_01_06_23';...
     'NEW_peak_values_01_09_23';...
-    'NEW_peak_values_01_10_23'};
+    'NEW_peak_values_01_10_23';...
+    'NEW_peak_values_01_11_23'};
 output= DailyCalibrationScript(files);
 disp(output)
