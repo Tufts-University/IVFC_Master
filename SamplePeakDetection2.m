@@ -477,6 +477,26 @@ for f=analysisvals
                 if isempty(M)
 
                 else
+                    %% Remove Clumps
+                    cum=sum(M(:,1:3),2);
+                    cum_std=std(cum);
+                    stop = 0;
+                    while 1
+                        if cum_std<1.75 || stop == 3
+                            break
+                        end
+                        for o=1:3
+                            mean_clump=movmean(M(:,o),[250,250]);
+                            %         clumps=zeros([length(M),1]);
+                            %         clumps(mean_clump>5*std(mean_clump))=mean_clump(mean_clump>5*std(mean_clump));
+                            M(:,o)=M(:,o)-mean_clump+mean(mean_clump);
+                            %M(M(:,i)<-2*std(M(:,i)),i)=0;
+                        end
+                        disp('I ran')
+                        cum=sum(M(:,1:3),2);
+                        cum_std=std(cum);
+                        stop = stop + 1;
+                    end
                     %% Filtering %%
                     M_filt(:,1)=filtfilt(b,a,M(:,1))./abs(spec(1));
                     M_filt(:,2)=filtfilt(b,a,M(:,2))./abs(spec(2));
@@ -500,6 +520,15 @@ for f=analysisvals
                     Norm=1;
                     SN_Green=SN_Green.*Norm;
                     SN_Red=SN_Red.*Norm;
+                    %% Normalize 0 to 1
+                    M = [SN_405,SN_488,SN_633,SN_Red,SN_Green];
+                    M2 = (M-min(M))./(max(M)-min(M));
+                    [~,~,~,norm,~,~] = pca(M2(:,1:3));
+                    
+                    SN_405 = M(:,1);
+                    SN_488 = M(:,2);
+                    SN_633 = M(:,3);
+                    M2(:,4:5) = M2(:,4:5)./max(M2(:,4:5));
 
                     if flr_detect_1==1 && flr_detect_2==1 %ALL Channels
                         cumulative_det=SN_405+SN_488+SN_633+SN_Green;
@@ -507,21 +536,23 @@ for f=analysisvals
                     elseif flr_detect_1==1 && flr_detect_2==0 %Scattering and FL1
                         cumulative_det=SN_Red;
                         cumulative=SN_405+SN_488+SN_633;
+                        scat_norm = norm;
                     elseif flr_detect_1==0 && flr_detect_2==1 %Scattering and FL1 +FL2
                         cumulative_det=SN_Green+SN_Red;
                         cumulative=SN_405+SN_488+SN_633;
+                        scat_norm = norm;
                     else % ONLY SCATTERING
                         cumulative=SN_405+SN_488+SN_633;
                         cumulative_det=SN_405+SN_488+SN_633;
                     end
-                    if f==1||f==3
-                        for row=1:length(cumulative)
-                            if cumulative(row)<0
-                                cumulative(row)=0;
-                                cumulative_det(row)=0;
-                            end
-                        end
-                    end
+%                     if f==1||f==3
+%                         for row=1:length(cumulative)
+%                             if cumulative(row)<0
+%                                 cumulative(row)=0;
+%                                 cumulative_det(row)=0;
+%                             end
+%                         end
+%                     end
 
                     cum_std(ii) = std(cumulative); %#ok<AGROW>
                     cum_avg(ii) = mean(cumulative); %#ok<AGROW>
@@ -681,16 +712,37 @@ for f=analysisvals
                     clusterpts(bad_peaks,:)=[]; %#ok<AGROW>
                     clear bad_peaks % reduces memory footprint
                     %% Set cluster range for interrogation based on closeness
-                    close_peaks = find(clusterpts(2:end,1)-clusterpts(1:end-1,2)<5);
-                    check_ranges = [clusterpts(:,1)-5, clusterpts(:,2)+5];
-                    for pts = 1:size(close_peaks,1)
-                        check_ranges(close_peaks(pts),2) = clusterpts(close_peaks(pts)+1,1);
-                        check_ranges(close_peaks(pts)+1,1) = clusterpts(close_peaks(pts),2);
+                    if ~isempty(clusterpts)
+                        close_peaks = find(clusterpts(2:end,1)-clusterpts(1:end-1,2)<10);
+                        check_ranges = [clusterpts(:,1)-10, clusterpts(:,2)+10];
+                        for pts = 1:size(close_peaks,1)
+                            check_ranges(close_peaks(pts),2) = clusterpts(close_peaks(pts)+1,1);
+                            check_ranges(close_peaks(pts)+1,1) = clusterpts(close_peaks(pts),2);
+                        end
+                        close_peaks = find(clusterpts(2:end,2)-clusterpts(1:end-1,1)<10);
+                        for pts = 1:size(close_peaks,1)
+                            check_ranges(close_peaks(pts),1) = clusterpts(close_peaks(pts)-1,2);
+                            check_ranges(close_peaks(pts)-1,2) = clusterpts(close_peaks(pts),1);
+                        end
                     end
-                    close_peaks = find(clusterpts(2:end,2)-clusterpts(1:end-1,1)<10);
-                    for pts = 1:size(close_peaks,1)
-                        check_ranges(close_peaks(pts),1) = clusterpts(close_peaks(pts)-1,2);
-                        check_ranges(close_peaks(pts)-1,2) = clusterpts(close_peaks(pts),1);
+                    %% Merge Peaks (last cleaning step)
+                    m = 1;
+                    n = size(check_ranges,1);
+                    while m < n
+                        int = m + 1;
+                        if check_ranges(m,2)>check_ranges(int,1)
+                            while 1
+                                check_ranges(m,2) = check_ranges(int,2);
+                                check_ranges(int,:) = [];
+                                peaks(int) = [];
+                                locs(int) = [];
+                                n = n-1;
+                                if check_ranges(m,2)<check_ranges(int,1)
+                                    break
+                                end
+                            end
+                        end
+                        m = m+1;
                     end
                     %% FWHM finding & Grabbing True Maximums
                     %FWHMs are found from the filtered peaks
@@ -700,19 +752,19 @@ for f=analysisvals
                     peak_data=zeros(length(locs),5);
                     for m=1:length(peaks)
                         %% Grab True Maximums
-                        data_range=M_filt(check_ranges(m,1):check_ranges(m,2),:); %grabs full cluster width by 5 matrix around peak
+                        data_range=M2(check_ranges(m,1):check_ranges(m,2),:); %grabs full cluster width by 5 matrix around peak
                         peak_data(m,:)=max(data_range); %grabs maximum which could be slightly different from channel to channel in time
                         clear data_range
                         %% Grab FWHMs
                         peak_height=M_filt(locs(m),:);% locs(m)
                         if clusterpts(m,2)+10>5400000
                             data_fwhm=M_filt(check_ranges(m,1):end,:);
-                            data_fwhm_cum=cumulative(clusterpts(m,1)-10:end);
+                            data_fwhm_cum=scat_norm(clusterpts(m,1)-10:end);
                         else
                             data_fwhm=M_filt(check_ranges(m,1):check_ranges(m,2),:);
-                            data_fwhm_cum=cumulative(check_ranges(m,1):check_ranges(m,2));
+                            data_fwhm_cum=scat_norm(check_ranges(m,1):check_ranges(m,2));
                         end
-                        peak_height_cum=cumulative(locs(m)); % locs(m)
+                        peak_height_cum=scat_norm(locs(m)); % locs(m)
                         %405
                         [fwhm_405(m),peak_area_405(m)]=NV_101719_fwhm_measure(data_fwhm(:,1),peak_height(1));
                         %488
