@@ -1,16 +1,16 @@
-%% 03/01/23 DataAnalysis
+%% 03/02/23 DataAnalysis
 % Owner: Nilay Vora
 % Data Type: Calibration Measurements
-% Flow Date: 03/01/2023
+% Flow Date: 03/02/2023
 %% Experiment Note
-% Added New beads
+% C
 %% Initialization
 clear
 clc
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Taras\IVFC\Acquired Data\Bead Calibration Data\2023\NV_030123_Calibration';
+filepath = 'T:\Nilay\IVFC\Acquired Data\Bead Calibration Data\2023\NV_030123_Calibration';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
