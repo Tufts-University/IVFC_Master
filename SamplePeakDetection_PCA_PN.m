@@ -527,7 +527,8 @@ for f=analysisvals
                     SN_633=(M_filt(:,3)-mean(M_filt(:,3)))./sigmas_final(3);
                     SN_Red=(M_filt(:,4)-mean(M_filt(:,4)));
                     SN_Green=(M_filt(:,5)-mean(M_filt(:,5)));
-
+                    SN_Green(SN_Green<0) = 0;
+                    SN_Red(SN_Red<0) = 0;
                     M = [SN_405,SN_488,SN_633,SN_Red,SN_Green];
                     %% Normalization
                     M2 = (M-min(M))./(max(M)-min(M));

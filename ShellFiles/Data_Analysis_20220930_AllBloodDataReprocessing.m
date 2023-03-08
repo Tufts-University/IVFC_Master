@@ -12,7 +12,7 @@ mainpath = 'T:\Nilay\IVFC\Acquired Data\Blood Cell Data\CNNData';
 cd(mainpath)
 [~,T] = xlsread('dict_key.csv');
 T(1)=[];
-for i=10:length(T)
+for i=1:length(T)
     disp(['Reprocessing Day ',num2str(i),' of 30'])
     exp_name=T{i};
     cd(exp_name(2:end-1))
