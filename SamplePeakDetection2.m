@@ -737,7 +737,7 @@ for f=analysisvals
                                 peaks(int) = [];
                                 locs(int) = [];
                                 n = n-1;
-                                if check_ranges(m,2)<check_ranges(int,1)
+                                if m < int || check_ranges(m,2)<check_ranges(int,1) 
                                     break
                                 end
                             end

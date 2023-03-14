@@ -420,8 +420,10 @@ for f=analysisvals
             %spec_file =[subdirinfo{1}.name(1:end-4),'_Spectralon_Avg',Spectralon_tail,'.csv'];
             if subdirinfo{1}.name(end-10)=='l'
                 spec_file =[subdirinfo{1}.name(1:end-10),'_Spectralon_Avg',Spectralon_tail,'.csv'];
-            else
+            elseif subdirinfo{1}.name(end-11)=='l'
                 spec_file =[subdirinfo{1}.name(1:end-11),'_Spectralon_Avg',Spectralon_tail,'.csv'];
+            else 
+                spec_file =[subdirinfo{1}.name(1:end-10),'_Spectralon_Avg',Spectralon_tail,'.csv'];
             end
             % Spectralon loading
             cd(mainFolder)
@@ -430,6 +432,13 @@ for f=analysisvals
             folders = strjoin(folders,'\');
             spec_path = [folders,'\',spec_file];
             fid=fopen(spec_path);
+            if fid<0
+                folders = strsplit(mainFolder,'\');
+                folders(6) = [];
+                folders = strjoin(folders,'\');
+                spec_path = [folders,'\',spec_file];
+                fid=fopen(spec_path);
+            end
             spec=textscan(fid,'%f %f %f %f %f %f %f %f','Delimiter',',');
             spec=cell2mat(spec);
             fclose(fid);
@@ -520,14 +529,15 @@ for f=analysisvals
                     SN_633=(M_filt(:,3)-mean(M_filt(:,3)))./sigmas_final(3);
                     SN_Red=(M_filt(:,4)-mean(M_filt(:,4)));
                     SN_Green=(M_filt(:,5)-mean(M_filt(:,5)));
-
+                    SN_Green(SN_Green<0) = 0;
+                    SN_Red(SN_Red<0) = 0;
                     M = [SN_405,SN_488,SN_633,SN_Red,SN_Green];
                     %% Normalization
                     M2 = (M-min(M))./(max(M)-min(M));
                     %% Sensor cleaning
                     [~,~,~,tsquared,~,~] = pca(M2(:,1:3));
                     %% Normalization of the data set
-                    %norm = (tsquared -min(tsquared))/(max(tsquared)-min(tsquared));
+                    M2 = M2(:,4:5)./max(M2(:,4:5));
                     norm = tsquared;
                     if flr_detect_1==1 && flr_detect_2==1 %ALL Channels
                         cumulative_det=SN_405+SN_488+SN_633+SN_Green;
@@ -535,9 +545,11 @@ for f=analysisvals
                     elseif flr_detect_1==1 && flr_detect_2==0 %Scattering and FL1
                         cumulative_det=SN_Red;
                         cumulative=SN_405+SN_488+SN_633;
+                        scatnorm = norm;
                     elseif flr_detect_1==0 && flr_detect_2==1 %Scattering and FL1 +FL2
                         cumulative_det=SN_Green+SN_Red;
                         cumulative=SN_405+SN_488+SN_633;
+                        scat_norm = norm;
                     else % ONLY SCATTERING
                         cumulative=SN_405+SN_488+SN_633;
                         cumulative_det=norm;
@@ -584,8 +596,8 @@ for f=analysisvals
                     clear dist_left_edge dist_right_edge
 
                     %% Catch Clusters(round 1)
-                    endpt1=find(cumulative_det(1:end-1)>10 & cumulative_det(2:end) < 10);
-                    startpt1=find(cumulative_det(1:end-1)<10 & cumulative_det(2:end)> 10);
+                    endpt1=find(cumulative_det(1:end-1)>std_threshold*cum_det_std(ii) & cumulative_det(2:end) < std_threshold);
+                    startpt1=find(cumulative_det(1:end-1)<std_threshold & cumulative_det(2:end)> std_threshold);
                     if length(startpt1)==length(endpt1)
                         ranges=[startpt1,endpt1];
                     elseif length(startpt1)>length(endpt1)
@@ -632,8 +644,8 @@ for f=analysisvals
 
                     clear p_store l_store save_lcos locs_clusters pt1 pt2 ranges pstore2
                     %% Catch Clusters
-                    endpt=find(cumulative_det(1:end-1)>10 & cumulative_det(2:end) < 10);
-                    startpt=find(cumulative_det(1:end-1)<10 & cumulative_det(2:end)> 10);
+                    endpt=find(cumulative_det(1:end-1)>std_threshold & cumulative_det(2:end) < std_threshold);
+                    startpt=find(cumulative_det(1:end-1)<std_threshold & cumulative_det(2:end)>std_threshold);
 
                     if length(startpt)==length(endpt)
                         ranges=[startpt,endpt];
@@ -729,9 +741,8 @@ for f=analysisvals
                     %% Merge Peaks (last cleaning step)
                     m = 1;
                     n = size(check_ranges,1);
-                    while m < n
+                    while 1
                         int = m + 1;
-                        if int>length(check_ranges)
                         if check_ranges(m,2)>check_ranges(int,1)
                             while 1
                                 check_ranges(m,2) = check_ranges(int,2);
@@ -739,12 +750,18 @@ for f=analysisvals
                                 peaks(int) = [];
                                 locs(int) = [];
                                 n = n-1;
+                                if m>=n
+                                    break
+                                end
                                 if check_ranges(m,2)<check_ranges(int,1)
                                     break
                                 end
                             end
                         end
                         m = m+1;
+                        if m>=n
+                            break
+                        end
                     end
                     %% FWHM finding & Grabbing True Maximums
                     %FWHMs are found from the filtered peaks

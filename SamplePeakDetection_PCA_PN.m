@@ -420,8 +420,10 @@ for f=analysisvals
             %spec_file =[subdirinfo{1}.name(1:end-4),'_Spectralon_Avg',Spectralon_tail,'.csv'];
             if subdirinfo{1}.name(end-10)=='l'
                 spec_file =[subdirinfo{1}.name(1:end-10),'_Spectralon_Avg',Spectralon_tail,'.csv'];
-            else
+            elseif subdirinfo{1}.name(end-11)=='l'
                 spec_file =[subdirinfo{1}.name(1:end-11),'_Spectralon_Avg',Spectralon_tail,'.csv'];
+            else 
+                spec_file =[subdirinfo{1}.name(1:end-10),'_Spectralon_Avg',Spectralon_tail,'.csv'];
             end
             % Spectralon loading
             cd(mainFolder)
@@ -454,7 +456,7 @@ for f=analysisvals
             elseif f==2
                 flr_detect_1 = 0; % Red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
-                if strcmp(sample_type,'Blood') && bead_flag==1 %#ok<BDSCA>
+                if strcmp(sample_type,'Blood') && bead_flag==1 
                     fileN=[fileName,'_NoScatAll'];
                 else
                     fileN=[fileName,'_NoScat'];
@@ -535,20 +537,24 @@ for f=analysisvals
                     %% Sensor cleaning
                     [~,~,~,tsquared,~,~] = pca(M2(:,1:3));
                     %% Normalization of the data set
-                    %norm = (tsquared -min(tsquared))/(max(tsquared)-min(tsquared));
+                    M2 = M2(:,4:5)./max(M2(:,4:5));
                     norm = tsquared;
                     if flr_detect_1==1 && flr_detect_2==1 %ALL Channels
                         cumulative_det=SN_405+SN_488+SN_633+SN_Green;
                         cumulative=SN_405+SN_488+SN_633;
+                        scat_norm = norm;
                     elseif flr_detect_1==1 && flr_detect_2==0 %Scattering and FL1
                         cumulative_det=SN_Red;
                         cumulative=SN_405+SN_488+SN_633;
+                        scat_norm = norm;
                     elseif flr_detect_1==0 && flr_detect_2==1 %Scattering and FL1 +FL2
                         cumulative_det=SN_Green+SN_Red;
                         cumulative=SN_405+SN_488+SN_633;
+                        scat_norm = norm;
                     else % ONLY SCATTERING
                         cumulative=SN_405+SN_488+SN_633;
                         cumulative_det=norm;
+                        scat_norm = norm;
                     end
 %                     if f==1||f==3
 %                         for row=1:length(cumulative)
@@ -559,9 +565,13 @@ for f=analysisvals
 %                         end
 %                     end
 
-                    cum_std(ii) = std(cumulative); %#ok<AGROW>
+                    cum_std(ii) = std(cumulative); 
                     cum_avg(ii) = mean(cumulative); %#ok<AGROW>
-                    cum_det_std(ii)=std(cumulative_det);%#ok<AGROW>
+                    if f == 1
+                        cum_det_std(ii) = 10; %#ok<AGROW>
+                    else
+                        cum_det_std(ii)=std(cumulative_det);%#ok<AGROW>
+                    end
                     %% Peak Finding %%
                     %MINPEAKDISTANCE= specified how many points past the peak the next peak must be. Based on observations typical peak is 5 so choose 10
                     %NPEAKS= 3 times the expected number per chunk.  This is to protect against possibility that expected number varies from chunk to chunk
@@ -592,8 +602,8 @@ for f=analysisvals
                     clear dist_left_edge dist_right_edge
 
                     %% Catch Clusters(round 1)
-                    endpt1=find(cumulative_det(1:end-1)>10 & cumulative_det(2:end) < 10);
-                    startpt1=find(cumulative_det(1:end-1)<10 & cumulative_det(2:end)> 10);
+                    endpt1=find(cumulative_det(1:end-1)>1*cum_det_std(ii) & cumulative_det(2:end) < 1*cum_det_std(ii));
+                    startpt1=find(cumulative_det(1:end-1)<1*cum_det_std(ii) & cumulative_det(2:end)> 1*cum_det_std(ii));
                     if length(startpt1)==length(endpt1)
                         ranges=[startpt1,endpt1];
                     elseif length(startpt1)>length(endpt1)
@@ -640,8 +650,8 @@ for f=analysisvals
 
                     clear p_store l_store save_lcos locs_clusters pt1 pt2 ranges pstore2
                     %% Catch Clusters
-                    endpt=find(cumulative_det(1:end-1)>10 & cumulative_det(2:end) < 10);
-                    startpt=find(cumulative_det(1:end-1)<10 & cumulative_det(2:end)> 10);
+                    endpt=find(cumulative_det(1:end-1)>std_threshold*cum_det_std(ii) & cumulative_det(2:end) < std_threshold*cum_det_std(ii));
+                    startpt=find(cumulative_det(1:end-1)<std_threshold*cum_det_std(ii) & cumulative_det(2:end)>std_threshold*cum_det_std(ii));
 
                     if length(startpt)==length(endpt)
                         ranges=[startpt,endpt];
@@ -774,12 +784,12 @@ for f=analysisvals
                         peak_height=M_filt(locs(m),:);% locs(m)
                         if clusterpts(m,2)+10>5400000
                             data_fwhm=M_filt(check_ranges(m,1):end,:);
-                            data_fwhm_cum=cumulative_det(clusterpts(m,1)-10:end);
+                            data_fwhm_cum=scat_norm(clusterpts(m,1)-10:end);
                         else
                             data_fwhm=M_filt(check_ranges(m,1):check_ranges(m,2),:);
-                            data_fwhm_cum=cumulative_det(check_ranges(m,1):check_ranges(m,2));
+                            data_fwhm_cum=scat_norm(check_ranges(m,1):check_ranges(m,2));
                         end
-                        peak_height_cum=cumulative_det(locs(m)); % locs(m)
+                        peak_height_cum=scat_norm(locs(m)); % locs(m)
                         %405
                         [fwhm_405(m),peak_area_405(m)]=NV_101719_fwhm_measure(data_fwhm(:,1),peak_height(1));
                         %488

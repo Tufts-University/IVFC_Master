@@ -7,7 +7,6 @@ clear
 clc
 %% Calling Script
 %% Data Files Names
-% Labview Conversion
 mainpath = 'T:\Nilay\IVFC\Acquired Data\Blood Cell Data';
 cd(mainpath)
 T = dir('*_noCell');
