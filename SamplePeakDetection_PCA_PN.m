@@ -537,7 +537,7 @@ for f=analysisvals
                     %% Sensor cleaning
                     [~,~,~,tsquared,~,~] = pca(M2(:,1:3));
                     %% Normalization of the data set
-                    M2 = M2(:,4:5)./max(M2(:,4:5));
+                    M2(:,4:5) = M2(:,4:5)./max(M2(:,4:5));
                     norm = tsquared;
                     if flr_detect_1==1 && flr_detect_2==1 %ALL Channels
                         cumulative_det=SN_405+SN_488+SN_633+SN_Green;
@@ -568,7 +568,7 @@ for f=analysisvals
                     cum_std(ii) = std(cumulative); 
                     cum_avg(ii) = mean(cumulative); %#ok<AGROW>
                     if f == 1
-                        cum_det_std(ii) = 10; %#ok<AGROW>
+                        cum_det_std(ii) = 10./std_threshold; %#ok<AGROW>
                     else
                         cum_det_std(ii)=std(cumulative_det);%#ok<AGROW>
                     end
@@ -749,6 +749,9 @@ for f=analysisvals
                     n = size(check_ranges,1);
                     while 1
                         int = m + 1;
+                        if int >= n
+                            break
+                        end
                         if check_ranges(m,2)>check_ranges(int,1)
                             while 1
                                 check_ranges(m,2) = check_ranges(int,2);
@@ -765,7 +768,7 @@ for f=analysisvals
                             end
                         end
                         m = m+1;
-                        if m>=n
+                        if m >= n
                             break
                         end
                     end
@@ -980,8 +983,8 @@ for f=analysisvals
         disp('Skipped')
     end
 end
-% if bead_flag==1
-%     successmessage=BeadSorting(filepath,file_range);
-%     disp(successmessage)
-% end
+if bead_flag==1
+    successmessage=BeadSorting(filepath,file_range);
+    disp(successmessage)
+end
 successmessage='Completed Peak Detection';
