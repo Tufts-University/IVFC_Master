@@ -94,11 +94,11 @@ if isempty(filepath)
     disp('Using Current Directory');
     filepath=pwd;
 end
-if isempty(bead_flag) || strcmp(sample_type,'Blood')==0
-    bead_flag=0;
-else
-    bead_flag=1;
-end
+% if isempty(bead_flag) || strcmp(sample_type,'Blood')==0
+%     bead_flag=0;
+% else
+%     bead_flag=1;
+% end
 %% Modifying Evaluation Parameters
 % switch sample_type
 %     case 'Cells'
@@ -756,8 +756,13 @@ for f=analysisvals
                             while 1
                                 check_ranges(m,2) = check_ranges(int,2);
                                 check_ranges(int,:) = [];
-                                peaks(int) = [];
-                                locs(int) = [];
+                                if peaks(int) < peaks(m)
+                                    del_row = int;
+                                else
+                                    del_row = m;
+                                end
+                                peaks(del_row) = [];
+                                locs(del_row) = [];
                                 n = n-1;
                                 if m>=n
                                     break

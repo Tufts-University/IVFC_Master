@@ -13,23 +13,17 @@ peaks=data_fwhm(locs2);
 locs2(peaks<0.05.*peak_height)=[];
 peaks(peaks<0.05.*peak_height)=[];
 data2=data_fwhm;
+init = 1;
 if length(locs2)>1
-    data2(1:locs2(1))=data2(1:locs2(1))./peaks(1);
-    m=(peaks(2)-peaks(1))./(locs2(2)-locs2(1));
-    b=peaks(2)-locs2(2).*m;
-    y=m.*((locs2(1)+1):(locs2(2)-1))+b;
-    data2((locs2(1)+1:(locs2(2)-1)))=data2((locs2(1)+1:(locs2(2)-1)))./y';
-    if length(locs2)>2
-        data2(locs2(2))=1;
-        m=(peaks(3)-peaks(2))./(locs2(3)-locs2(2));
-        b=peaks(3)-locs2(3).*m;
-        y=m.*((locs2(2)+1):(locs2(3)-1))+b;
-        data2((locs2(2)+1:(locs2(3)-1)))=data2((locs2(2)+1:(locs2(3)-1)))./y';
-        data2(locs2(3):length(data2))=data2(locs2(3):length(data2))./peaks(3);
-    else
-        data2(locs2(2):length(data2))=data2(locs2(2):length(data2))./peaks(2);
+    for n = 1:length(peaks)-1
+        data2(init:locs2(n)) = data2(init:locs2(n))./peaks(n);
+        m = (peaks(n+1)-peaks(n))./(locs2(n+1)-locs2(n));
+        b =  peaks(n+1)-locs2(n+1).*m;
+        y= m.*((locs2(n)+1):(locs2(n+1)-1))+b;
+        data2((locs2(n)+1:(locs2(n+1)-1)))=data2((locs2(n)+1:(locs2(n+1)-1)))./y';
+        init = locs2(n+1);
     end
-    %data2=(data2-min(data2))./(max(data2)-min(data2));
+    data2(init:end) = data2(init:end)./peaks(end);
 else
     data2=data2./max(data2);
     %data2=(data2-min(data2))./(max(data2)-min(data2));
