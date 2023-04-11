@@ -1,0 +1,67 @@
+%% NV_032723_DeepPeak_VariabilityAnalysis
+%% Initialization
+clear
+clc
+mainpath = 'T:\Nilay\IVFC\DeepPeakResults\Trial_2';
+cd(mainpath)
+%% Main Code
+%% All Data Thresh
+files = dir('*All_Thresh*');
+xstore = zeros(136,1);
+ystore = zeros(136,1);
+count = 1;
+savetable = zeros(4,3);
+thresh = [10,100,30,50];
+for i = 1:length(files)
+    load(files(i).name)
+    n = length(x)-1;
+    xstore(count:count+n,1) = x';
+    if length(unique(y))>1
+       y = repmat(mode(y),1,n+1);
+    end
+    ystore(count:count+n,1) = y';
+    count = count + n+1;
+    savetable(i,:) = [thresh(i),mean(double(x)),std(double(x))];
+end
+savetable = sortrows(savetable,1);
+values = [xstore,ystore];
+sortedvalues = sortrows(values,2);
+x = sortedvalues(:,1);
+y = sortedvalues(:,2);
+mdl = fitlm(savetable(:,1),savetable(:,2))
+plot(mdl)
+boldify
+xlabel('Expected Number of Events')
+ylabel('Average DeepPeak Events')
+title('Expected Counts vs. DeepPeak Average Counts')
+%% Test Data Thresh
+files = dir('Pearson_Thresh*');
+xstore = zeros(40,1);
+ystore = zeros(40,1);
+count = 1;
+savetable = zeros(4,3);
+thresh = [10,100,30,50];
+for i = 1:length(files)
+    load(files(i).name)
+    n = length(x)-1;
+    xstore(count:count+n,1) = x';
+    if length(unique(y))>1
+       y = repmat(mode(y),1,n+1);
+    end
+    ystore(count:count+n,1) = y';
+    count = count + n+1;
+    savetable(i,:) = [thresh(i),mean(double(x)),std(double(x))];
+end
+savetable = sortrows(savetable,1);
+values = [xstore,ystore];
+sortedvalues = sortrows(values,2);
+x = sortedvalues(:,1);
+y = sortedvalues(:,2);
+mdl = fitlm(savetable(:,1),savetable(:,2))
+figure;
+plot(mdl)
+boldify
+xlabel('Expected Number of Events')
+ylabel('Average DeepPeak Events')
+title('Expected Counts vs. DeepPeak Average Counts')
+figure

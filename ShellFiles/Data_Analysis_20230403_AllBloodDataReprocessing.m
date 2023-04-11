@@ -5,13 +5,24 @@
 clear
 clc
 %% Calling Script
-mainpath = 'T:\Nilay\IVFC\Acquired Data\Blood Cell Data\DeepPeak2023';
+data_path = 'T:\Nilay\IVFC\Acquired Data\Blood Cell Data\';
+cd(data_path)
+T = readtable("NV_20230328_DatasetSummary.xlsx");
+fname_dict = T.FolderName;
+fname_dict = cellfun(@(x) x(2:end-1), fname_dict, 'UniformOutput', false);
+CTCCFlag = T.CTCCFlag;
+BeadFlag = T.BeadFlag;
+RatFlag = T.RatFlag;
+idx = find(RatFlag==0 & CTCCFlag==1);
+Final_Fname = {fname_dict{idx}}';
+Final_BeadFlag = BeadFlag(idx);
+
+mainpath = 'T:\Nilay\IVFC\Acquired Data\Blood Cell Data\DeepPeak2023\MouseData';
 cd(mainpath)
-fname_dict = readtable("dict_key.csv",'Delimiter','''');
-T = table2cell(fname_dict(:,2));
-parfor i=1:length(T)
-    disp(['Reprocessing Day ',num2str(i),' of ',num2str(length(T))])
-    exp_name=T{i};
+
+parfor i=1:length(Final_Fname)
+    disp(['Reprocessing Day ',num2str(i),' of ',num2str(length(Final_Fname))])
+    exp_name=Final_Fname{i};
     mydir = fullfile([mainpath,'\',exp_name])
     cd(mydir)
     filepath=cd;
@@ -33,11 +44,7 @@ parfor i=1:length(T)
     Spectralon_tail= '_1';
     FWMH_threshold=0;
     intensity_threshold= 0.1;
-    if i>=6 && i<=10 || i>31
-        bead_flag=0;
-    else
-        bead_flag=1;
-    end
+    bead_flag = Final_BeadFlag(i)
     output=SamplePeakDetection_PCA_PN(filepath,outputfile,file_range,Window_Low,...
         Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
         Spectralon_tail,FWMH_threshold,intensity_threshold,bead_flag);

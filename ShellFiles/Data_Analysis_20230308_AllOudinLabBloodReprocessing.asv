@@ -13,7 +13,7 @@ mainpath = 'T:\Nilay\IVFC\Acquired Data\SydneyMice';
 cd(mainpath)
 %% Healthy Controls
 T = dir('*Control');
-for i=2:length(T)
+for i=1:length(T)
     disp(['Reprocessing Day ',num2str(i),' of ' num2str(length(T))])
     exp_name=T(i).name;
     cd(exp_name)
@@ -39,7 +39,7 @@ for i=2:length(T)
         analysisvals=[4];
         sample_type= 'Blood';
         exp_num=round(6000/9);
-        std_threshold=10;
+        std_threshold=3;
         Spectralon_tail= '_1';
         FWMH_threshold=0;
         intensity_threshold= 0.0;
@@ -74,7 +74,7 @@ parfor i=1:length(T)
     analysisvals=[4];
     sample_type= 'Blood';
     exp_num=round(6000/9);
-    std_threshold=10;
+    std_threshold=3;
     Spectralon_tail= '_1';
     FWMH_threshold=0;
     intensity_threshold= 0.0;
