@@ -13,7 +13,7 @@ mainpath = 'T:\Nilay\IVFC\Acquired Data\SydneyMice';
 cd(mainpath)
 %% Healthy Controls
 T = dir('*Control');
-for i=2:length(T)
+for i=1:length(T)
     disp(['Reprocessing Day ',num2str(i),' of ' num2str(length(T))])
     exp_name=T(i).name;
     cd(exp_name)

@@ -1,0 +1,76 @@
+%% Initialization
+clear
+clc
+addpath(genpath('C:\Users\nvora01\Documents\MATLAB\IVFC'))
+addpath(genpath('C:\Users\nvora01\Documents\MATLAB\ivfc_master\'))
+%% Calling Script
+mainpath = 'T:\Nilay\IVFC\Acquired Data\SydneyMice';
+cd(mainpath)
+%% Healthy Controls
+T = dir('*Control');
+counts = struct;
+for i=1:length(T)
+    disp(['Analyzing Day ',num2str(i),' of ' num2str(length(T))])
+    exp_name=T(i).name;
+    cd(exp_name)
+    outpath=cd;
+    subfolders = dir();
+    subfolders(~[subfolders.isdir]) = [];  %remove non-directories
+    subfolders(ismember( {subfolders.name}, {'.', '..','Local Plots'})) = [];  %remove . and ..
+    for j = 1:length(subfolders)
+        data_path = subfolders(j).name;
+        cd(data_path)
+        data_folders = dir();
+        data_folders(~[data_folders.isdir]) = [];  %remove non-directories
+        data_folders(ismember( {data_folders.name}, {'.', '..','Local Plots'})) = [];  %remove . and ..
+        data_name = data_folders(1).name;
+        rFlr_data = dir('Corrected*');
+        rFlr_data = rFlr_data(2);
+        % Check
+        if contains(rFlr_data.name,'RFLR') == 0
+           disp('Error')
+           break 
+        end
+        load(rFlr_data.name,'peak_values');
+        counts.(data_name) = size(peak_values,1);
+        cd(outpath)
+    end
+    cd(mainpath)
+end
+%% Cancer Mice
+T = dir('*Cancer*');
+for i=1:length(T)
+    disp(['Analyzing Day ',num2str(i),' of ' num2str(length(T))])
+    exp_name=T(i).name;
+    cd(exp_name)
+    outpath=cd;
+    data_folders = dir();
+    data_folders(~[data_folders.isdir]) = [];  %remove non-directories
+    data_folders(ismember( {data_folders.name}, {'.', '..','Local Plots'})) = [];  %remove . and ..
+    data_name = data_folders(1).name;
+    rFlr_data = dir('Corrected*');
+    rFlr_data = rFlr_data(2);
+    % Check
+    if contains(rFlr_data.name,'RFLR') == 0
+       disp('Error')
+       break 
+    end
+    load(rFlr_data.name,'peak_values');
+    if isfield(counts,data_name)
+        temp_val = counts.(data_name);
+        new_val = [temp_val;size(peak_values,1)];
+    else
+        new_val = size(peak_values,1);
+    end
+    counts.(data_name) = new_val;
+    cd(mainpath)
+end
+%% Analysis
+cd('T:\Nilay\IVFC\Acquired Data\SydneyMice')
+T = readtable("MetsNotebook.xlsx");
+Obese = T(strcmp(T.DietType, 'Obese'),:);
+Lean = T(strcmp(T.DietType, 'Lean'),:);
+timePts = unique(T.TimePoint,'stable');
+
+fields = fieldnames(counts);
+Events = zeros()
