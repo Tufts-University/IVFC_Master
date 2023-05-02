@@ -32,7 +32,7 @@ for i=1:length(T)
            break 
         end
         load(rFlr_data.name,'peak_values');
-        counts.(data_name) = size(peak_values,1);
+        counts.(data_name) = size(peak_values(peak_values(:,17)>13,:),1);
         cd(outpath)
     end
     cd(mainpath)
@@ -58,9 +58,9 @@ for i=1:length(T)
     load(rFlr_data.name,'peak_values');
     if isfield(counts,data_name)
         temp_val = counts.(data_name);
-        new_val = [temp_val;size(peak_values,1)];
+        new_val = [temp_val;size(peak_values(peak_values(:,17)>13,:),1)];
     else
-        new_val = size(peak_values,1);
+        new_val = size(peak_values(peak_values(:,17)>13,:),1);
     end
     counts.(data_name) = new_val;
     cd(mainpath)
