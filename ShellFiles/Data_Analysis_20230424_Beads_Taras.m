@@ -1,25 +1,25 @@
-%% 07/07/22_DataAnalysis
+%% 04/24/23 DataAnalysis
 % Owner: Nilay Vora
-% Data Type: Calibration Measuremnts
-% Flow Date: 07/07/2022
+% Data Type: Calibration Measurements
+% Flow Date: 04/24/2023
 %% Experiment Note
-% Channel Clogged on file #2. I did not repeat due to time contrainst
+% Added New beads
 %% Initialization
 clear
 clc
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Nilay\IVFC\Acquired Data\Bead Calibration Data\2022\NV_070722_Calibration';
+filepath = 'T:\Taras\IVFC\Acquired Data\Bead Calibration Data\2023\NV_042423_Calibration';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
 output=Labview_convert_rawdata_batch(filepath,Fs,Window_Low,Window_High);
 disp(output)
 close all
-%%
+
 %Peak Detection
-outputfile= 'NEW_peak_values_07_07_22';
+outputfile= 'NEW_peak_values_04_24_23';
 file_range= (1:2);
 analysisvals=(1:3);
 sample_type= 'Beads';
@@ -27,7 +27,7 @@ exp_num=[];
 std_threshold=4;
 Spectralon_tail= '';
 FWMH_threshold=0;
-intensity_threshold= 0.75;
+intensity_threshold= 0.15;
 bead_flag=0;
 output=SamplePeakDetection(filepath,outputfile,file_range,Window_Low,...
     Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
@@ -35,12 +35,9 @@ output=SamplePeakDetection(filepath,outputfile,file_range,Window_Low,...
 disp(output)
 
 % Calibration
-files={'NEW_peak_values_05_23_22';...
-    'NEW_peak_values_05_24_22';...
-    'NEW_peak_values_05_25_22';...
-    'NEW_peak_values_06_07_22';...
-    'NEW_peak_values_06_08_22';...
-    'NEW_peak_values_07_06_22';...
-    'NEW_peak_values_07_07_22'};
+files={'NEW_peak_values_02_28_23';...
+    'NEW_peak_values_03_01_23';...
+    'NEW_peak_values_04_11_23';...
+    'NEW_peak_values_04_24_23'};
 output= DailyCalibrationScript(files);
 disp(output)
