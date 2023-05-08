@@ -48,7 +48,7 @@ dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
 
 dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
 
-subdirinfo = cell(length(dirinfo));
+subdirinfo = cell(length(dirinfo)); 
 
 for K = 1 : length(dirinfo)
     thisdir = dirinfo(K).name;
