@@ -21,7 +21,7 @@ close all
 %%
 %Peak Detection
 outputfile= 'NEW_peak_values_05_15_23';
-file_range= (1:1);
+file_range= (1:2);
 analysisvals=(1:3);
 sample_type= 'Cells';
 exp_num=[];

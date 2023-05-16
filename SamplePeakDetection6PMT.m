@@ -414,7 +414,7 @@ for f=analysisvals
             % Spectralon loading
             cd(mainFolder)
             fid=fopen(spec_file);
-            spec=textscan(fid,'%f %f %f %f %f %f %f %f','Delimiter',',');
+            spec=textscan(fid,'%f %f %f %f %f %f %f %f %f','Delimiter',',');
             spec=cell2mat(spec);
             fclose(fid);
             % Find all raw files

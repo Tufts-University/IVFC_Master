@@ -1,6 +1,6 @@
 function [successmessage] = Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% file:Labview_convert_rawdata_batch.m
+% file:Labview_convert_rawdata_batch_6PMT.m
 % ***Description***:
 % This function serves to convert any .csv file found in the parent folder
 % into .mat files. This script automatically loops through the .csv file
@@ -80,7 +80,7 @@ for i=1:length(subdirinfo)
         while 1
             disp(['Chunk # ',num2str(ii)])
             block=chunk_size;
-            [M,~]=textscan(fid,'%f %f %f %f %f',block,'Delimiter',',');
+            [M,~]=textscan(fid,'%f %f %f %f %f %f',block,'Delimiter',',');
             M=cell2mat(M);
             if isempty(M)
                 %Nothing happens if that chunk is empty
