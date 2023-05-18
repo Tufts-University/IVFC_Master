@@ -15,13 +15,13 @@ filepath = 'T:\Taras\IVFC\Acquired Data\CellMedia\TH_051823_CellMedia';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-% output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-% disp(output)
+output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+disp(output)
 close all
 %%
 %Peak Detection
 outputfile= 'NEW_peak_values_05_18_23';
-file_range= (1:2);
+file_range= (1);
 analysisvals=(1:4);
 sample_type= 'Cells';
 exp_num=[];

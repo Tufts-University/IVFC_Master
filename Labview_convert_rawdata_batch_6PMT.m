@@ -85,9 +85,8 @@ for i=1:length(subdirinfo)
             if isempty(M)
                 %Nothing happens if that chunk is empty
             else
-            M_filt=zeros(length(M),6);
-            avg_scat(ii,:)=mean(M,'omitnan');
-            std_scat(ii,:)=std(M,'omitnan');
+            avg_scat(ii,:)=mean(M,'omitnan'); %#ok<AGROW> 
+            std_scat(ii,:)=std(M,'omitnan'); %#ok<AGROW> 
             scat_file=[data_type,'_',num2str(ii),'_raw'];
 
             M_filt=zeros(length(M),6);
@@ -98,7 +97,7 @@ for i=1:length(subdirinfo)
             M_filt(:,4)=filtfilt(b,a,M(:,4));
             M_filt(:,5)=filtfilt(b,a,M(:,5));
             M_filt(:,6)=filtfilt(b,a,M(:,6));
-            sigmas(ii,:)=std(M_filt,0,1);
+            sigmas(ii,:)=std(M_filt,0,1); %#ok<AGROW> 
             if size(M,1)<chunk_size
                 break
             end

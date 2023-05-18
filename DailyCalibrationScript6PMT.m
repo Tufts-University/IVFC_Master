@@ -146,7 +146,7 @@ if ~exist([cd,'\Data_Plots'],'dir')
 end
 tempdir=[tempdir,'\Data_Plots'];
 FolderName = tempdir;   % Your destination folder
-for iFig = 1:15
+for iFig = 1:18
     FigHandle = figure(iFig);
     FigName   = ['Stats_Plots(norm)_',num2str(iFig)];
     saveas(FigHandle, fullfile(FolderName, [FigName, '.png']));
