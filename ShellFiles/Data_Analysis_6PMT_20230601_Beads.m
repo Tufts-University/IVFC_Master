@@ -21,7 +21,7 @@ close all
 %%
 %Peak Detection
 outputfile= 'NEW_peak_values_06_01_23';
-file_range= (1:3);
+file_range= (1:2);
 analysisvals=(1:4);
 sample_type= 'Beads';
 exp_num=[];
