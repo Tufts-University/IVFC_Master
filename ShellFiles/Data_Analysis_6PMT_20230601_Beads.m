@@ -21,7 +21,7 @@ close all
 %%
 %Peak Detection
 outputfile= 'NEW_peak_values_06_01_23';
-file_range= (1:2);
+file_range= (1:3);
 analysisvals=(1:4);
 sample_type= 'Beads';
 exp_num=[];
@@ -37,8 +37,8 @@ disp(output)
 
 % Calibration
 files={'NEW_peak_values_05_16_23';...
-    'NEW_peak_values_05_31_23';...
     'NEW_peak_values_05_18_23';...
+    'NEW_peak_values_05_31_23';...
     'NEW_peak_values_06_01_23'};
 output= DailyCalibrationScript6PMT(files);
 disp(output)
