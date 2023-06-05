@@ -7,7 +7,7 @@
 %% Initialization
 clear
 clc
-addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
+addpath 'C:\Users\nvora01\Documents\MATLAB\ivfc_master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
@@ -15,8 +15,8 @@ filepath = 'T:\Taras\IVFC\Acquired Data\Bead Calibration Data\2023\6PMT\TH_05312
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-disp(output)
+% output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+% disp(output)
 close all
 %%
 %Peak Detection

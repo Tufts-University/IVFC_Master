@@ -7,7 +7,7 @@
 %% Initialization
 clear
 clc
-addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
+addpath 'C:\Users\nvora01\Documents\MATLAB\ivfc_master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
