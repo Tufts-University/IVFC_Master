@@ -424,7 +424,7 @@ for f=analysisvals
             % Spectralon loading
             cd(mainFolder)
             folders = strsplit(mainFolder,'\');
-            folders(6) = [];
+            %folders(6) = [];
             folders = strjoin(folders,'\');
             spec_path = [folders,'\',spec_file];
             fid=fopen(spec_path);
