@@ -880,7 +880,7 @@ for f=analysisvals
         peak_values(:,22)=all_fwhm_fl3_Store; peak_values(:,23)=all_peak_area_fl3_Store;
         peak_values(:,24)=all_file_num_Store;
         % Sorting peaks
-        peak_values=sortrows(peak_values,6);
+        peak_values=sortrows(peak_values,7);
         delrow=peak_values(:,24)==0;
         peak_values(delrow,:)=[];
 

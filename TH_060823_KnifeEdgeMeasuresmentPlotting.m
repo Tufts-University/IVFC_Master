@@ -1,9 +1,9 @@
-%% NV_051523_KnifeEdgeMeasuresmentPlotting
+%% TH_060823_KnifeEdgeMeasuresmentPlotting
 %% Initialization
 clear
 clc
 close all
-main_path = 'T:\Nilay\IVFC\KnifeEdge Measurments';
+main_path = 'T:\Taras\IVFC\KnifeEdge Measurments';
 %% Load in Data [Slit Length]
 cd(main_path)
 T = readtable("TH_060223_KnifeEdge Measurments");
@@ -30,8 +30,8 @@ xlabel('Position')
 legend('405','488','633','Numcolumns',3,'Location','southoutside',...
         'AutoUpdate','off')
 boldify
-xlim([500,880])
-xticks(500:20:900)
+xlim([0,350])
+xticks(0:10:350)
 yline(0.9,'k--','LineWidth',3)
 yline(0.1,'k--','LineWidth',3)
 % xline(219,'k--','LineWidth',3)
@@ -40,7 +40,7 @@ set(gcf,'Color','w')
 export_fig('SlitLengthPlot_Expanded.png')
 %% Load in Data [Slit Width]
 cd(main_path)
-T2 = readtable("NV_053123_KnifeEdgeMeasurements_slitwidth_Expanded.xlsx");
+T2 = readtable("TH_060223_KnifeEdge Measurments2");
 Position = T2(2:end,1);
 w_405 = T2(2:end,2);
 w_488 = T2(2:end,3);
@@ -63,11 +63,11 @@ xlabel('Position')
 legend('405','488','633','Numcolumns',3,'Location','southoutside',...
         'AutoUpdate','off')
 boldify
-xlim([20,46])
-xticks(20:2:46)
+xlim([110,150])
+xticks(110:5:150)
 yline(0.9,'k--','LineWidth',3)
 yline(0.1,'k--','LineWidth',3)
-% xline(7.5,'k--','LineWidth',3)
-% xline(12,'k--','LineWidth',3)
+%xline(7.5,'k--','LineWidth',3)
+%xline(12,'k--','LineWidth',3)
 set(gcf,'Color','w')
 export_fig('SlitWidthPlot_Expanded.png')
