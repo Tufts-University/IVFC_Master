@@ -3,7 +3,7 @@
 % Data Type: Blood Cell Data from Human plus Cell
 % Flow Date: 06/20/23
 %% Notes
-% Medford-3 Blood + Cell+Beads
+% Medford-5 Blood + Cell+Beads
 %% Initialization
 clear
 clc
@@ -15,8 +15,8 @@ addpath 'C:\Users\hanul\Documents\MATLAB\ivfc_master'
     Fs=60e3;
     Window_Low= 50;
     Window_High= 10000;
-   % output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-    %disp(output)
+    output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+    disp(output)
     close all
     
     cd(filepath)
