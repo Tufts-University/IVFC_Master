@@ -46,6 +46,11 @@ for i=1:length(Final_Fname)
 
     bead_flag = bead_flags(i);
     subdirinfo2 =  dirinfo2;
+    if bead_flag == 1
+        search_tag = '_NoScatCell';
+    else
+        search_tag = '_NoScat.mat';
+    end
     for j=1:length(subdirinfo2)
         disp(['     File ',num2str(j),' of ',num2str(length(subdirinfo2))])
         newFolder2 = [subdirinfo2(j).folder,'\',subdirinfo2(j).name];
@@ -54,7 +59,7 @@ for i=1:length(Final_Fname)
         files = [dir('*21*'); dir('*22*')];
         if length(files)>1
             for k=1:length(files)
-                if contains(files(k).name,header) && contains(files(k).name,'_NoScatCell')
+                if contains(files(k).name,header) && contains(files(k).name,search_tag)
                     base_name=files(k).name;
                     break
                 end
@@ -87,7 +92,7 @@ for i=1:length(Final_Fname)
     base_name = [];
     if ~isempty(files)
         for k=1:length(files)
-            if contains(files(k).name,header) && contains(files(k).name,'_NoScatCell')
+            if contains(files(k).name,header) && contains(files(k).name,search_tag)
                 base_name=files(k).name;
                 break
             end
@@ -120,6 +125,8 @@ end
 
 t=total_tot2./sum(total_tot2);
 perform_mat = [(1:length(Final_Fname))',SC_tot2,t];
+T_final = table(Final_Fname,SC_tot2);
+writetable(T_final,'SensitivityTable_Updated.xlsx')
 disp('Weighted Performance')
 disp('------------------------------')
 final = sum(SC_tot2.*t,'omitnan')./sum(t)

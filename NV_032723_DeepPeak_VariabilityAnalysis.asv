@@ -49,7 +49,7 @@ yticks(0:10:100)
 str_r2 = num2str(mdl.Rsquared.Adjusted);
 str_r2 = str_r2(3:end);
 file_name = ['Seed2_SpikingRatio_FullDataset_LinFit_r_0p',str_r2];
- print(file_name,'-dsvg')
+ print(file_name,'-dpng')
 
 figure; 
 boxchart(categorical(y),x,"MarkerStyle",".","MarkerSize",23)
@@ -58,7 +58,7 @@ xlabel('Expected Number of Events')
 ylabel('Observed DeepPeak Events')
 boldify
 file_name = 'Seed2_SpikingRatio_FullDataset_BoxChart';
-print(file_name,'-dsvg')
+print(file_name,'-dpng')
 %% Test Data Thresh
 files = dir('Pearson_Thresh*');
 xstore = zeros(45,1);
@@ -97,7 +97,7 @@ boldify
 str_r2 = num2str(mdl.Rsquared.Adjusted);
 str_r2 = str_r2(3:end);
 file_name = ['Seed2_SpikingRatio_TestDataset_LinFit_r_0p',str_r2];
-print(file_name,'-dsvg')
+print(file_name,'-dpng')
 
 
 figure; 
@@ -107,4 +107,4 @@ xlabel('Expected Number of Events')
 ylabel('Observed DeepPeak Events')
 boldify
 file_name = 'Seed2_SpikingRatio_TestDataset_BoxChart';
-print(file_name,'-dsvg')
+print(file_name,'-dpng')

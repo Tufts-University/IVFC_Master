@@ -532,12 +532,13 @@ for f=analysisvals
                     SN_Green(SN_Green<0) = 0;
                     SN_Red(SN_Red<0) = 0;
                     M = [SN_405,SN_488,SN_633,SN_Red,SN_Green];
+                    signal_max = 11;
                     %% Normalization
                     M2 = (M-min(M))./(max(M)-min(M));
                     %% Sensor cleaning
                     [~,~,~,tsquared,~,~] = pca(M2(:,1:3));
                     %% Normalization of the data set
-                    M2(:,4:5) = M2(:,4:5)./max(M2(:,4:5));
+                    M2(:,4:5) = [SN_Red,SN_Green]./signal_max;
                     norm = tsquared;
                     if flr_detect_1==1 && flr_detect_2==1 %ALL Channels
                         cumulative_det=SN_405+SN_488+SN_633+SN_Green;

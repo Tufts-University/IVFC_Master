@@ -39,8 +39,8 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     Spectralon_tail= '';
     FWMH_threshold=0;
     intensity_threshold= 0.1;
-    flag=0;
+    bead_flag=0;
     output=SamplePeakDetection_PCA_PN_6PMT(filepath,outputfile,file_range,Window_Low,...
         Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
-        Spectralon_tail,FWMH_threshold,intensity_threshold,flag);
+        Spectralon_tail,FWMH_threshold,intensity_threshold,bead_flag);
     disp(output)
