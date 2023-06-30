@@ -5,18 +5,27 @@ clc
 close all
 mainpath = 'T:\Nilay\IVFC\DeepPeakResults\Trial_2';
 cd(mainpath)
+datapath = 'T:\Nilay\IVFC\Acquired Data\Blood Cell Data\DeepPeak2023';
+cd(datapath)
+exlusiondata = readtable('NV_060823_ExclusionTable_Threshold.xlsx','NumHeaderLines',1);
+cd(mainpath);
 %% Main Code
 colors = colororder;
 %% All Data Thresh
 files = dir('*All_Thresh*');
-xstore = zeros(136,1);
-ystore = zeros(136,1);
+alldata = table2array(exlusiondata(:,2:6));
+total = sum(alldata,'all');
+xstore = zeros(total,1);
+ystore = zeros(total,1);
 count = 1;
 savetable = zeros(4,3);
-thresh = [10,100,30,50];
+alldata = alldata(:,[5,2,3,4,1]);
+thresh = [100,10,30,50,5];
 for i = 1:length(files)
     load(files(i).name)
     n = length(x)-1;
+    x = x.*alldata(i);
+    y = y.*alldata(i);
     xstore(count:count+n,1) = x';
     if length(unique(y))>1
        y = repmat(mode(y),1,n+1);
@@ -39,8 +48,8 @@ boldify
 yticks(0:10:100)
 str_r2 = num2str(mdl.Rsquared.Adjusted);
 str_r2 = str_r2(3:end);
-file_name = ['SpikingRatio_FullDataset_LinFit_r_0p',str_r2];
-% print(file_name,'-dpng')
+file_name = ['Seed2_SpikingRatio_FullDataset_LinFit_r_0p',str_r2];
+ print(file_name,'-dsvg')
 
 figure; 
 boxchart(categorical(y),x,"MarkerStyle",".","MarkerSize",23)
@@ -48,21 +57,25 @@ title('Recovery of Spiked CTCCs (Full Dataset)')
 xlabel('Expected Number of Events')
 ylabel('Observed DeepPeak Events')
 boldify
-file_name = 'SpikingRatio_FullDataset_BoxChart';
-% print(file_name,'-dpng')
+file_name = 'Seed2_SpikingRatio_FullDataset_BoxChart';
+print(file_name,'-dsvg')
 %% Test Data Thresh
 files = dir('Pearson_Thresh*');
-xstore = zeros(40,1);
-ystore = zeros(40,1);
+xstore = zeros(45,1);
+ystore = zeros(45,1);
 count = 1;
 savetable = zeros(4,3);
-thresh = [10,100,30,50];
+thresh = [10,100,30,5,50];
 for i = 1:length(files)
     load(files(i).name)
+%     if i~=1 && i~=5
+        x(5) = [];
+        y(5) = [];
+%     end
     n = length(x)-1;
     xstore(count:count+n,1) = x';
     if length(unique(y))>1
-       y = repmat(mode(y),1,n+1);
+       y = repmat(thresh(i),1,n+1);
     end
     ystore(count:count+n,1) = y';
     count = count + n+1;
@@ -83,8 +96,8 @@ yticks(0:10:100)
 boldify
 str_r2 = num2str(mdl.Rsquared.Adjusted);
 str_r2 = str_r2(3:end);
-file_name = ['SpikingRatio_TestDataset_LinFit_r_0p',str_r2];
-% print(file_name,'-dpng')
+file_name = ['Seed2_SpikingRatio_TestDataset_LinFit_r_0p',str_r2];
+print(file_name,'-dsvg')
 
 
 figure; 
@@ -93,5 +106,5 @@ title('Recovery of Spiked CTCCs (Test Set)')
 xlabel('Expected Number of Events')
 ylabel('Observed DeepPeak Events')
 boldify
-file_name = 'SpikingRatio_TestDataset_BoxChart';
-% print(file_name,'-dpng')
+file_name = 'Seed2_SpikingRatio_TestDataset_BoxChart';
+print(file_name,'-dsvg')

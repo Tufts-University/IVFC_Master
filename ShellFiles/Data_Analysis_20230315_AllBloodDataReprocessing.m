@@ -5,11 +5,22 @@
 clear
 clc
 %% Calling Script
+data_path = 'T:\Nilay\IVFC\Acquired Data\Blood Cell Data\';
+cd(data_path)
+T = readtable("NV_20230328_DatasetSummary.xlsx");
+fname_dict = T.FolderName;
+fname_dict = cellfun(@(x) x(2:end-1), fname_dict, 'UniformOutput', false);
+CTCCFlag = T.CTCCFlag;
+BeadFlag = T.BeadFlag;
+RatFlag = T.RatFlag;
+idx = find(RatFlag==1 & CTCCFlag==1 & T.inc ==1);
+Final_Fname = {fname_dict{idx}}';
+Final_BeadFlag = BeadFlag(idx);
+
 mainpath = 'T:\Nilay\IVFC\Acquired Data\Blood Cell Data\DeepPeak2023';
 cd(mainpath)
-fname_dict = readtable("dict_key.csv",'Delimiter','''');
 T = table2cell(fname_dict(:,2));
-parfor i=1:length(T)
+for i=1:length(T)
     disp(['Reprocessing Day ',num2str(i),' of ',num2str(length(T))])
     exp_name=T{i};
     mydir = fullfile([mainpath,'\',exp_name])

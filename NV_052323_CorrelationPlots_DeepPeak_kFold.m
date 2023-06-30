@@ -26,7 +26,7 @@ for i = 1:length(F_names)
                        ', R^2 = ',num2str(r(1,2).^2)])
     xlabel('DeepPeak Detected Events')
     ylabel('True # of CTCCs')
-    title('DeepPeak vs. True Events')
+    title('All Data: DeepPeak vs. True Events')
     hold on
     upperbound = max(max(x),5000);
     plot((0:100:upperbound),(0:100:upperbound),'k--')
@@ -34,9 +34,10 @@ for i = 1:length(F_names)
     xlim([-10,upperbound])
     boldify
     legend('Data','','Fit','Confidence Bound','','y=x')
-    set(gcf,'color','w');
+    set(gcf,'color','w');         
+    set(gca,'FontName','Arial','FontSize',12);
     FileName = 'LinFit_FullData';
-    print(FileName,'-dpng')
+    print(FileName,'-dsvg')
     PearsonStorage(i,1:3) = [str2double(F_names{i}(find(F_names{i}==' ')+1:end)),r(1,2),r(1,2).^2];
     %% Lower Range Fit
     locs = find(x<max((max(x).*0.3),1500));
@@ -64,8 +65,9 @@ for i = 1:length(F_names)
         boldify
         legend('Data','','Fit','Confidence Bound','','y=x')
         set(gcf,'color','w');
+        set(gca,'FontName','Arial','FontSize',12);
         FileName = 'LinFit_FullData_LowerRange';
-        print(FileName,'-dpng')
+        print(FileName,'-dsvg')
         PearsonStorage(i,4:5) = [r(1,2),r(1,2).^2];
     end
     %% Test Set Fit
@@ -83,7 +85,7 @@ for i = 1:length(F_names)
                         ', R^2 = ',num2str(r(1,2).^2)])
     xlabel('DeepPeak Detected Events')
     ylabel('True # of CTCCs')
-    title('DeepPeak vs. True Events')
+    title('Test Data: DeepPeak vs. True Events')
     hold on
     upperbound = max(max(x),5000);
     plot((0:100:upperbound),(0:100:upperbound),'k--')
@@ -91,13 +93,46 @@ for i = 1:length(F_names)
     xlim([-10,upperbound])
     boldify
     legend('Data','','Fit','Confidence Bound','','y=x')
-    set(gcf,'color','w');
+    set(gcf,'color','w');         
+    set(gca,'FontName','Arial','FontSize',12);
     FileName = 'LinFit_TestSet';
     pause(1)
-    print(FileName,'-dpng')
+    print(FileName,'-dsvg')
     PearsonStorage(i,6:7) = [r(1,2),r(1,2).^2];
     close all
     cd(mainpath)
+    %% Lower Range Fit
+    locs = find(x<max((max(x).*0.3),1000));
+    if ~isempty(locs)
+        x2 = x(locs);
+        y2 = y(locs);
+        
+        figure; plot(x2,y2,'b.','MarkerSize',23)
+        xlabel('DeepPeak Detected Events')
+        ylabel('True # of CTCCs')
+        a = fitlm(x2,y2);
+        hold on
+        plot(a)
+        r = corrcoef(x2,y2);
+        disp([9 'Pearson Correlation = ', num2str(r(1,2)),...
+                            ', R^2 = ',num2str(r(1,2).^2)])
+        xlabel('DeepPeak Detected Events')
+        ylabel('True # of CTCCs')
+        title('DeepPeak vs. True Events')
+        hold on
+        upperbound = max((max(x).*0.3),1500);
+        plot((0:100:upperbound),(0:100:upperbound),'k--')
+        ylim([-10,upperbound])
+        xlim([-10,upperbound])
+        boldify
+        legend('Data','','Fit','Confidence Bound','','y=x')
+        set(gcf,'color','w');
+        set(gca,'FontName','Arial','FontSize',12);
+        FileName = 'LinFit_TestData_LowerRange';
+        pause(1)
+        print(FileName,'-dsvg')
+        PearsonStorage(i,4:5) = [r(1,2),r(1,2).^2];
+    end
 end
 %% FAR Calculation 
 cd(mainpath)
@@ -121,7 +156,7 @@ for i = 1:length(F_names)
 end
 %% Load k-fold Sheet
 T = readtable("k-fold_Sheet.xlsx");
-values = table2array(T(:,2:end));
+values = table2array(T(1:5,2:end));
 % Mean Performance
 avg_fold = mean(values);
 % Variance
@@ -150,7 +185,7 @@ b = bar((1:5),[Test_avg_fold;All_avg_fold],'grouped','LineWidth',1.5,...
 colororder(colors)
 boldify
 set(gcf,'color','w');
-set(gca,'FontSize',12,'FontName','Ariel','LineWidth',1.5);
+set(gca,'FontSize',12,'FontName','Arial','LineWidth',1.5);
 yticks([0:0.1:1])
 hold on
 
@@ -169,9 +204,9 @@ errorbar(x',totalPerform_mean,totalPerform_err,'k','linestyle','none',...
     'LineWidth',3,'CapSize',9);
 xticklabels(Metrics)
 legend('Test Set','All Data','location','southoutside','numcolumns',2,...
-        'FontSize',12,'FontName','Ariel')
+        'FontSize',12,'FontName','Arial')
 ylabel('Performance')
-print(gcf, '-dmeta', 'k-fold_validation.emf');
+print(gcf, '-dsvg', 'k-fold_validation.svg');
 %% Plot k-fold performance v2
 colors = linspecer(5);
 Metrics = {'Accuracy','Sensitivity','Purity','Specificity',...
@@ -184,7 +219,7 @@ b = bar((1:2),data','grouped','LineWidth',1.5,...
 colororder(colors)
 boldify
 set(gcf,'color','w');
-set(gca,'FontSize',12,'FontName','Ariel','LineWidth',1.5);
+set(gca,'FontSize',12,'FontName','Arial','LineWidth',1.5);
 yticks([0:0.1:1])
 hold on
 
@@ -205,6 +240,78 @@ errorbar(x',totalPerform_mean,totalPerform_err,'k','linestyle','none',...
 xticklabels({'Test Data','All Data'})
 legend('Purity','Specificity','Sensitivity','Accuracy','Pearson Corr.',...
         'Location','southoutside','numcolumns',5,...
-        'FontSize',12,'FontName','Ariel')
+        'FontSize',12,'FontName','Arial')
 ylabel('Performance')
-print(gcf, '-dmeta', 'k-fold_validation_V2.emf');
+print(gcf, '-dsvg', 'k-fold_validation_V2.svg');
+%% Plot k-fold performance v3
+colors = linspecer(5);
+Metrics = {'Accuracy','Sensitivity','Purity','Specificity',...
+            'Pearson Corr.'};
+figure('units','inch','position',[2,2,2,2]);
+data = [Test_avg_fold]';
+data = data([3,4,2,1,5],:);
+b = bar((1),data','grouped','LineWidth',1.5,...
+        'FaceAlpha',0.9);
+colororder(colors)
+boldify
+set(gcf,'color','w');
+set(gca,'FontSize',12,'FontName','Arial','LineWidth',1.5);
+yticks([0:0.1:1])
+hold on
+
+totalPerform_mean = data';
+totalPerform_err = [Test_std_fold];
+
+totalPerform_err = totalPerform_err(:,[3,4,2,1,5]);
+% Calculate the number of groups and number of bars in each group
+[ngroups,nbars] = size(totalPerform_mean);
+% Get the x coordinate of the bars
+x = nan(nbars, ngroups);
+for i = 1:nbars
+    x(i,:) = b(i).XEndPoints;
+end
+% Plot the errorbars
+errorbar(x',totalPerform_mean,totalPerform_err,'k','linestyle','none',...
+    'LineWidth',3,'CapSize',9);
+xticklabels({'','All Data'})
+legend('Purity','Specificity','Sensitivity','Accuracy','Pearson Corr.',...
+        'Location','southoutside','numcolumns',5,...
+        'FontSize',12,'FontName','Arial')
+ylabel('Performance')
+print(gcf, '-dsvg', 'k-fold_validation_Test.svg');
+%% All Data
+colors = linspecer(5);
+Metrics = {'Accuracy','Sensitivity','Purity','Specificity',...
+            'Pearson Corr.'};
+figure('units','inch','position',[2,2,2,2]);
+data = [All_avg_fold]';
+data = data([3,4,2,1,5],:);
+b = bar((1),data','grouped','LineWidth',1.5,...
+        'FaceAlpha',0.9);
+colororder(colors)
+boldify
+set(gcf,'color','w');
+set(gca,'FontSize',12,'FontName','Arial','LineWidth',1.5);
+yticks([0:0.1:1])
+hold on
+
+totalPerform_mean = data';
+totalPerform_err = [All_std_fold];
+
+totalPerform_err = totalPerform_err(:,[3,4,2,1,5]);
+% Calculate the number of groups and number of bars in each group
+[ngroups,nbars] = size(totalPerform_mean);
+% Get the x coordinate of the bars
+x = nan(nbars, ngroups);
+for i = 1:nbars
+    x(i,:) = b(i).XEndPoints;
+end
+% Plot the errorbars
+errorbar(x',totalPerform_mean,totalPerform_err,'k','linestyle','none',...
+    'LineWidth',3,'CapSize',9);
+xticklabels({'','All Data'})
+legend('Purity','Specificity','Sensitivity','Accuracy','Pearson Corr.',...
+        'Location','southoutside','numcolumns',5,...
+        'FontSize',12,'FontName','Arial')
+ylabel('Performance')
+print(gcf, '-dsvg', 'k-fold_validation_All.svg');
