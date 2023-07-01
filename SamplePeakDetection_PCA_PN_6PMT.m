@@ -462,7 +462,7 @@ for f=analysisvals
                 flr_detect_1 = 0; % iRFP red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
                 flr_detect_3 = 0; % E2C red Fluorescence
-                if strcmp('Blood',sample_type) && bead_flag==1 
+                if strcmp(sample_type,'Blood') && bead_flag==1 
                     fileN=[fileName,'_NoScatAll'];
                 else
                     fileN=[fileName,'_NoScat'];
