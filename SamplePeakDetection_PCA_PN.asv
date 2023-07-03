@@ -1,4 +1,4 @@
-function successmessage=SamplePeakDetection_PCA_PN_6PMT(filepath,outputfile,...
+function successmessage=SamplePeakDetection_PCA(filepath,outputfile,...
     file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,...
     exp_num,std_threshold,Spectralon_tail,FWMH_threshold,...
     intensity_threshold,bead_flag)
@@ -10,8 +10,7 @@ function successmessage=SamplePeakDetection_PCA_PN_6PMT(filepath,outputfile,...
 % the correct thresholds are used. This algorithm is set up for mouse data,
 % blood data, bead data, and cell data. Please read the input carefully as
 % there are many ways to use this code!
-% Written By: Nilay Vora (nvora01@tufts.edu) Taras Hanulia 
-% (thanul01@tufts.edu)
+% Written By: Nilay Vora (nvora01@tufts.edu)
 % Date Written: 10/01/2021
 % Modifying Author:Nilay Vora
 % Date Modified: 01/13/2022
@@ -21,9 +20,6 @@ function successmessage=SamplePeakDetection_PCA_PN_6PMT(filepath,outputfile,...
 % Date Modified: 06/06/2022
 % Latest Revision: Changed the Green FLR FWHM measure script for peak
 % equalization
-% Date Modified: 06/27/2023
-% Modifying Author:Taras Hanulia
-% Latest Revision: Modified for 6 PMT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Function details
 % Inputs:
@@ -400,9 +396,9 @@ for f=analysisvals
     widths_cum=zeros(1,1);
     peak_area_cum=zeros(1,1);
     all_chunks=zeros(1,1);
-    peak_values=zeros(1,6);
-    all_fwhm_405=zeros(1,1); all_fwhm_488=zeros(1,1); all_fwhm_633=zeros(1,1); all_fwhm_fl1=zeros(1,1); all_fwhm_fl2=zeros(1,1);all_fwhm_fl3=zeros(1,1);
-    all_peak_area_405=zeros(1,1); all_peak_area_488=zeros(1,1); all_peak_area_633=zeros(1,1); all_peak_area_fl1=zeros(1,1); all_peak_area_fl2=zeros(1,1);all_peak_area_fl3=zeros(1,1);
+    peak_values=zeros(1,5);
+    all_fwhm_405=zeros(1,1); all_fwhm_488=zeros(1,1); all_fwhm_633=zeros(1,1); all_fwhm_fl1=zeros(1,1); all_fwhm_fl2=zeros(1,1);
+    all_peak_area_405=zeros(1,1); all_peak_area_488=zeros(1,1); all_peak_area_633=zeros(1,1); all_peak_area_fl1=zeros(1,1); all_peak_area_fl2=zeros(1,1);
     all_file_num=zeros(1,1);
 
     all_peaks_Store=zeros(1,1);
@@ -410,9 +406,9 @@ for f=analysisvals
     widths_cum_Store=zeros(1,1);
     peak_area_cum_Store=zeros(1,1);
     all_chunks_Store=zeros(1,1);
-    peak_values_Store=zeros(1,6);
-    all_fwhm_405_Store=zeros(1,1); all_fwhm_488_Store=zeros(1,1); all_fwhm_633_Store=zeros(1,1); all_fwhm_fl1_Store=zeros(1,1); all_fwhm_fl2_Store=zeros(1,1);all_fwhm_fl3_Store=zeros(1,1);
-    all_peak_area_405_Store=zeros(1,1); all_peak_area_488_Store=zeros(1,1); all_peak_area_633_Store=zeros(1,1); all_peak_area_fl1_Store=zeros(1,1); all_peak_area_fl2_Store=zeros(1,1);all_peak_area_fl3_Store=zeros(1,1);
+    peak_values_Store=zeros(1,5);
+    all_fwhm_405_Store=zeros(1,1); all_fwhm_488_Store=zeros(1,1); all_fwhm_633_Store=zeros(1,1); all_fwhm_fl1_Store=zeros(1,1); all_fwhm_fl2_Store=zeros(1,1);
+    all_peak_area_405_Store=zeros(1,1); all_peak_area_488_Store=zeros(1,1); all_peak_area_633_Store=zeros(1,1); all_peak_area_fl1_Store=zeros(1,1); all_peak_area_fl2_Store=zeros(1,1);
     all_file_num_Store=zeros(1,1);
 
     disp(['Current evaluation based on ',types{f},' Data']);
@@ -443,7 +439,7 @@ for f=analysisvals
                 spec_path = [folders,'\',spec_file];
                 fid=fopen(spec_path);
             end
-            spec=textscan(fid,'%f %f %f %f %f %f %f %f %f','Delimiter',',');
+            spec=textscan(fid,'%f %f %f %f %f %f %f %f','Delimiter',',');
             spec=cell2mat(spec);
             fclose(fid);
 
@@ -454,28 +450,24 @@ for f=analysisvals
             num_chunks=length(dirinfo2);
             % Select detection scheme
             if f==1
-                flr_detect_1 = 0; % iRFP red Fluorescence
+                flr_detect_1 = 0; % Red Fluorescence
                 flr_detect_2 = 0; % Green Fluorescence
-                flr_detect_3 = 0; % E2C red Fluorescence
                 fileN=[fileName,'_NoFLR'];
             elseif f==2
-                flr_detect_1 = 0; % iRFP red Fluorescence
+                flr_detect_1 = 0; % Red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
-                flr_detect_3 = 0; % E2C red Fluorescence
-                if strcmp('Blood',sample_type) && bead_flag==1 
+                if strcmp(sample_type,'Blood') && bead_flag==1 
                     fileN=[fileName,'_NoScatAll'];
                 else
                     fileN=[fileName,'_NoScat'];
                 end
             elseif f==3
-                flr_detect_1 = 1; % iRFP red Fluorescence
+                flr_detect_1 = 1; % Red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
-                flr_detect_3 = 1; % E2C red Fluorescence
                 fileN=[fileName]; %#ok<NBRAK>
             else
-                flr_detect_1 = 1; % iRFP red Fluorescence
+                flr_detect_1 = 1; % Red Fluorescence
                 flr_detect_2 = 0; % Green Fluorescence
-                flr_detect_3 = 1; % E2C red Fluorescence
                 fileN=[fileName,'_RFLR'];
             end
             % Load Standard Deviations
@@ -523,14 +515,12 @@ for f=analysisvals
                     M_filt(:,3)=filtfilt(b,a,M(:,3))./abs(spec(3));
                     M_filt(:,4)=filtfilt(b,a,M(:,4));
                     M_filt(:,5)=filtfilt(b,a,M(:,5));
-                    M_filt(:,6)=filtfilt(b,a,M(:,6));
 
                     M_filt(:,1)=(M_filt(:,1)-mean(M_filt(:,1)));
                     M_filt(:,2)=(M_filt(:,2)-mean(M_filt(:,2)));
                     M_filt(:,3)=(M_filt(:,3)-mean(M_filt(:,3)));
                     M_filt(:,4)=(M_filt(:,4)-mean(M_filt(:,4)));
                     M_filt(:,5)=(M_filt(:,5)-mean(M_filt(:,5)));
-                    M_filt(:,6)=(M_filt(:,6)-mean(M_filt(:,6)));
                     clear M
                     %% Normalizing by standard deviation
 
@@ -539,28 +529,27 @@ for f=analysisvals
                     SN_633=(M_filt(:,3)-mean(M_filt(:,3)))./sigmas_final(3);
                     SN_Red=(M_filt(:,4)-mean(M_filt(:,4)));
                     SN_Green=(M_filt(:,5)-mean(M_filt(:,5)));
-                    SN_Red2=(M_filt(:,6)-mean(M_filt(:,6)));
                     SN_Green(SN_Green<0) = 0;
                     SN_Red(SN_Red<0) = 0;
-                    SN_Red2(SN_Red<0) = 0;
-                    M = [SN_405,SN_488,SN_633,SN_Red,SN_Green,SN_Red2];
+                    M = [SN_405,SN_488,SN_633,SN_Red,SN_Green];
+                    signal_max = 11;
                     %% Normalization
                     M2 = (M-min(M))./(max(M)-min(M));
                     %% Sensor cleaning
-                    [~,~,~,tsquared,~,~,~] = pca(M2(:,1:3));
+                    [~,~,~,tsquared,~,~] = pca(M2(:,1:3));
                     %% Normalization of the data set
-                    M2(:,4:6) = M2(:,4:6)./max(M2(:,4:6));
+                    M2(:,4:5) = [SN_Red,SN_Green]./signal_max;
                     norm = tsquared;
-                    if flr_detect_1==1 && flr_detect_2==1 && flr_detect_3==1 %ALL Channels
+                    if flr_detect_1==1 && flr_detect_2==1 %ALL Channels
                         cumulative_det=SN_405+SN_488+SN_633+SN_Green;
                         cumulative=SN_405+SN_488+SN_633;
                         scat_norm = norm;
-                    elseif flr_detect_1==1 && flr_detect_2==0 && flr_detect_3==1 %Scattering and red FL (FL1 and FL3)
-                        cumulative_det=SN_Red+SN_Red2;
+                    elseif flr_detect_1==1 && flr_detect_2==0 %Scattering and FL1
+                        cumulative_det=SN_Red;
                         cumulative=SN_405+SN_488+SN_633;
                         scat_norm = norm;
-                    elseif flr_detect_1==0 && flr_detect_2==1 && flr_detect_3==0 %Scattering and FL1 +FL2 + FL3
-                        cumulative_det=SN_Green+SN_Red+SN_Red2;
+                    elseif flr_detect_1==0 && flr_detect_2==1 %Scattering and FL1 +FL2
+                        cumulative_det=SN_Green+SN_Red;
                         cumulative=SN_405+SN_488+SN_633;
                         scat_norm = norm;
                     else % ONLY SCATTERING
@@ -589,7 +578,7 @@ for f=analysisvals
                     %NPEAKS= 3 times the expected number per chunk.  This is to protect against possibility that expected number varies from chunk to chunk
                     %
                     %[~,locs]=findpeaks(cumulative_det,'NPeaks',10*exp_num,'SortStr','descend');
-                    if flr_detect_1==0 && flr_detect_2==1 && flr_detect_3==0 
+                    if flr_detect_1==0 && flr_detect_2==1
                         [~,locs]=findpeaks(cumulative_det,'NPeaks',5*exp_num,'SortStr','descend');
                     else
                         [~,locs]=findpeaks(cumulative_det,'NPeaks',20*exp_num,'SortStr','descend');
@@ -799,9 +788,9 @@ for f=analysisvals
                         %% FWHM finding & Grabbing True Maximums
                         %FWHMs are found from the filtered peaks
                         fwhm=zeros(length(peaks),1);
-                        peak_area_405=zeros(length(peaks),1); peak_area_488=zeros(length(peaks),1); peak_area_633=zeros(length(peaks),1); peak_area_fl1=zeros(length(peaks),1); peak_area_fl2=zeros(length(peaks),1); peak_area_fl3=zeros(length(peaks),1);
-                        fwhm_405=zeros(length(peaks),1); fwhm_488=zeros(length(peaks),1); fwhm_633=zeros(length(peaks),1); fwhm_fl1=zeros(length(peaks),1); fwhm_fl2=zeros(length(peaks),1);fwhm_fl3=zeros(length(peaks),1);
-                        peak_data=zeros(length(locs),6);
+                        peak_area_405=zeros(length(peaks),1); peak_area_488=zeros(length(peaks),1); peak_area_633=zeros(length(peaks),1); peak_area_fl1=zeros(length(peaks),1); peak_area_fl2=zeros(length(peaks),1);
+                        fwhm_405=zeros(length(peaks),1); fwhm_488=zeros(length(peaks),1); fwhm_633=zeros(length(peaks),1); fwhm_fl1=zeros(length(peaks),1); fwhm_fl2=zeros(length(peaks),1);
+                        peak_data=zeros(length(locs),5);
                         for m=1:length(peaks)
                             %% Grab True Maximums
                             data_range=M2(check_ranges(m,1):check_ranges(m,2),:); %grabs full cluster width by 5 matrix around peak
@@ -827,8 +816,6 @@ for f=analysisvals
                             [fwhm_fl1(m),peak_area_fl1(m)]=NV_101719_fwhm_measure(data_fwhm(:,4),peak_height(4));
                             %Fl2
                             [fwhm_fl2(m),peak_area_fl2(m)]=NV_052322_fwhm_measure(data_fwhm(:,5),peak_height(5));
-                            %Fl3
-                            [fwhm_fl3(m),peak_area_fl3(m)]=NV_052322_fwhm_measure(data_fwhm(:,6),peak_height(6));
                             %cum
                             [fwhm(m),peak_area(m)]=NV_052322_fwhm_measure(data_fwhm_cum,peak_height_cum); %#ok<AGROW>
                             % Get rid of zeros
@@ -853,13 +840,11 @@ for f=analysisvals
                                     fwhm_633=fwhm_633(idx(idx2(:)));
                                     fwhm_fl1=fwhm_fl1(idx(idx2(:)));
                                     fwhm_fl2=fwhm_fl2(idx(idx2(:)));
-                                    fwhm_fl3=fwhm_fl3(idx(idx2(:)));
                                     peak_area_405=peak_area_405(idx(idx2(:)));
                                     peak_area_488=peak_area_488(idx(idx2(:)));
                                     peak_area_633=peak_area_633(idx(idx2(:)));
                                     peak_area_fl1=peak_area_fl1(idx(idx2(:)));
                                     peak_area_fl2=peak_area_fl2(idx(idx2(:)));
-                                    peak_area_fl3=peak_area_fl3(idx(idx2(:)));
                                     File_num=repmat(i,size(peak_data,1),1);
     
                                     all_peaks=[all_peaks,peaks']; %#ok<AGROW>
@@ -873,13 +858,11 @@ for f=analysisvals
                                     all_fwhm_633=[all_fwhm_633;fwhm_633]; %#ok<AGROW>
                                     all_fwhm_fl1=[all_fwhm_fl1;fwhm_fl1]; %#ok<AGROW>
                                     all_fwhm_fl2=[all_fwhm_fl2;fwhm_fl2];%#ok<AGROW>
-                                    all_fwhm_fl3=[all_fwhm_fl3;fwhm_fl3];%#ok<AGROW>
                                     all_peak_area_405=[all_peak_area_405;peak_area_405]; %#ok<AGROW>
                                     all_peak_area_488=[all_peak_area_488;peak_area_488]; %#ok<AGROW>
                                     all_peak_area_633=[all_peak_area_633;peak_area_633]; %#ok<AGROW>
                                     all_peak_area_fl1=[all_peak_area_fl1;peak_area_fl1]; %#ok<AGROW>
                                     all_peak_area_fl2=[all_peak_area_fl2;peak_area_fl2];%#ok<AGROW>
-                                    all_peak_area_fl3=[all_peak_area_fl3;peak_area_fl3];%#ok<AGROW>
                                     all_file_num=[all_file_num;File_num];%#ok<AGROW>
                                 end
                             else
@@ -893,13 +876,11 @@ for f=analysisvals
                                 fwhm_633=fwhm_633(idx(:));
                                 fwhm_fl1=fwhm_fl1(idx(:));
                                 fwhm_fl2=fwhm_fl2(idx(:));
-                                fwhm_fl3=fwhm_fl3(idx(:));
                                 peak_area_405=peak_area_405(idx(:));
                                 peak_area_488=peak_area_488(idx(:));
                                 peak_area_633=peak_area_633(idx(:));
                                 peak_area_fl1=peak_area_fl1(idx(:));
                                 peak_area_fl2=peak_area_fl2(idx(:));
-                                peak_area_fl3=peak_area_fl3(idx(:));
                                 File_num=repmat(i,size(peak_data,1),1);
     
                                 all_peaks=[all_peaks,peaks'];%#ok<AGROW>
@@ -913,20 +894,18 @@ for f=analysisvals
                                 all_fwhm_633=[all_fwhm_633;fwhm_633]; %#ok<AGROW>
                                 all_fwhm_fl1=[all_fwhm_fl1;fwhm_fl1]; %#ok<AGROW>
                                 all_fwhm_fl2=[all_fwhm_fl2;fwhm_fl2];%#ok<AGROW>
-                                all_fwhm_fl3=[all_fwhm_fl3;fwhm_fl3];%#ok<AGROW>
                                 all_peak_area_405=[all_peak_area_405;peak_area_405]; %#ok<AGROW>
                                 all_peak_area_488=[all_peak_area_488;peak_area_488]; %#ok<AGROW>
                                 all_peak_area_633=[all_peak_area_633;peak_area_633]; %#ok<AGROW>
                                 all_peak_area_fl1=[all_peak_area_fl1;peak_area_fl1]; %#ok<AGROW>
                                 all_peak_area_fl2=[all_peak_area_fl2;peak_area_fl2];%#ok<AGROW>
-                                all_peak_area_fl3=[all_peak_area_fl3;peak_area_fl3];%#ok<AGROW>
                                 all_file_num=[all_file_num;File_num];%#ok<AGROW>
                             end
                         end
                     end
                     clear M2 peaks locs cumulative peak_data tsquared M_filt
-                    clear fwhm fwhm_405 fwhm_488 fwhm_633 fwhm_fl1 fwhm_fl2 
-                    clear peak_area peak_area_405 peak_area_488 peak_area_633 peak_area_fl1 peak_area_fl2 peak_area_fl3 File_num
+                    clear fwhm fwhm_405 fwhm_488 fwhm_633 fwhm_fl1 fwhm_fl2
+                    clear peak_area peak_area_405 peak_area_488 peak_area_633 peak_area_fl1 peak_area_fl2 File_num
                     toc
                 end
             end

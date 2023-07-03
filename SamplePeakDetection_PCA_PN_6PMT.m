@@ -462,7 +462,7 @@ for f=analysisvals
                 flr_detect_1 = 0; % iRFP red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
                 flr_detect_3 = 0; % E2C red Fluorescence
-                if strcmp('Blood',sample_type) && bead_flag==1 
+                 if bead_flag==1 % removed strcmp(sample_type,'Blood') && 
                     fileN=[fileName,'_NoScatAll'];
                 else
                     fileN=[fileName,'_NoScat'];
@@ -1024,7 +1024,7 @@ for f=analysisvals
     end
 end
 if bead_flag==1
-    successmessage=BeadSorting(filepath,file_range);
+    successmessage=BeadSorting6PMT(filepath,file_range);
     disp(successmessage)
 end
 successmessage='Completed Peak Detection';
