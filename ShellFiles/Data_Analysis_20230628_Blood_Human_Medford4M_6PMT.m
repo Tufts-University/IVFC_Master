@@ -15,8 +15,8 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     Fs=60e3;
     Window_Low= 50;
     Window_High= 10000;
-   output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-   disp(output)
+    output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+    disp(output)
     close all
     
     cd(filepath)

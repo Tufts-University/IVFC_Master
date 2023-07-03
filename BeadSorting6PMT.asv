@@ -1,4 +1,4 @@
-function successmessage=BeadSorting6PMT2(filepath,file_range)
+function successmessage=BeadSorting6PMT(filepath,file_range)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % file:BeadSorting.m
 % ***Description***:
@@ -67,7 +67,7 @@ for i=file_range
             disp(['Chunk # ',num2str(j),' of ',num2str(max(chunks))]);
             a=pv1(:,7)==j;
             loc=pv1(a,8);
-            load([subdirinfo{i}(1).name(1:end-8),'NoScat.mat'],'peak_values')
+            load([subdirinfo{i}(1).name(1:end-8),'NoScatAll.mat'],'peak_values')
             pv2=peak_values;
             a2=find(pv2(:,7)==j);
             loc2=pv2(a2,8);
@@ -106,5 +106,5 @@ cd(mainFolder)
  peak_values=pv1;
  save([subdirinfo{i}(1).name(4:end-8),'NoScatBeads.mat'],'peak_values')
  peak_values=pv2;
- save([subdirinfo{i}(1).name(4:end-8),'NoScatCell.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(5:end-8),'NoScatCell.mat'],'peak_values')
 successmessage='Completed Seperating Bead Peaks';
