@@ -3,7 +3,7 @@
 % Data Type: Blood Cell Data from Human plus Cell
 % Flow Date: 06/20/23
 %% Notes
-% Medford-1 Blood + Cell+Beads single channel 
+% Medford-4 Blood + Cell+Beads single channel 
 %% Initialization
 clear
 clc
