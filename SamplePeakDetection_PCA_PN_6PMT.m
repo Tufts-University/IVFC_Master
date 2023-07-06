@@ -462,7 +462,7 @@ for f=analysisvals
                 flr_detect_1 = 0; % iRFP red Fluorescence
                 flr_detect_2 = 1; % Green Fluorescence
                 flr_detect_3 = 0; % E2C red Fluorescence
-                 if bead_flag==1 && strcmp(sample_type,'Blood') % removed strcmp(sample_type,'Blood') && 
+                if strcmp(sample_type,'Blood')==1 && bead_flag==1  % removed strcmp(sample_type,'Blood') && 
 
 %                 if strcmp(sample_type,'Blood') && bead_flag==1 
 
@@ -547,12 +547,13 @@ for f=analysisvals
                     SN_Red(SN_Red<0) = 0;
                     SN_Red2(SN_Red<0) = 0;
                     M = [SN_405,SN_488,SN_633,SN_Red,SN_Green,SN_Red2];
+                    signal_max = 11;
                     %% Normalization
                     M2 = (M-min(M))./(max(M)-min(M));
                     %% Sensor cleaning
                     [~,~,~,tsquared,~,~] = pca(M2(:,1:3));
                     %% Normalization of the data set
-                    M2(:,4:6) = M2(:,4:6)./max(M2(:,4:6));
+                    M2(:,4:6) = [SN_Red,SN_Green,SN_Red2]./signal_max;
                     norm = tsquared;
                     if flr_detect_1==1 && flr_detect_2==1 && flr_detect_3==1 %ALL Channels
                         cumulative_det=SN_405+SN_488+SN_633+SN_Green;
