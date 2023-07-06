@@ -1,4 +1,4 @@
-cd%% NV_033123_CVTesting
+%% NV_033123_CVTesting
 %% Initialization
 clear
 clc
@@ -134,24 +134,17 @@ for i = 1:length(files)
 end
 CV = CV_store(:,3)./CV_store(:,2);
 %% Test Set Sum of Variance
-average = zeros(5,2);
-seeds = randi(500,20,1);
-for n = 1:length(seeds)
-    seed = seeds(n);
-    rng(seed)
-    Final_CV2 = zeros(5,2);
-    for k = 1:length(thresh)
-        x_theoretical = poissrnd(thresh(k),[9,1]);
-        x_theoretical = (x_theoretical-min(x_theoretical))./(max(x_theoretical)-min(x_theoretical));
-        x_purity = events(events(:,2)==thresh(k),1);
-        x_purity = (x_purity-min(x_purity))./(max(x_purity)-min(x_purity));
-        covariance_mat = cov(x_theoretical,x_purity);
-        stdev_sample = sqrt(covariance_mat(1,1)+covariance_mat(2,2) + ...
-                        2.*covariance_mat(1,2));
-        mean_sample = mean(x_theoretical) + mean(x_purity);
-        Final_CV2(k,:) = [thresh(k),stdev_sample./mean_sample];
-    end
-    sortedCV2 = sortrows(Final_CV2,1);
-    average = average + sortedCV2;
+rng(15)
+Final_CV2 = zeros(5,2);
+for k = 1:length(thresh)
+    x_theoretical = poissrnd(thresh(k),[9,1]);
+    x_theoretical = (x_theoretical-min(x_theoretical))./(max(x_theoretical)-min(x_theoretical));
+    x_purity = events(events(:,2)==thresh(k),1);
+    x_purity = (x_purity-min(x_purity))./(max(x_purity)-min(x_purity));
+    covariance_mat = cov(x_theoretical,x_purity);
+    stdev_sample = sqrt(covariance_mat(1,1)+covariance_mat(2,2) + ...
+                    2.*covariance_mat(1,2));
+    mean_sample = mean(x_theoretical) + mean(x_purity);
+    Final_CV2(k,:) = [thresh(k),stdev_sample./mean_sample];
 end
-average = average./20;
+sortedCV2 = sortrows(Final_CV2,1)

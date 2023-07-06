@@ -3,7 +3,7 @@
 % Data Type: Blood Cell Data from Human plus Cell
 % Flow Date: 06/20/23
 %% Notes
-% Medford-1 Blood + Cell+Beads single channel 
+% Medford-4 Blood + Cell+Beads single channel 
 %% Initialization
 clear
 clc
@@ -32,7 +32,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
     file_range= (1:length(dirinfo));
-    analysisvals=[1:4];
+    analysisvals=(1:4);
     sample_type= 'Blood';
     exp_num=[];
     std_threshold=3;

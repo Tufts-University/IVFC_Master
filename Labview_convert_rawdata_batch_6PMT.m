@@ -4,12 +4,12 @@ function [successmessage] = Labview_convert_rawdata_batch_6PMT(filepath,Fs,Windo
 % ***Description***:
 % This function serves to convert any .csv file found in the parent folder
 % into .mat files. This script automatically loops through the .csv file
-% and save the chunks in their respective folders. 
+% and save the chunks in their respective folders.
 % Written By: Taras Hanulia (thanul01@tufts.edu)
 % Date Written: 05/15/2023
 % Modifying Author:
 % Date Modified:
-% Latest Revision: 
+% Latest Revision:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Function details
 % Inputs:
@@ -48,7 +48,7 @@ dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
 
 dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
 
-subdirinfo = cell(length(dirinfo)); 
+subdirinfo = cell(length(dirinfo));
 
 for K = 1 : length(dirinfo)
     thisdir = dirinfo(K).name;
@@ -64,14 +64,14 @@ for i=1:length(subdirinfo)
         scatpath=fullfile(subdirinfo{i}.folder,subdirinfo{i}.name);
         cd(subdirinfo{i}.folder)
         data_type=subdirinfo{i}.name(1:end-4);
-        
+
         %% Converts Labview processed CSV text file of RAW Data to Mat files
         feature accel on
         format shortEng
         chunk_time=1.5;
         smpl_rate=Fs; %per channel
-        chunk_size=smpl_rate*60*chunk_time; 
-        
+        chunk_size=smpl_rate*60*chunk_time;
+
         Wn=Window./(Fs/2);%Cutoff frequencies divided by Nyquist frequency
         [b,a]=butter(2,Wn);
         error=0;
@@ -84,53 +84,55 @@ for i=1:length(subdirinfo)
             M=cell2mat(M);
             if isempty(M)
                 %Nothing happens if that chunk is empty
-            else
-            avg_scat(ii,:)=mean(M,'omitnan'); %#ok<AGROW> 
-            std_scat(ii,:)=std(M,'omitnan'); %#ok<AGROW> 
-            scat_file=[data_type,'_',num2str(ii),'_raw'];
-
-            M_filt=zeros(length(M),6);
-            save(scat_file,'M')
-            M_filt(:,1)=filtfilt(b,a,M(:,1));
-            M_filt(:,2)=filtfilt(b,a,M(:,2));
-            M_filt(:,3)=filtfilt(b,a,M(:,3));
-            M_filt(:,4)=filtfilt(b,a,M(:,4));
-            M_filt(:,5)=filtfilt(b,a,M(:,5));
-            M_filt(:,6)=filtfilt(b,a,M(:,6));
-            sigmas(ii,:)=std(M_filt,0,1); %#ok<AGROW> 
-            if size(M,1)<chunk_size
+                ii = ii-1;
                 break
-            end
-            ii=ii+1;
-            clear M M_filt
+            else
+                avg_scat(ii,:)=mean(M,'omitnan'); %#ok<AGROW>
+                std_scat(ii,:)=std(M,'omitnan'); %#ok<AGROW>
+                scat_file=[data_type,'_',num2str(ii),'_raw'];
+
+                M_filt=zeros(length(M),6);
+                save(scat_file,'M')
+                M_filt(:,1)=filtfilt(b,a,M(:,1));
+                M_filt(:,2)=filtfilt(b,a,M(:,2));
+                M_filt(:,3)=filtfilt(b,a,M(:,3));
+                M_filt(:,4)=filtfilt(b,a,M(:,4));
+                M_filt(:,5)=filtfilt(b,a,M(:,5));
+                M_filt(:,6)=filtfilt(b,a,M(:,6));
+                sigmas(ii,:)=std(M_filt,0,1); %#ok<AGROW>
+                if size(M,1)<chunk_size
+                    break
+                end
+                ii=ii+1;
+                clear M M_filt
             end
         end
         num_chunks=ii;
         sigmas_final=mean(sigmas,1);
         save([data_type,'_sigmas'],'sigmas_final');
-        
+
         h=figure;
         subplot(2,3,1)
         errorbar(1:num_chunks-error,avg_scat(:,1),std_scat(:,1));
         title('Assesing Channel Drift','FontSize',12)
         xlabel('Time(1.5min chunks)','FontSize',10)
         ylabel('Average 405 Intensity','FontSize',10)
-        
+
         subplot(2,3,2)
         errorbar(1:num_chunks-error,avg_scat(:,2),std_scat(:,2));
         xlabel('Time(1.5min chunks)','FontSize',10)
         ylabel('Average 488 Intensity','FontSize',10)
-        
+
         subplot(2,3,3)
         errorbar(1:num_chunks-error,avg_scat(:,3),std_scat(:,3));
         xlabel('Time(1.5min chunks)','FontSize',10)
         ylabel('Average 632.8 Intensity','FontSize',10)
-        
+
         subplot(2,3,4)
         errorbar(1:num_chunks-error,avg_scat(:,4),std_scat(:,4));
         xlabel('Time(1.5min chunks)','FontSize',10)
         ylabel('Average iRFP720 Flr Intensity','FontSize',10)
-        
+
         subplot(2,3,5)
         errorbar(1:num_chunks-error,avg_scat(:,5),std_scat(:,5));
         xlabel('Time(1.5min chunks)','FontSize',10)
@@ -140,7 +142,7 @@ for i=1:length(subdirinfo)
         errorbar(1:num_chunks-error,avg_scat(:,6),std_scat(:,6));
         xlabel('Time(1.5min chunks)','FontSize',10)
         ylabel('Average E2-Crimson Flr Intensity','FontSize',10)
-        
+
         set(gcf,'Position',[680.0000e+000   559.0000e+000   798.0000e+000   419.0000e+000]);
         filename=[data_type,'_Channel_Drift.jpeg'];
         saveas(h,filename)
