@@ -128,7 +128,7 @@ for i=1:5
     fit_data=[];
     group=[];
     for iii=1:num_files % Sets up data for ANOVA
-        fit_data=[fit_data;fits(:,2,iii)]; %#ok<AGROW> 
+        fit_data=[fit_data;fits(:,2,iii).*fits(:,1,iii)]; %#ok<AGROW> 
         group=[group,repmat(legend_el(:,iii),1,100)]; %#ok<AGROW> 
     end
 
