@@ -11,7 +11,7 @@ clc
 addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
 %% Calling Script
 
-    filepath = 'T:\Taras\IVFC\Acquired Data\Human Studies\TMC-03\TH_060923_Patient3Tiro_TMC';
+    filepath = 'T:\Taras\IVFC\Acquired Data\Human Studies\TH_060923_Patient3Tiro_TMC';
     % Labview Conversion
     Fs=60e3;
     Window_Low= 50;
@@ -33,7 +33,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
     file_range= (1:length(dirinfo));
-    analysisvals=(1:4);
+    analysisvals=[2,4];
     sample_type= 'Blood';
     exp_num=[];
     std_threshold=3;
@@ -43,5 +43,5 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     bead_flag = 1;
     output=SamplePeakDetection_PCA_PN_6PMT(filepath,outputfile,file_range,Window_Low,...
         Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
-        Spectralon_tail,FWMH_threshold,intensity_threshold,flag);
+        Spectralon_tail,FWMH_threshold,intensity_threshold,bead_flag);
     disp(output)

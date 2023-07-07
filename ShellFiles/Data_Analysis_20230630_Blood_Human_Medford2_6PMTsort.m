@@ -10,7 +10,7 @@ clc
 addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
 %% Calling Script
 
-    filepath = 'T:\Taras\IVFC\Acquired Data\Human Studies\Medford-02';
+    filepath = 'T:\Taras\IVFC\Acquired Data\Human Studies\TH_061323_Medford-02_Cell';
     % Labview Conversion
     Fs=60e3;
     Window_Low= 50;
