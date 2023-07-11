@@ -7,7 +7,6 @@ clear
 clc
 %% Calling Script
 %% Data Files Names
-% Labview Conversion
 mainpath = 'T:\Nilay\IVFC\Acquired Data\Blood Cell Data\CNNData';
 cd(mainpath)
 [~,T] = xlsread('dict_key.csv');
@@ -18,7 +17,7 @@ performance(:,1) = [threshold,13]';
 for j = 1:5
     thresh = threshold(j);
     disp(['Threshold ',num2str(j),' of 5'])
-    parfor i=1:30%length(T)
+    for i=1:30%length(T)
         disp([9 'Reprocessing Day ',num2str(i),' of 30'])
         exp_name=T{i};
         cd(exp_name(2:end))

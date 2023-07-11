@@ -3,7 +3,7 @@
 % clear
 % clc
 % close all
-mainpath = 'T:\Nilay\IVFC\DeepPeakResults\Trial_2\ThreeCellAnalysis\k-fold\Seed 2\Metrics';
+mainpath = 'T:\Nilay\IVFC\DeepPeakResults\Trial_2\k-fold\Seed 2\Metrics';
 cd(mainpath)
 folders = dir('*Cell_Metrics.mat');
 [F_names] = natsortfiles({folders.name});
@@ -47,9 +47,9 @@ folders = dir('*Pearson_Metrics.mat');
 load(F_names{1});
 x = double(squeeze(Pearson(:,:,1)));
 y = double(squeeze(Pearson(:,:,2)));
-keys = [1,2,6,8,11,14,18,21,22,28];
-x = x(keys,:);
-y = y(keys,:); 
+% keys = [1,2,6,8,11,14,18,21,22,28];
+% x = x(keys,:);
+% y = y(keys,:); 
 Pearson_store = zeros(10,1);
 for j = 1:10
     disp(['Model # ',num2str(j),' of 10'])
@@ -101,7 +101,7 @@ for j = 1:10
     total_time = 175; % mins
     flow_rate = 3; % uL/min
     total_volume = total_time.*flow_rate;
-    FAR_store(j) = total_FP./total_volume;
+    FAR_store(j) = total_FP./total_time;
 end
 figure;
 plot((1:10),FAR_store);
@@ -123,7 +123,7 @@ plot((1:10),meanPur,'-','Color',colors(3,:));
 boldify
 yyaxis("right")
 plot((1:10),FAR_store,'Color',colors(4,:));
-ylabel('False Alarm Rate (\muL^{-1})')
+ylabel('False Alarm Rate (min^{-1})')
 boldify
 legend('Pearson Correlation','Net Sensitivity','Purity','FAR','Location',...
     'southoutside','NumColumns',2)

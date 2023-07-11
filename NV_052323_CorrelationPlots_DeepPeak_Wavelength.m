@@ -160,7 +160,7 @@ xticklabels(combos)
 legend(Metrics,'location','southoutside','numcolumns',5,...
         'FontSize',12,'FontName','Ariel')
 ylabel('Performance')
-print(gcf, '-dmeta', 'Combos.emf');
+print(gcf, '-dsvg', 'Combos.svg');
 %% Plot Combos All performance
 colors = linspecer(5);
 Metrics = {'Purity','Specificity','Sensitivity','Accuracy',...
@@ -190,7 +190,7 @@ xticklabels(combos)
 legend(Metrics,'location','southoutside','numcolumns',5,...
         'FontSize',12,'FontName','Ariel')
 ylabel('Performance')
-print(gcf, '-dmeta', 'Combos_All.emf');
+print(gcf, '-dsvg', 'Combos_All.svg');
 %% Plot Test performance v2
 colors = linspecer(5);
 Metrics = {'Purity','Specificity','Sensitivity','Accuracy',...
@@ -220,7 +220,7 @@ xticklabels(Metrics)
 legend(combos,'location','southoutside','numcolumns',5,...
         'FontSize',12,'FontName','Ariel')
 ylabel('Performance')
-print(gcf, '-dmeta', 'Combos_v2.emf');
+print(gcf, '-dsvg', 'Combos_v2.svg');
 %% Plot Combos All performance
 colors = linspecer(5);
 Metrics = {'Purity','Specificity','Sensitivity','Accuracy',...
@@ -250,4 +250,4 @@ xticklabels(Metrics)
 legend(combos,'location','southoutside','numcolumns',5,...
         'FontSize',12,'FontName','Ariel')
 ylabel('Performance')
-print(gcf, '-dmeta', 'Combos_All_v2.emf');
+print(gcf, '-dsvg', 'Combos_All_v2.svg');

@@ -3,7 +3,7 @@
 % file:NV_050223_PressureCalculator.m
 % ***Description***:
 % This function calculates the needed input pressure for the pressure 
-% driven flow based on viscocity, number of channels, and channel gap. 
+% driven flow based on viscosity, number of channels, and channel gap. 
 % Written By: Nilay Vora (nvora01@tufts.edu)
 % Date Written: 05/02/2023
 % Modifying Author:

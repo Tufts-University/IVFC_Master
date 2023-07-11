@@ -1,8 +1,8 @@
 function [successmessage]=DailyCalibrationScript(files)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  file: DailyCalibrationScript.m
-%  This file will read the outputed peak_values data files and
-%  generate histograms and conduct ANOVA calculation for verificaiton of
+%  This file will read the outputted peak_values data files and
+%  generate histograms and conduct ANOVA calculation for verification of
 %  alignment from day to day
 %  Written By: Nilay Vora (nvora01@tufts.edu)
 %  Date Written: 01/12/2022

@@ -20,12 +20,12 @@ idxs = [];
     
 load(Base_Name,'-mat','peak_values');
 if contains(Base_Name,'Scat')
-    peak_values = peak_values((peak_values(:,19)>=38),:);
+    peak_values = peak_values((peak_values(:,19)>=30),:);
     if bead_flag == 1
         peak_values(peak_values(:,4)>0.05,:)=[];
     end
 else
-    peak_values(peak_values(:,9)<20,:)=[];
+    peak_values(peak_values(:,9)<17,:)=[];
     if bead_flag == 1
         peak_values(peak_values(:,4)>0.05,:)=[];
     end
@@ -34,12 +34,12 @@ pv1=[pv1;peak_values];
 load(Base_Name2,'-mat','peak_values');
 
 if contains(Base_Name2,'Scat')
-    peak_values = peak_values((peak_values(:,19)>=38),:);
+    peak_values = peak_values((peak_values(:,19)>=30),:);
     if bead_flag == 1
         peak_values(peak_values(:,4)>0.05,:)=[];
     end
 else
-    peak_values(peak_values(:,9)<20,:)=[];
+    peak_values(peak_values(:,9)<17,:)=[];
     if bead_flag == 1
         peak_values(peak_values(:,4)>0.05,:)=[];
     end

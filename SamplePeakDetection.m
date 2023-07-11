@@ -30,14 +30,14 @@ function successmessage=SamplePeakDetection(filepath,outputfile,...
 %   Window_High = High frequency cutoff of Butterworth filter window
 %   Fs = Sample frequency used during acquisition
 %   analysisvals = Which detection methods do you want to use
-%   sample_type = (sting) Sample type (i.e. 'Cells','Blood','Beads',
+%   sample_type = (sting) Sample type (i.e., 'Cells','Blood','Beads',
 %                  'Animal')
-%   exp_num = Expected number of events in 1.5 minute chunk
+%   exp_num = Expected number of events in 1.5-minute chunk
 %   std_threshold = Cluster cutoff value
 %   Spectralon_tail= Tail format of Spectralon file
-%   FWMH_threshold = Minimum peak width allowe do be detected
+%   FWMH_threshold = Minimum peak width allowed to be detected
 %   intensity_threshold= Minimum peak intensity for detection
-%   bead_flag=Indicator that seperated beads from cell peaks in blood data
+%   bead_flag=Indicator that separated beads from cell peaks in blood data
 % Outputs:
 %   successmessage = a string that indicates the completion of the code
 %
