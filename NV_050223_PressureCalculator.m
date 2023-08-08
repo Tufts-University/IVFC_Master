@@ -35,7 +35,9 @@ L_channels = 10; % mm (Length of Channels)
 W_channels = 0.03; % mm (channel width)
 %% Equations 
 R_circ = @(eta,L) (8.*eta*L)./(pi*r_tube.^4);
-R_rect = @(eta,L,width) (12*eta*L)./...
+R_rect = @(eta,L,width) (28.4*eta*L)./...
+                        (height.^4); 
+R_rect2 = @(eta,L,width) (12*eta*L)./...
                         (width*height.^3.*(1-0.63*(height/width))); 
 width = @(n_channel,w_gap) 0.03*n_channel + (n_channel-1)*w_gap; % um
 P0 = @(R_eff) Q.*R_eff;
@@ -55,11 +57,16 @@ L_out = str2double(answer{4}); % Tubing length out of device (mm)
 eta = str2double(answer{5}) * 1e-3 * 1e-2; % Viscosity (milibar * s)
 %% Calculate Pressure
 width_final = width(n_channels,w_gap);
+if width_final>2*height
+    factor_R = @(eta,L_split,width_final) R_rect2(eta,L_split,width_final);
+else
+    factor_R = @(eta,L_split,width_final) R_rect(eta,L_split,width_final);
+end
 R_eff = @(n_channel) R_circ(eta,L_in) + R_circ(eta,L_out) + ...
-        2.* R_rect(eta,L_split,width_final) + ...
+        2.* factor_R(eta,L_split,width_final) + ...
         R_rect(eta,L_channels,W_channels)./n_channel;
 R_final = R_eff(n_channels);
-P_final = P0(R_final);
+P_final = n_channels.*P0(R_final);
 disp('-------------------------------------------------------------------')
 disp('Pressure needed for specified parameters =')
 disp([num2str(P_final), ' milibars'])
