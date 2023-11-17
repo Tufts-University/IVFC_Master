@@ -17,6 +17,7 @@ clc
 % Water: 0.89 cP
 % Blood: 4 cP
 % Media: 0.93 cP
+% Rat blood 1.53 cP
 %% Unit Conversions:
 % 1 uL = 1 mm^3
 % 1 cP = 1e-3 Pa*s
@@ -28,7 +29,7 @@ r_tube = 0.38/2; % mm (from tubing specifications)
 P_atm = 1013.25; % mbar
 Q = 3; % uL/min (Desired Flow Rate)
 Q = Q./60; % mm^3/sec
-height = 25;% um (channel height)
+height = 30;% um (channel height)
 height = height./1000; % mm
 L_split = 1.46; % mm (Distance from center of punch to channel split)
 L_channels = 10; % mm (Length of Channels)
