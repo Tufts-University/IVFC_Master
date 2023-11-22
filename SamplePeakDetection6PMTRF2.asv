@@ -738,7 +738,7 @@ for f=analysisvals
                         idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
                     end
                     if isempty(idx)==0
-                        if f==6||f==2 % f=6 when red fluorescence 6
+                        if f==6||f==2 %f=6 red fluorescence
                             idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold); % 5 for green fluorescence 
                             if isempty(idx2)==0
                                 peaks=peaks(idx(idx2(:)));
