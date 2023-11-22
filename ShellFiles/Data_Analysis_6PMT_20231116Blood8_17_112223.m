@@ -21,7 +21,7 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_11_22_23';
+outputfile= 'NEW_peak_values_11_16_23';
 file_range= (8:17);
 analysisvals=[1,2,3,6];
 sample_type= 'Blood';
