@@ -1,4 +1,4 @@
-function successmessage=BeadSorting6PMT(filepath,file_range)
+function successmessage=BeadSorting6PMT112223(filepath,file_range)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % file:BeadSorting.m
 % ***Description***:
@@ -45,14 +45,14 @@ subdirinfo = cell(length(dirinfo));
 
 for K = 1 : length(dirinfo)
     thisdir = dirinfo(c(K)).name;
-    subdirinfo{K} = dir(fullfile(thisdir, '*RFLR.mat'));
+    subdirinfo{K} = dir(fullfile(thisdir, '*11_22_23_RFLR.mat'));
 end
 
 subdirinfo =  subdirinfo(~cellfun('isempty',subdirinfo));
 
-% if file_range(1)~=1
-%     file_range=file_range-(file_range(1)-1);
-% end
+if file_range(1)~=1
+    file_range=file_range-(file_range(1)-1);
+end
 %% Main Loop: Split the Cells from Beads
 for i=file_range
     disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
@@ -67,7 +67,7 @@ for i=file_range
             disp(['Chunk # ',num2str(j),' of ',num2str(max(chunks))]);
             a=pv1(:,7)==j;
             loc=pv1(a,8);
-            load([subdirinfo{i}(1).name(1:end-8),'NoScatAll.mat'],'peak_values')
+            load('NEW_peak_values_11_22_23_NoScatAll.mat','peak_values')
             pv2=peak_values;
             a2=find(pv2(:,7)==j);
             loc2=pv2(a2,8);
@@ -104,7 +104,7 @@ for i=file_range
 end
 cd(mainFolder)
  peak_values=pv1;
- save([subdirinfo{i}(1).name(5:end-8),'NoScatBeads.mat'],'peak_values')
+ save('NEW_peak_values_11_22_23_NoScatBeads.mat','peak_values')
  peak_values=pv2;
- save([subdirinfo{i}(1).name(5:end-8),'NoScatCell.mat'],'peak_values')
+ save('NEW_peak_values_11_22_23_NoScatCell.mat','peak_values')
 successmessage='Completed Seperating Bead Peaks';
