@@ -17,6 +17,7 @@ clc
 % Water: 0.89 cP
 % Blood: 4 cP
 % Media: 0.93 cP
+% Rat blood 1.53 cP
 %% Unit Conversions:
 % 1 uL = 1 mm^3
 % 1 cP = 1e-3 Pa*s
