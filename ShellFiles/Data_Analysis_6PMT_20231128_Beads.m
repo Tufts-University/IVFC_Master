@@ -11,7 +11,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Taras\IVFC\Acquired Data\Bead Calibration Data\2023\6PMT\TH_112723_Calibration';
+filepath = 'T:\Taras\IVFC\Acquired Data\Bead Calibration Data\2023\6PMT\TH_112823_Calibration';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
