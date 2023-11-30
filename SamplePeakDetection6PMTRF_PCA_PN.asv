@@ -729,61 +729,7 @@ for f=analysisvals
                     locs(bad_peaks)=[];
                     clusterpts(bad_peaks,:)=[]; %#ok<AGROW>
                     clear bad_peaks % reduces memory footprint
-    %% Set cluster range for interrogation based on closeness
-                        if size(clusterpts,1)<2
-                            check_ranges = [clusterpts(:,1)-5, clusterpts(:,2)+5];
-                        else
-                            close_peaks = find(clusterpts(2:end,1)-clusterpts(1:end-1,2)<5);
-                            check_ranges = [clusterpts(:,1)-5, clusterpts(:,2)+5];
-                            for pts = 1:size(close_peaks,1)
-                                check_ranges(close_peaks(pts),2) = clusterpts(close_peaks(pts)+1,1);
-                                check_ranges(close_peaks(pts)+1,1) = clusterpts(close_peaks(pts),2);
-                            end
-                            close_peaks = find(clusterpts(2:end,2)-clusterpts(1:end-1,1)<5);
-                            for pts = 1:size(close_peaks,1)
-                                check_ranges(close_peaks(pts),1) = clusterpts(close_peaks(pts)-1,2);
-                                check_ranges(close_peaks(pts)-1,2) = clusterpts(close_peaks(pts),1);
-                            end
-                        end
-                        if check_ranges(1,1)<0
-                            check_ranges(1,1) = 1;
-                        elseif check_ranges(end,2) > length(M_filt)
-                            check_ranges(end,2) = length(M_filt);
-                        end
-                        
-                        %% Merge Peaks (last cleaning step)
-                        m = 1;
-                        n = size(check_ranges,1);
-                        while 1
-                            int = m + 1;
-                            if int >= n
-                                break
-                            end
-                            if check_ranges(m,2)>check_ranges(int,1)
-                                while 1
-                                    check_ranges(m,2) = check_ranges(int,2);
-                                    check_ranges(int,:) = [];
-                                    if peaks(int) < peaks(m)
-                                        del_row = int;
-                                    else
-                                        del_row = m;
-                                    end
-                                    peaks(del_row) = [];
-                                    locs(del_row) = [];
-                                    n = n-1;
-                                    if m>=n
-                                        break
-                                    end
-                                    if check_ranges(m,2)<check_ranges(int,1)
-                                        break
-                                    end
-                                end
-                            end
-                            m = m+1;
-                            if m >= n
-                                break
-                            end
-                        end
+
                     %% FWHM finding & Grabbing True Maximums
                     %FWHMs are found from the filtered peaks
                     fwhm=zeros(length(peaks),1);
@@ -793,18 +739,17 @@ for f=analysisvals
 
                     for m=1:length(peaks)
                         %% Grab True Maximums
-                        
                         data_range=M2(check_ranges(m,1):check_ranges(m,2),:); %grabs full cluster width by 5 matrix around peak
                         peak_data(m,:)=max(data_range); %grabs maximum which could be slightly different from channel to channel in time
                         clear data_range
                         %% Grab FWHMs
                         peak_height=M_filt(locs(m),:);% locs(m)
                         if clusterpts(m,2)+10>5400000
-                                data_fwhm=M_filt(check_ranges(m,1):end,:);
-                                data_fwhm_cum=scat_norm(clusterpts(m,1)-10:end);
+                            data_fwhm=M_filt(clusterpts(m,1)-10:end,:);
+                            data_fwhm_cum=scat_norm(clusterpts(m,1)-10:end);
                         else
-                                data_fwhm=M_filt(check_ranges(m,1):check_ranges(m,2),:);
-                                data_fwhm_cum=scat_norm(check_ranges(m,1):check_ranges(m,2));
+                            data_fwhm=M_filt(clusterpts(m,1)-10:clusterpts(m,2)+10,:);
+                            data_fwhm_cum=scat_norm(clusterpts(m,1)-10:clusterpts(m,2)+10);
                         end
                         peak_height_cum=scat_norm(locs(m)); % locs(m)
                         %405
