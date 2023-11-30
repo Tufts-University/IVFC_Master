@@ -104,7 +104,7 @@ for i=file_range
 end
 cd(mainFolder)
  peak_values=pv1;
- save([subdirinfo{i}(1).name(5:end-8),'NoScatBeads.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(4:end-8),'NoScatBeads.mat'],'peak_values')
  peak_values=pv2;
- save([subdirinfo{i}(1).name(5:end-8),'NoScatCell.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(4:end-8),'NoScatCell.mat'],'peak_values')
 successmessage='Completed Seperating Bead Peaks';

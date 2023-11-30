@@ -1,4 +1,4 @@
-%% 11/28/23 DataAnalysis
+%% 11/28/23 DataAnalysis and 11/30/2023
 % Owner: Taras Hanulia
 % Data Type: Blood    Measurements
 % Flow Date: 11/28/2023
@@ -31,7 +31,7 @@ Spectralon_tail= '';
 FWMH_threshold=0;
 intensity_threshold= 0.15;
 bead_flag=1;
-output=SamplePeakDetection6PMTRF2(filepath,outputfile,file_range,Window_Low,...
+output=SamplePeakDetection6PMTRF_PCA_PN(filepath,outputfile,file_range,Window_Low,...
     Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
     Spectralon_tail,FWMH_threshold,intensity_threshold,bead_flag);
 disp(output)
