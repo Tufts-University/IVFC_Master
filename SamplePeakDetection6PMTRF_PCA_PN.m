@@ -574,7 +574,12 @@ for f=analysisvals
 
                     cum_std(ii) = std(cumulative); %#ok<AGROW>
                     cum_avg(ii) = mean(cumulative); %#ok<AGROW>
-                    cum_det_std(ii)=std(cumulative_det);%#ok<AGROW>
+%%%% Added this as we want to used a threshold of 10 for PCA Detection %%%%
+                    if f == 1
+                        cum_det_std(ii) = 10./std_threshold; %#ok<AGROW>
+                    else
+                        cum_det_std(ii)=std(cumulative_det);%#ok<AGROW>
+                    end
                     %% Peak Finding %%
                     %MINPEAKDISTANCE= specified how many points past the peak the next peak must be. Based on observations typical peak is 5 so choose 10
                     %NPEAKS= 3 times the expected number per chunk.  This is to protect against possibility that expected number varies from chunk to chunk
