@@ -545,7 +545,7 @@ for f=analysisvals
                     SN_Red2=(M_filt(:,6)-mean(M_filt(:,6)));
                     SN_Green(SN_Green<0) = 0;
                     SN_Red(SN_Red<0) = 0;
-                    SN_Red2(SN_Red<0) = 0;
+                    SN_Red2(SN_Red2<0) = 0;
                     M = [SN_405,SN_488,SN_633,SN_Red,SN_Green,SN_Red2];
                     signal_max = 11;
                     %% Normalization
