@@ -560,7 +560,7 @@ for f=analysisvals
                         scat_norm = norm;
                     else % ONLY SCATTERING
                         cumulative=SN_405+SN_488+SN_633;
-                        cumulative_det=SN_405+SN_488+SN_633;
+                        cumulative_det=norm;
                         scat_norm = norm;
                     end
 %                     if f==1||f==3
