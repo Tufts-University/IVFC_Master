@@ -23,7 +23,7 @@ close all
 %Peak Detection
 outputfile= 'NEW_peak_values_11_28_23';
 file_range= (1:7);
-analysisvals=[1,2,3,6];
+analysisvals=(1);
 sample_type= 'Blood';
 exp_num=[];
 std_threshold=3;
