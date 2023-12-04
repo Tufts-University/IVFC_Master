@@ -1,10 +1,10 @@
-%% 11/28/23 DataAnalysis and 11/30/2023
+%% 12/04/23 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Blood    Measurements
-% Flow Date: 11/28/2023
+% Flow Date: 11/16/2023
 %% Experiment Note
 % CAL27EGFP Cells 
-% flow faster than expected
+% flow 8-17 correct , flow 1-7 not correct
 %% Initialization
 clear
 clc
@@ -12,7 +12,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_masterr'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Taras\IVFC\Acquired Data\Blood Cell Data\TH_112823_Blood_Cell';
+filepath = 'T:\Taras\IVFC\Acquired Data\Blood Cell Data\TH_111623_Blood_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -21,9 +21,9 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_11_28_23';
-file_range= (1:7);
-analysisvals=(1);
+outputfile= 'NEW_peak_values_11_16_23';
+file_range= (8:17);
+analysisvals=[1,2,3,6];
 sample_type= 'Blood';
 exp_num=[];
 std_threshold=3;
