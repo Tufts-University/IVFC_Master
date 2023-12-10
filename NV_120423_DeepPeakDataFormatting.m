@@ -50,7 +50,7 @@ end
 %% Data Formatting
 function [range_data,label,peak_values]=MLformating(fname,bead_flag)
 load(fname,'-mat','peak_values')
-peak_values(peak_values(:,10)<20,:) = [];
+peak_values(peak_values(:,10)<17,:) = [];
 peak_values = sortrows(peak_values,[24,7,8]);
 range_data = zeros(size(peak_values,1),396);
 label = 1.*ones(size(peak_values,1),1);

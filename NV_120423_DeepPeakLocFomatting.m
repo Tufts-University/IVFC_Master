@@ -50,7 +50,7 @@ end
 %% Data Formatting
 function [locs_save,label]=Locformating(fname,bead_flag,day)
 load(fname,'-mat','peak_values')
-peak_values(peak_values(:,10)<20,:) = [];
+peak_values(peak_values(:,10)<17,:) = [];
 peak_values = sortrows(peak_values,[24,7,8]);
 label = ones(size(peak_values,1),1);
 count = 1;
@@ -72,10 +72,10 @@ for j=1:length(unique(peak_values(:,24)))
     for k=1:size(chunks,1)
         disp(['          Chunk # ',num2str(k),' of ',...
             num2str(size(chunks,1))])
-        load(chunks(c(k)).name)
-        M(:,1)=(M(:,1)-mean(M(:,1)))./std(M(:,1));
-        M(:,2)=(M(:,2)-mean(M(:,2)))./std(M(:,2));
-        M(:,3)=(M(:,3)-mean(M(:,3)))./std(M(:,3));
+%         load(chunks(c(k)).name)
+%         M(:,1)=(M(:,1)-mean(M(:,1)))./std(M(:,1));
+%         M(:,2)=(M(:,2)-mean(M(:,2)))./std(M(:,2));
+%         M(:,3)=(M(:,3)-mean(M(:,3)))./std(M(:,3));
         chunk_loc=pv_temp(pv_temp(:,7)==k,:);
         for l=1:size(chunk_loc,1)
             if bead_flag == 1
