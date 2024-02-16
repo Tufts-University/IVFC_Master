@@ -3,7 +3,8 @@
 % Data Type: Cells   Measurements
 % Flow Date: 02/14/2024
 %% Experiment Note
-% B Cells +iRFP720 
+% B Cells +iRFP720 change intensity treshhold 0.1 from 0.15 from green 5 to
+% red 4
 % Cells in Media
 %% Initialization
 clear
