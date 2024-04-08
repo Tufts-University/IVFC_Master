@@ -29,7 +29,7 @@ r_tube = 0.38/2; % mm (from tubing specifications)
 P_atm = 1013.25; % mbar
 Q = 3; % uL/min (Desired Flow Rate)
 Q = Q./60; % mm^3/sec
-height = 30;% um (channel height)
+height = 25;% um (channel height)
 height = height./1000; % mm
 L_split = 1.46; % mm (Distance from center of punch to channel split)
 L_channels = 10; % mm (Length of Channels)
@@ -47,7 +47,7 @@ prompt = {'Enter number of channels:', 'Enter channel gap size (um):',...
           'Enter length of inlet tubing (mm):',...
           'Enter length of outlet tubing (mm):',...
           'Enter sample Viscosity (cP):'};
-definput = {'3','15','300','150', '0.89'}; % default values
+definput = {'1','0','360','90', '0.89'}; % default values
 dims = [1 50];
 dlgtitle = 'Pressure Calculator';
 answer = inputdlg(prompt,dlgtitle,dims,definput);
