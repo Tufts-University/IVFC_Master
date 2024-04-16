@@ -1,9 +1,9 @@
-%% 04/09/24 DataAnalysis
+%% 04/16/24 DataAnalysis
 % Owner: Taras Hanulia
 % Data Type: Beads Calibration 
-% Flow Date: 04/09/2024 
+% Flow Date: 04/16/2024 
 %% Experiment Note
-% beads ND 0.6 on 405  slit of 405 shorter new aligment new bemblock
+% beads ND 0.6 on 405  slit of 405 shorter
 % position
 %% Initialization
 clear
@@ -12,16 +12,16 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Taras\IVFC\Acquired Data\Bead Calibration Data\2024\TH_040824_Calibration';
+filepath = 'T:\Taras\IVFC\Acquired Data\Bead Calibration Data\2024\TH_041624_Calibration';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-% output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-% disp(output)
+output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+disp(output)
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_04_08_24';
+outputfile= 'NEW_peak_values_04_16_24';
 file_range= (1:2);
 analysisvals=(1:4);
 sample_type= 'Beads';
@@ -40,9 +40,9 @@ disp(output)
 files={
 
 
-    'NEW_peak_values_03_26_24';...
     'NEW_peak_values_04_02_24';...
     'NEW_peak_values_04_02_24_2';...
-    'NEW_peak_values_04_08_24'};
+    'NEW_peak_values_04_08_24';...
+    'NEW_peak_values_04_16_24'};
 output= DailyCalibrationScript6PMT(files);
 disp(output)
