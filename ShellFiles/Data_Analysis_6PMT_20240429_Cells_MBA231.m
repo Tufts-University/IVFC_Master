@@ -23,7 +23,7 @@ close all
 %Peak Detection
 outputfile= 'NEW_peak_values_04_26_24';
 file_range= (1:4);
-analysisvals=[1,2,3,4,5,6];
+analysisvals=[1,2,3,6];
 sample_type= 'Cells';
 exp_num=[];
 std_threshold=3;

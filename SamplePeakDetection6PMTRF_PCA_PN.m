@@ -839,7 +839,7 @@ for f=analysisvals
                         end
                         if isempty(idx)==0
                             if f==6||f==2||f==4||f==5  % f=6 when red fluorescence 6 , was only 6 and 2
-                                idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,4)>intensity_threshold); % 5 for green fluorescence 4 Irfp
+                                idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold); % 5 for green fluorescence 4 Irfp
                                 if isempty(idx2)==0
                                     peaks=peaks(idx(idx2(:)));
                                     locs=locs(idx(idx2(:)));
