@@ -1,9 +1,9 @@
-%% 04/29/23 DataAnalysis 
+%% 05/03/23 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
-% Flow Date: 04/26/2024
+% Flow Date: 05/02/2024
 %% Experiment Note
-% CAL27 GFP+
+% BiRFP
 % Cells in Media
 %% Initialization
 clear
@@ -12,7 +12,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_masterr'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Taras\IVFC\Acquired Data\Cell\TH_042624_Cell';
+filepath = 'T:\Taras\IVFC\Acquired Data\Cell\TH_050124_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -21,7 +21,7 @@ disp(output)
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_04_26_24';
+outputfile= 'NEW_peak_values_05_01_24';
 file_range= (1:4);
 analysisvals=[1,2,3,4,5,6];
 sample_type= 'Cells';
