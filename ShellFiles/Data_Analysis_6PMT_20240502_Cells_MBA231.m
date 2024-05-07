@@ -16,12 +16,12 @@ filepath = 'T:\Taras\IVFC\Acquired Data\Cell\TH_050224_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-disp(output)
+% output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+% disp(output)
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_05_02_24';
+outputfile= 'NEW_peak_values_05_07_24';
 file_range= (1:4);
 analysisvals=[1,2,3,6];
 sample_type= 'Cells';
