@@ -710,7 +710,7 @@ for f=analysisvals
                         %Fl2
                         [fwhm_fl2(m),peak_area_fl2(m)]=NV_052322_fwhm_measure(data_fwhm(:,5),peak_height(5));
                         %Fl3
-                        [fwhm_fl3(m),peak_area_fl3(m)]=NV_052322_fwhm_measure(data_fwhm(:,6),peak_height(6)); % we dont have NV_052322_fwhm_measure for 6 
+                        [fwhm_fl3(m),peak_area_fl3(m)]=NV_101719_fwhm_measure(data_fwhm(:,6),peak_height(6)); % we dont have NV_052322_fwhm_measure for 6 
                         %cum
                         [fwhm(m),peak_area(m)]=NV_101719_fwhm_measure(data_fwhm_cum,peak_height_cum); %#ok<AGROW>
                         % Get rid of zeros
@@ -723,7 +723,7 @@ for f=analysisvals
                     end
                     if isempty(idx)==0
                         if f==4||f==2
-                            idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,6)>intensity_threshold);
+                            idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold); % 5 for green fluorescence 4 Irfp
                             if isempty(idx2)==0
                                 peaks=peaks(idx(idx2(:)));
                                 locs=locs(idx(idx2(:)));
