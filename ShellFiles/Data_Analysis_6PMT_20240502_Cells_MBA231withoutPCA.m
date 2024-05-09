@@ -1,4 +1,4 @@
-%% 05/03/23 DataAnalysis 
+%% 05/08/23 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
 % Flow Date: 05/02/2024
@@ -21,9 +21,9 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_05_08_24';
+outputfile= 'NEW_peak_values_05_08_24_withoutPCA';
 file_range= (1:4);
-analysisvals=[1,2,3,6];
+analysisvals=[4];
 sample_type= 'Cells';
 exp_num=[40];
 std_threshold=3;
@@ -31,7 +31,7 @@ Spectralon_tail= '';
 FWMH_threshold=0;
 intensity_threshold= 0.15;
 bead_flag=0;
-output=SamplePeakDetection6PMTRF_PCA_PN(filepath,outputfile,file_range,Window_Low,...
+output=SamplePeakDetection6PMT(filepath,outputfile,file_range,Window_Low,...
     Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
     Spectralon_tail,FWMH_threshold,intensity_threshold,bead_flag);
 disp(output)
