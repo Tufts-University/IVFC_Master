@@ -410,12 +410,12 @@ for f=analysisvals
         tic
         if~isempty(subdirinfo{i})
             scatpath=subdirinfo{i}.folder;
-            spec_file =[subdirinfo{1}.name(1:end-4),'_Spectralon_Avg',Spectralon_tail,'.csv'];
+            %spec_file =[subdirinfo{1}.name(1:end-4),'_Spectralon_Avg',Spectralon_tail,'.csv'];
             % Spectralon loading
             cd(mainFolder)
-            fid=fopen(spec_file);
-            spec=textscan(fid,'%f %f %f %f %f %f %f %f %f','Delimiter',',');
-            spec=cell2mat(spec);
+            % fid=fopen(spec_file);
+            % spec=textscan(fid,'%f %f %f %f %f %f %f %f %f','Delimiter',',');
+            % spec=cell2mat(spec);
             fclose(fid);
             % Find all raw files
             cd(scatpath)
@@ -738,8 +738,8 @@ for f=analysisvals
                         idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
                     end
                     if isempty(idx)==0
-                        if ismember(f, [2, 4, 5, 6])% was if f==4||f==2 w
-                            idx2=find(fwhm(idx)>FWMH_threshold  & (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold));
+                        if ismember(f, [2, 4, 5, 6])% was if f==4||f==2 when we have GFP+ data and f=1-4 
+                            idx2=find(fwhm(idx)>FWMH_threshold  & (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold));% was idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold); % 5 for green fluorescence 4 Irfp
                             if isempty(idx2)==0
                                 peaks=peaks(idx(idx2(:)));
                                 locs=locs(idx(idx2(:)));
