@@ -8,7 +8,7 @@
 %% Initialization
 clear
 clc
-addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_masterr'
+addpath 'C:\Users\thanul01\Documents\MATLAB\IVFC_Master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
@@ -22,7 +22,7 @@ close all
 %%
 %Peak Detection
 outputfile= 'NEW_peak_values_05_10_24_RF4';
-file_range=[1];
+file_range=1;
 analysisvals=[1,2,3];
 sample_type= 'Cells';
 exp_num=[];

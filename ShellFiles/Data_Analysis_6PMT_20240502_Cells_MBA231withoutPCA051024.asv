@@ -21,11 +21,11 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_05_13_24_RF_2';
+outputfile= 'NEW_peak_values_05_13_24_RF_4';
 file_range= (1);
 analysisvals=[1,2,3];
 sample_type= 'Cells';
-exp_num=[10];
+exp_num=[40];
 std_threshold=4;
 Spectralon_tail= '';
 FWMH_threshold=0;

@@ -517,10 +517,10 @@ for f=analysisvals
                         cumulative_det=SN_Green+SN_Red1+SN_Red2;
                         cumulative=SN_405+SN_488+SN_633;
                     elseif flr_detect_1==1 && flr_detect_2==0 && flr_detect_3==0 %Scattering and FL1 
-                        cumulative_det=SN_405+SN_488+SN_633+SN_Red1;
+                        cumulative_det=SN_Red1;
                         cumulative=SN_405+SN_488+SN_633;
                     elseif flr_detect_1==0 && flr_detect_2==0 && flr_detect_3==1 %Scattering and FL2 
-                        cumulative_det=SN_405+SN_488+SN_633+SN_Red2;
+                        cumulative_det=SN_Red2;
                         cumulative=SN_405+SN_488+SN_633;
                     else % ONLY SCATTERING
                         cumulative=SN_405+SN_488+SN_633;
@@ -546,7 +546,7 @@ for f=analysisvals
                     if flr_detect_1==0 && flr_detect_2==1 && flr_detect_3==0 
                         [~,locs]=findpeaks(cumulative_det,'NPeaks',5*exp_num,'SortStr','descend');
                     else
-                        [~,locs]=findpeaks(cumulative_det,'NPeaks',3*exp_num,'SortStr','descend');
+                        [~,locs]=findpeaks(cumulative_det,'NPeaks',20*exp_num,'SortStr','descend');
                     end
                     locs=sort(locs,'ascend');
                     peaks=cumulative(locs);
@@ -739,7 +739,7 @@ for f=analysisvals
                     end
                     if isempty(idx)==0
                         if ismember(f, [2, 4, 5, 6])% was if f==4||f==2 when we have GFP+ data and f=1-4 
-                            idx2=find(fwhm(idx)>FWMH_threshold  & (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold));% was idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold); % 5 for green fluorescence 4 Irfp
+                            idx2=find(fwhm(idx)>FWMH_threshold  & (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold));% was idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold); % 5 for green fluorescence 4 Irfp (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold)
                             if isempty(idx2)==0
                                 peaks=peaks(idx(idx2(:)));
                                 locs=locs(idx(idx2(:)));
