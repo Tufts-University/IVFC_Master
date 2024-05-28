@@ -1,9 +1,10 @@
-%% 05/08/23 DataAnalysis 051424
+%% 05/17/23 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
-% Flow Date: 05/02/2024
+% Flow Date: 05/16/2024
 %% Experiment Note
-% MBA231 GFP+
+% HEKE2CAntiCD19 ,first 4 experiment T1and T2, T3 T4 is HEKiRFP ,T5,T6 GFP, T7,T8
+% E2CantiCD19
 % Cells in Media
 %% Initialization
 clear
@@ -12,7 +13,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_masterr'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Taras\IVFC\Acquired Data\Cell\TH_050224_Cell';
+filepath = 'T:\Taras\IVFC\Acquired Data\Cell\TH_051624_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -21,15 +22,15 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_05_02_24';
-file_range= (1);
-analysisvals=[1];
+outputfile= 'NEW1_peak_values_05_17_24';
+file_range= (7:8);
+analysisvals=[2,4,5,6];
 sample_type= 'Cells';
 exp_num=[];
 std_threshold=4;
 Spectralon_tail= '';
-FWMH_threshold=0;
-intensity_threshold= 0.1;
+FWMH_threshold=1;
+intensity_threshold= 0.2;
 bead_flag=0;
 output=SamplePeakDetection6PMTRF(filepath,outputfile,file_range,Window_Low,...
     Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...

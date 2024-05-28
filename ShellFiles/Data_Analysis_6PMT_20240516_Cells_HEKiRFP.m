@@ -1,9 +1,10 @@
-%% 05/08/23 DataAnalysis 051424
+%% 05/16/23 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
-% Flow Date: 05/02/2024
+% Flow Date: 05/16/2024
 %% Experiment Note
-% MBA231 GFP+
+% HEKiRFP ,first 4 experiment T1and T2, T3 T4 is HEKiRFP ,T5,T6 GFP, T7,T8
+% E2CantiCD19
 % Cells in Media
 %% Initialization
 clear
@@ -12,18 +13,18 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_masterr'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Taras\IVFC\Acquired Data\Cell\TH_050224_Cell';
+filepath = 'T:\Taras\IVFC\Acquired Data\Cell\TH_051624_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-% output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-% disp(output)
+output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+disp(output)
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_05_02_24';
-file_range= (1);
-analysisvals=[1];
+outputfile= 'NEW1_peak_values_05_16_24';
+file_range= (1:4);
+analysisvals=[1,2,3,4,5,6];
 sample_type= 'Cells';
 exp_num=[];
 std_threshold=4;

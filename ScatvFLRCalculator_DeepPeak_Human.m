@@ -10,7 +10,7 @@ function [finalSens, finalPur] = ScatvFLRCalculator_DeepPeak_Human(mainFolder,he
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-datasheet_path = 'T:\Taras\IVFC\Acquired Data\Human Studies';
+datasheet_path = 'T:\Taras\IVFC\Acquired Data\Cell\Test';% path was changed
 cd(mainFolder)
 T = readtable([datasheet_path,'\TH_20230705_DatasetSummary.xlsx']);
 fname_dict = T.FolderName;
@@ -56,7 +56,7 @@ for i=1:length(Final_Fname)
         newFolder2 = [subdirinfo2(j).folder,'\',subdirinfo2(j).name];
         cd(newFolder2)
         base_name = [];
-        files = [dir('*21*'); dir('*22*'); dir('*23*')];
+        files = [dir('*21*'); dir('*22*'); dir('*23*'); dir('*24*')];
         if length(files)>1
             for k=1:length(files)
                 if contains(files(k).name,header) && contains(files(k).name,search_tag)
@@ -89,7 +89,7 @@ for i=1:length(Final_Fname)
         tempnames = [tempnames;subdirinfo2(j).name];
     end
     cd(newFolder)
-    files = [dir('*21*'); dir('*22*'); dir('*23*')];
+    files = [dir('*21*'); dir('*22*'); dir('*23*');dir('*24*')];
     base_name = [];
     if ~isempty(files)
         for k=1:length(files)
