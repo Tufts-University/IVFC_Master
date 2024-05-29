@@ -1,13 +1,15 @@
-%% NV_050223_PressureCalculator
+%% TH_052924_PressureCalculator
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% file:NV_050223_PressureCalculator.m
+% file:NV_050223_PressureCalculator.m and TH_052924_PressureCalculator.m
 % ***Description***:
 % This function calculates the needed input pressure for the pressure 
 % driven flow based on viscosity, number of channels, and channel gap. 
 % Written By: Nilay Vora (nvora01@tufts.edu)
 % Date Written: 05/02/2023
-% Modifying Author:
-% Date Modified:
+% Modifying Author:Taras Hanulia
+% Date Modified:05/29/2024
+% the presure at the channel shoud be divided to number of channel. Reff
+% modification.
 % Latest Revision: 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initialization
@@ -65,7 +67,7 @@ else
 end
 R_eff = @(n_channel) R_circ(eta,L_in) + R_circ(eta,L_out) + ...
         2.* factor_R(eta,L_split,width_final) + ...
-        R_rect(eta,L_channels,W_channels)./n_channel;
+        factor_R(eta,L_channels,W_channels)./n_channel;
 R_final = R_eff(n_channels);
 P_final = n_channels.*P0(R_final);
 disp('-------------------------------------------------------------------')

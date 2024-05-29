@@ -1,13 +1,15 @@
-%% NV_050223_PressureCalculator
+%% TH_052924_PressureCalculator
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% file:NV_050223_PressureCalculator.m
+% file:NV_050223_PressureCalculator.m and TH_052924_PressureCalculator.m
 % ***Description***:
 % This function calculates the needed input pressure for the pressure 
 % driven flow based on viscosity, number of channels, and channel gap. 
 % Written By: Nilay Vora (nvora01@tufts.edu)
 % Date Written: 05/02/2023
-% Modifying Author:
-% Date Modified:
+% Modifying Author:Taras Hanulia
+% Date Modified:05/29/2024
+% the presure at the channel shoud be divided to number of channel. Reff
+% modification.
 % Latest Revision: 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Initialization
@@ -33,12 +35,12 @@ height = 30;% um (channel height)
 height = height./1000; % mm
 L_split = 1.46; % mm (Distance from center of punch to channel split)
 L_channels = 10; % mm (Length of Channels)
-W_channels = 0.03; % mm (channel width)
+W_channels = 0.165; % mm (channel width)
 %% Equations 
-R_circ = @(eta,L) (8.*eta*L)./(pi*r_tube.^4);
-R_rect = @(eta,L,width) (28.4*eta*L)./...
+R_circ = @(eta,L_channels) (8.*eta*L_channels)./(pi*r_tube.^4);
+R_rect = @(eta,L_channels,width) (28.4*eta*L_channels)./...
                         (height.^4); 
-R_rect2 = @(eta,L,width) (12*eta*L)./...
+R_rect2 = @(eta,L_channels,width) (12*eta*L_channels)./...
                         (width*height.^3.*(1-0.63*(height/width))); 
 width = @(n_channel,w_gap) W_channels*n_channel + (n_channel-1)*w_gap; % um
 P0 = @(R_eff) Q.*R_eff;
@@ -65,7 +67,7 @@ else
 end
 R_eff = @(n_channel) R_circ(eta,L_in) + R_circ(eta,L_out) + ...
         2.* factor_R(eta,L_split,width_final) + ...
-        R_rect(eta,L_channels,W_channels)./n_channel;
+        factor_R(eta,L_channels,W_channels)./n_channel;
 R_final = R_eff(n_channels);
 P_final = n_channels.*P0(R_final);
 disp('-------------------------------------------------------------------')
