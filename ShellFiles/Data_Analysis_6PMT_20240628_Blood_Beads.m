@@ -1,22 +1,22 @@
 %% 070124_DataAnalysis
 % Owner: Taras Hanulia
-% Data Type: Blood Cell Data plus Cell+ Beads
-% Flow Date: 06/27/24
+% Data Type: Blood Cell Data plus Beads
+% Flow Date: 06/28/24
 %% Notes
-% rat Blood + Cell+Beads
+% rat Blood +Beads
 %% Initialization
 clear
 clc
 addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
 %% Calling Script
 
-    filepath = 'T:\Taras\IVFC\Acquired Data\Blood Cell Data\TH_062724_Blood_Cell';
+    filepath = 'T:\Taras\IVFC\Acquired Data\Test\Test_flow_Blood_Beads\TH_062824_Blood_Bead';
     % Labview Conversion
     Fs=60e3;
     Window_Low= 50;
     Window_High= 10000;
-    output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-    disp(output)
+%     output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+%     disp(output)
     close all
     
     cd(filepath)
@@ -28,11 +28,11 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     date = strread(date,'%2s');
     %%Peak Detection
     outputfile= ['NEW_peak_values_',date{1},'_',date{2},'_',date{3}];
-    dirinfo = dir('*Cell*');
+    dirinfo = dir('*Bead*');
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
     file_range= (1:length(dirinfo));
-    analysisvals=[2,4];
+    analysisvals=[1,2,3,4];
     sample_type= 'Blood';
     exp_num=[];
     std_threshold=5;

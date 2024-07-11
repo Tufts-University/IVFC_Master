@@ -15,8 +15,8 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     Fs=60e3;
     Window_Low= 50;
     Window_High= 10000;
-    output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-    disp(output)
+%     output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+%     disp(output)
     close all
     
     cd(filepath)
@@ -32,7 +32,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
     file_range= (1:length(dirinfo));
-    analysisvals=[2,4];
+    analysisvals=[4];
     sample_type= 'Blood';
     exp_num=[];
     std_threshold=5;
