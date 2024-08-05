@@ -648,13 +648,15 @@ for f=analysisvals
                             pt2=ranges(n,2);
                             locs_clusters=locs(locs>=pt1 & locs<=pt2);
                             if ~isempty(locs_clusters)
-%                                 [~,I] = max(cumulative(locs_clusters));
-%                                 save_locs=[save_locs;locs_clusters(I)]; %#ok<AGROW>
-%                                 locs_clusters(I)=[];
-%                                 tossed_peak=[tossed_peak;locs_clusters]; %#ok<AGROW>
-%                                 clusterpts=[clusterpts;[pt1,pt2]]; %#ok<AGROW>
-                                  save_locs=[save_locs;locs_clusters]; %#ok<AGROW>
-                                  clusterpts=[clusterpts; repmat([pt1, pt2], length(locs_clusters), 1)]; %#ok<AGROW>
+                                % Save start and end points of the peak
+                                peak_start_end = [peak_start_end; pt1, pt2]; %#ok<AGROW>
+                                [~,I] = max(cumulative(locs_clusters));
+                                save_locs=[save_locs;locs_clusters(I)]; %#ok<AGROW>
+                                locs_clusters(I)=[];
+                                tossed_peak=[tossed_peak;locs_clusters]; %#ok<AGROW>
+                                clusterpts=[clusterpts;[pt1,pt2]]; %#ok<AGROW>
+%                                   save_locs=[save_locs;locs_clusters]; %#ok<AGROW>
+%                                   clusterpts=[clusterpts; repmat([pt1, pt2], length(locs_clusters), 1)]; %#ok<AGROW>
                             end
                         end
                     end
@@ -674,26 +676,26 @@ for f=analysisvals
                     %% Throws out peaks that are too close
                     % Peaks are sorted descending so that peaks that are thrown away start
                     % from the largest peak I.E. the most likely peaks
-%                     bad_peaks=0; %initializing
-%                     for k=1:length(locs)
-%                         peak_dist=abs(locs-locs(k)); %distances between all peaks and ith peak
-%                         close_peaks=find(peak_dist<=10); %distance is 5 pts between peaks
-%                         if length(close_peaks)>1 %peak will identify itself as less than 5 pts away
-%                             [~,idx]=sort(peaks(close_peaks),'descend');
-%                             cp_sorted=close_peaks(idx);
-%                             for j=2:length(close_peaks)
-%                                 bad_peak=cp_sorted(j);
-%                                 bad_peaks=[bad_peaks,bad_peak]; %#ok<AGROW>
-%                             end
-%                             clear bad_peak
-%                         end
-%                         clear close_peaks peak_dist
-%                     end
-%                     bad_peaks(1)=[]; % removing initial 0
-%                     peaks(bad_peaks)=[];
-%                     locs(bad_peaks)=[];
-%                     clusterpts(bad_peaks,:)=[]; %#ok<AGROW>
-%                     clear bad_peaks % reduces memory footprint
+                    bad_peaks=0; %initializing
+                    for k=1:length(locs)
+                        peak_dist=abs(locs-locs(k)); %distances between all peaks and ith peak
+                        close_peaks=find(peak_dist<=10); %distance is 5 pts between peaks
+                        if length(close_peaks)>1 %peak will identify itself as less than 5 pts away
+                            [~,idx]=sort(peaks(close_peaks),'descend');
+                            cp_sorted=close_peaks(idx);
+                            for j=2:length(close_peaks)
+                                bad_peak=cp_sorted(j);
+                                bad_peaks=[bad_peaks,bad_peak]; %#ok<AGROW>
+                            end
+                            clear bad_peak
+                        end
+                        clear close_peaks peak_dist
+                    end
+                    bad_peaks(1)=[]; % removing initial 0
+                    peaks(bad_peaks)=[];
+                    locs(bad_peaks)=[];
+                    clusterpts(bad_peaks,:)=[]; %#ok<AGROW>
+                    clear bad_peaks % reduces memory footprint
 
                     %% FWHM finding & Grabbing True Maximums
                     %FWHMs are found from the filtered peaks

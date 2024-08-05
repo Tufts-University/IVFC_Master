@@ -648,6 +648,8 @@ for f=analysisvals
                             pt2=ranges(n,2);
                             locs_clusters=locs(locs>=pt1 & locs<=pt2);
                             if ~isempty(locs_clusters)
+                                % Save start and end points of the peak
+%                                 peak_start_end = [peak_start_end; pt1, pt2]; %#ok<AGROW> 
                                 [~,I] = max(cumulative(locs_clusters));
                                 save_locs=[save_locs;locs_clusters(I)]; %#ok<AGROW>
                                 locs_clusters(I)=[];
