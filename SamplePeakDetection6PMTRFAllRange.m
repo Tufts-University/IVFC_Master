@@ -393,6 +393,15 @@ for f=analysisvals
     all_fwhm_405=zeros(1,1); all_fwhm_488=zeros(1,1); all_fwhm_633=zeros(1,1); all_fwhm_fl1=zeros(1,1); all_fwhm_fl2=zeros(1,1);all_fwhm_fl3=zeros(1,1);
     all_peak_area_405=zeros(1,1); all_peak_area_488=zeros(1,1); all_peak_area_633=zeros(1,1); all_peak_area_fl1=zeros(1,1); all_peak_area_fl2=zeros(1,1);all_peak_area_fl3=zeros(1,1);
     all_file_num=zeros(1,1);
+%     peak_start_end = zeros(1,2);
+%     all_peak_start_end = zeros(1,2);
+%     all_peak_start_end_Store = zeros(1,2);
+%     peak_start_end = [];
+%     all_peak_start_end = [];
+%     all_peak_start_end_Store = [];
+    peak_start =zeros(1,1); all_peak_start=zeros(1,1);all_peak_start_Store=zeros(1,1);
+    peak_end =zeros(1,1); all_peak_end=zeros(1,1);all_peak_end_Store=zeros(1,1);
+
 
     all_peaks_Store=zeros(1,1);
     all_locs_Store=zeros(1,1);
@@ -403,6 +412,8 @@ for f=analysisvals
     all_fwhm_405_Store=zeros(1,1); all_fwhm_488_Store=zeros(1,1); all_fwhm_633_Store=zeros(1,1); all_fwhm_fl1_Store=zeros(1,1); all_fwhm_fl2_Store=zeros(1,1);all_fwhm_fl3_Store=zeros(1,1);
     all_peak_area_405_Store=zeros(1,1); all_peak_area_488_Store=zeros(1,1); all_peak_area_633_Store=zeros(1,1); all_peak_area_fl1_Store=zeros(1,1); all_peak_area_fl2_Store=zeros(1,1);all_peak_area_fl3_Store=zeros(1,1);
     all_file_num_Store=zeros(1,1);
+%     peak_start_end1 = zeros(1,3); 
+
 
     disp(['Current evaluation based on ',types{f},' Data']);
     for i=file_range
@@ -549,6 +560,7 @@ for f=analysisvals
                         [~,locs]=findpeaks(cumulative_det,'NPeaks',20*exp_num,'SortStr','descend');
                     end
                     locs=sort(locs,'ascend');
+                    
                     peaks=cumulative(locs);
                     peaks_det=cumulative_det(locs);
                     %% Clips peaks near edges
@@ -648,15 +660,12 @@ for f=analysisvals
                             pt2=ranges(n,2);
                             locs_clusters=locs(locs>=pt1 & locs<=pt2);
                             if ~isempty(locs_clusters)
-                                % Save start and end points of the peak
-%                                 peak_start_end = [peak_start_end; pt1, pt2]; %#ok<AGROW> 
                                 [~,I] = max(cumulative(locs_clusters));
                                 save_locs=[save_locs;locs_clusters(I)]; %#ok<AGROW>
                                 locs_clusters(I)=[];
                                 tossed_peak=[tossed_peak;locs_clusters]; %#ok<AGROW>
                                 clusterpts=[clusterpts;[pt1,pt2]]; %#ok<AGROW>
-%                                   save_locs=[save_locs;locs_clusters]; %#ok<AGROW>
-%                                   clusterpts=[clusterpts; repmat([pt1, pt2], length(locs_clusters), 1)]; %#ok<AGROW>
+%                                 peak_start_end1 = [peak_start_end1; pt1, save_locs(end), pt2]; %#ok<AGROW>
                             end
                         end
                     end
@@ -671,7 +680,11 @@ for f=analysisvals
                     end
                     peaks=p_store;
                     locs=l_store;
-
+%                     if length(peak_start_end1) >= length(l_store)
+%                         peak_start_end1 = peak_start_end1(1:length(l_store), :);
+%                     else
+%                         error('Inconsistent sizes between peak_start_end and l_store');
+%                     end
                     clear p_store l_store
                     %% Throws out peaks that are too close
                     % Peaks are sorted descending so that peaks that are thrown away start
@@ -695,6 +708,7 @@ for f=analysisvals
                     peaks(bad_peaks)=[];
                     locs(bad_peaks)=[];
                     clusterpts(bad_peaks,:)=[]; %#ok<AGROW>
+%                     peak_start_end1(bad_peaks, :) = [];
                     clear bad_peaks % reduces memory footprint
 
                     %% FWHM finding & Grabbing True Maximums
@@ -703,12 +717,19 @@ for f=analysisvals
                     peak_area_405=zeros(length(peaks),1); peak_area_488=zeros(length(peaks),1); peak_area_633=zeros(length(peaks),1); peak_area_fl1=zeros(length(peaks),1); peak_area_fl2=zeros(length(peaks),1); peak_area_fl3=zeros(length(peaks),1);
                     fwhm_405=zeros(length(peaks),1); fwhm_488=zeros(length(peaks),1); fwhm_633=zeros(length(peaks),1); fwhm_fl1=zeros(length(peaks),1); fwhm_fl2=zeros(length(peaks),1);fwhm_fl3=zeros(length(peaks),1);
                     peak_data=zeros(length(locs),6);
+                    
 
                     for m=1:length(peaks)
                         %% Grab True Maximums
                         data_range=M_filt(locs(m)-10:locs(m)+10,:); %grabs full cluster width by 5 matrix around peak
                         peak_data(m,:)=max(data_range); %grabs maximum which could be slightly different from channel to channel in time
                         clear data_range
+                        %% Determine Start and End Points
+                        start_point = clusterpts(m, 1); % Starting point of the peak
+                        end_point = min(clusterpts(m, 2), size(M_filt, 1)); % Ending point of the peak, ensuring it does not exceed matrix size
+%                         peak_start_end = [peak_start_end; start_point, end_point]; %#ok<AGROW>
+                        peak_start(m)= start_point;%[peak_start;start_point];%#ok<AGROW>
+                        peak_end(m)= end_point;%[peak_end;end_point];%#ok<AGROW>
                         %% Grab FWHMs
                         peak_height=M_filt(locs(m),:);% locs(m)
                         if clusterpts(m,2)+10>5400000
@@ -747,6 +768,9 @@ for f=analysisvals
                             if isempty(idx2)==0
                                 peaks=peaks(idx(idx2(:)));
                                 locs=locs(idx(idx2(:)));
+%                                 peak_start_end = peak_start_end(idx(idx2(:)), :);
+                                peak_start = peak_start(idx(idx2(:)));
+                                peak_end = peak_end(idx(idx2(:)));
                                 fwhm=fwhm(idx(idx2(:)));
                                 peak_data= peak_data(idx(idx2(:)),:);
                                 peak_area=peak_area(idx(idx2(:)));
@@ -766,6 +790,9 @@ for f=analysisvals
 
                                 all_peaks=[all_peaks,peaks']; %#ok<AGROW>
                                 all_locs=[all_locs,locs'];%#ok<AGROW>
+%                                 all_peak_start_end=[all_peak_start_end,peak_start_end'];%#ok<AGROW>
+                                all_peak_start=[all_peak_start,peak_start'];%#ok<AGROW>
+                                all_peak_end=[all_peak_end,peak_end'];%#ok<AGROW>
                                 all_chunks=[all_chunks,(ones(1,length(locs))*ii)];%#ok<AGROW>
                                 widths_cum=[widths_cum,fwhm'];%#ok<AGROW>
                                 peak_area_cum=[peak_area_cum,peak_area];%#ok<AGROW>
@@ -790,6 +817,9 @@ for f=analysisvals
                             fwhm=fwhm(idx(:));
                             peak_data= peak_data(idx(:),:);
                             peak_area=peak_area(idx(:));
+%                             peak_start_end = peak_start_end(idx(:), :);
+                            peak_start = peak_start(idx(:));
+                            peak_end = peak_end(idx(:));
                             fwhm_405=fwhm_405(idx(:));
                             fwhm_488=fwhm_488(idx(:));
                             fwhm_633=fwhm_633(idx(:));
@@ -806,6 +836,9 @@ for f=analysisvals
 
                             all_peaks=[all_peaks,peaks'];%#ok<AGROW>
                             all_locs=[all_locs,locs'];%#ok<AGROW>
+%                             all_peak_start_end=[all_peak_start_end,peak_start_end'];%#ok<AGROW>
+                            all_peak_start=[all_peak_start,peak_start];%#ok<AGROW>
+                            all_peak_end=[all_peak_end,peak_end];%#ok<AGROW>
                             all_chunks=[all_chunks,(ones(1,length(locs))*ii)];%#ok<AGROW>
                             widths_cum=[widths_cum,fwhm'];%#ok<AGROW>
                             peak_area_cum=[peak_area_cum,peak_area];%#ok<AGROW>
@@ -828,11 +861,15 @@ for f=analysisvals
                     clear M_filt peaks locs cumulative peak_data
                     clear fwhm fwhm_405 fwhm_488 fwhm_633 fwhm_fl1 fwhm_fl2 fwhm_fl3
                     clear peak_area peak_area_405 peak_area_488 peak_area_633 peak_area_fl1 peak_area_fl2 peak_area_fl3 File_num
+%                     clear peak_start peak_end
                     toc
                 end
             end
             all_peaks_Store=[all_peaks_Store,all_peaks];%#ok<AGROW>
             all_locs_Store=[all_locs_Store,all_locs];%#ok<AGROW>
+%             all_peak_start_end_Store=[all_peak_start_end_Store,all_peak_start_end];%#ok<AGROW>
+            all_peak_start_Store=[all_peak_start_Store,all_peak_start];%#ok<AGROW>
+            all_peak_end_Store=[all_peak_end_Store,all_peak_end];%#ok<AGROW>
             all_chunks_Store=[all_chunks_Store,all_chunks];%#ok<AGROW>
             widths_cum_Store=[widths_cum_Store,widths_cum,];%#ok<AGROW>
             peak_area_cum_Store=[peak_area_cum_Store,peak_area_cum];%#ok<AGROW>
@@ -864,7 +901,10 @@ for f=analysisvals
             peak_values(:,20)=all_fwhm_fl2; peak_values(:,21)=all_peak_area_fl2;
             peak_values(:,22)=all_fwhm_fl3; peak_values(:,23)=all_peak_area_fl3;
             peak_values(:,24)=all_file_num;
+            peak_values(:,25)=all_peak_start;
+            peak_values(:,26)=all_peak_end;
             peak_values(1,:)=[];
+%             peak_start_end(1,:)=[];
             peak_values=sortrows(peak_values,7);
             cd(subdirinfo{i}.folder)
             fileN2=['T',num2str(i),'-',fileN];
@@ -872,9 +912,12 @@ for f=analysisvals
             clear all_peaks all_locs all_chunks peak_values widths_cum
             clear all_fwhm_405 all_fwhm_488 all_fwhm_633 all_fwhm_fl1 all_fwhm_fl2 all_fwhm_fl3
             clear peak_area_cum all_peak_area_405 all_peak_area_488 all_peak_area_633 all_peak_area_fl1 all_peak_area_fl2 all_peak_area_fl3 all_file_num
+            clear all_peak_start all_peak_end
 
             all_peaks=zeros(1,1);
             all_locs=zeros(1,1);
+            all_peak_start=zeros(1,1);
+            all_peak_end=zeros(1,1);
             widths_cum=zeros(1,1);
             peak_area_cum=zeros(1,1);
             all_chunks=zeros(1,1);
@@ -899,11 +942,13 @@ for f=analysisvals
         peak_values(:,20)=all_fwhm_fl2_Store; peak_values(:,21)=all_peak_area_fl2_Store;
         peak_values(:,22)=all_fwhm_fl3_Store; peak_values(:,23)=all_peak_area_fl3_Store;
         peak_values(:,24)=all_file_num_Store;
+        peak_values(:,25)=all_peak_start_Store;
+        peak_values(:,26)=all_peak_end_Store;
         % Sorting peaks
         peak_values=sortrows(peak_values,7);
-        delrow=peak_values(:,24)==0;
+        delrow=peak_values(:,26)==0;
         peak_values(delrow,:)=[];
-
+       
         clear cumulative
 
         % - - - - - - %
@@ -924,7 +969,7 @@ for f=analysisvals
     end
 end
 if bead_flag==1
-    successmessage=BeadSorting(filepath,file_range);
+    successmessage=BeadSorting6PMT(filepath,file_range);
     disp(successmessage)
 end
 successmessage='Completed Peak Detection';
