@@ -21,9 +21,9 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_08_05_24_1';
+outputfile= 'NEW_peak_values_08_05_24_3';
 file_range= (1:2);
-analysisvals=(1);
+analysisvals=[1,2];
 sample_type= 'Beads';
 exp_num=[];
 std_threshold=4;
@@ -31,7 +31,7 @@ Spectralon_tail= '';
 FWMH_threshold=0;
 intensity_threshold= 0.15;
 bead_flag=1;
-output=SamplePeakDetection6PMTRFAllRange(filepath,outputfile,file_range,Window_Low,...
+output=SamplePeakDetection6PMTRFAllRangeLocs(filepath,outputfile,file_range,Window_Low,...
     Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
     Spectralon_tail,FWMH_threshold,intensity_threshold,bead_flag);
 disp(output)
