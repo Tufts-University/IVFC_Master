@@ -1,10 +1,11 @@
-%% 08/17/24 DataAnalysis 
+%% 08/17/24 09/17/24 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
 % Flow Date: 08/17/2024
 %% Experiment Note
 % CART B16F10 1:1 Cells T1 and T2 low laser power for 405
-% Cells in Media
+% Cells in Media 
+% exp_num from 9000/6 to 100 and std_threshold from 4 to 5
 %% Initialization
 clear
 clc
@@ -21,12 +22,12 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_08_17_24_T1_2';
+outputfile= 'NEW_peak_values_09_17_24_T1_2_exp_num_10';
 file_range= [1,2];
-analysisvals=[1,2,3];
+analysisvals=[2];
 sample_type= 'Cells';
-exp_num=[];
-std_threshold=4;
+exp_num=[10];
+std_threshold=5;
 Spectralon_tail= '_1';
 FWMH_threshold=0;
 intensity_threshold= 0.15;

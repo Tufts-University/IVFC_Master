@@ -1,4 +1,4 @@
-%% 08/17/24 DataAnalysis 
+%% 08/17/24 091624 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
 % Flow Date: 08/16/2024
@@ -21,9 +21,9 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_08_16_24';
+outputfile= 'NEW_peak_values_09_16_24';
 file_range= [1,2];
-analysisvals=[1,2,3,4,5,6];
+analysisvals=[1,2,3,6];
 sample_type= 'Cells';
 exp_num=[];
 std_threshold=4;

@@ -21,7 +21,7 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_08_15_24_T3';
+outputfile= 'NEW_peak_values_09_18_24_T3';
 file_range= [3];
 analysisvals=[1,2,3,6];
 sample_type= 'Cells';
@@ -29,7 +29,7 @@ exp_num=[];
 std_threshold=4;
 Spectralon_tail= '_3';
 FWMH_threshold=0;
-intensity_threshold= 0.15;
+intensity_threshold= 0.1;
 bead_flag=0;
 output=SamplePeakDetection6PMTRF(filepath,outputfile,file_range,Window_Low,...
     Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...

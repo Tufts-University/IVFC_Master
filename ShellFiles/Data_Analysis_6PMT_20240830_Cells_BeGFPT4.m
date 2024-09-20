@@ -21,12 +21,12 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_08_15_24_T4';
+outputfile= 'NEW_peak_values_09_18_24_T4';
 file_range= [4];
 analysisvals=[1,2,3,6];
 sample_type= 'Cells';
 exp_num=[];
-std_threshold=4;
+std_threshold=5;
 Spectralon_tail= '_4';
 FWMH_threshold=0;
 intensity_threshold= 0.15;

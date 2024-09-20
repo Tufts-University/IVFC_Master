@@ -4,7 +4,7 @@
 % Flow Date: 08/17/2024
 %% Experiment Note
 % B16F10 CART ratio 1:1 T10 11 after 4 hour of mixture
-% Cells in Media
+% Cells in Media from 4std to 5std_threshold exp_number 100
 %% Initialization
 clear
 clc
@@ -21,12 +21,12 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_08_09_24_T10_11';
+outputfile= 'NEW_peak_values_09_17_24_T10_11';
 file_range= [10,11];
 analysisvals=[1,2,3];
 sample_type= 'Cells';
-exp_num=[];
-std_threshold=4;
+exp_num=[10];
+std_threshold=5;
 Spectralon_tail= '_2';
 FWMH_threshold=0;
 intensity_threshold= 0.15;

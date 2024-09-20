@@ -1,7 +1,7 @@
-%% 08/15/24 DataAnalysis 
+%% 08/17/24 09/17/24 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
-% Flow Date: 08/15/2024
+% Flow Date: 08/17/2024
 %% Experiment Note
 % BeGFP Cells
 % Cells in Media
@@ -12,22 +12,22 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\IVFC_Master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Taras\IVFC\Acquired Data\Cell\TH_081524_Cell';
+filepath = 'T:\Taras\IVFC\Acquired Data\Cell\TH_081724_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-disp(output)
+% output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+% disp(output)
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_08_15_24_T1_2';
-file_range= [1,2];
-analysisvals=[1,2,3,6];
+outputfile= 'NEW_peak_values_09_17_24_T3_4';
+file_range= [3,4];
+analysisvals=[1,2,3];
 sample_type= 'Cells';
 exp_num=[];
-std_threshold=4;
-Spectralon_tail= '_1';
+std_threshold=5;
+Spectralon_tail= '_2';
 FWMH_threshold=0;
 intensity_threshold= 0.15;
 bead_flag=0;
