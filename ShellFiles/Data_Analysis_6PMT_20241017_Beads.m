@@ -1,7 +1,7 @@
-%% 10/02/24 DataAnalysis
+%% 10/17/24 DataAnalysis
 % Owner: Taras Hanulia
 % Data Type: Beads Calibration 
-% Flow Date: 10/02/2024 
+% Flow Date: 10/17/2024 
 %% Experiment Note
 % beads ND 0.9 on 405 and 1.3 on 633, 1.5 on 488 slit of 405 shorter 
 % new ND filter for spactralon 2.3 befor new ex 
@@ -12,7 +12,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'T:\Taras\IVFC\Acquired Data\Bead Calibration Data\2024\TH_100224_Calibration';
+filepath = 'T:\Taras\IVFC\Acquired Data\Bead Calibration Data\2024\TH_101724_Calibration';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -21,7 +21,7 @@ disp(output)
 close all
 %%
 % Peak Detection
-outputfile= 'NEW_peak_values_10_02_24';
+outputfile= 'NEW_peak_values_10_17_24';
 file_range= (1:2);
 analysisvals=(1:4);
 sample_type= 'Beads';
@@ -38,10 +38,9 @@ disp(output)
 
 %% Calibration
 files={
-
-    'NEW_peak_values_09_26_24_2';...
-    'NEW_peak_values_09_27_24_1_4';...
-    'NEW_peak_values_09_30_24';...
-    'NEW_peak_values_10_02_24'};
+    'NEW_peak_values_10_03_24';...
+    'NEW_peak_values_10_14_24';...
+    'NEW_peak_values_10_16_24';...
+    'NEW_peak_values_10_17_24'};
 output= DailyCalibrationScript6PMT(files);
 disp(output)

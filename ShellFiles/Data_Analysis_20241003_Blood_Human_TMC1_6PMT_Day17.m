@@ -1,15 +1,15 @@
-%% 100924_DataAnalysis
+%% 102124_DataAnalysis
 % Owner: Taras Hanulia
-% Data Type: Blood CART Cell Data from Human Patient
-% Flow Date: 10/03/24
+% Data Type: Blood Data from Human Medford control
+% Flow Date: 10/17/24
 %% Notes
-% TMC-1 Day3 Blood
+% 1 Medford  Blood
 %% Initialization
 clear
 clc
 addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
 %% Calling Script
-    filepath = 'T:\Taras\IVFC\Acquired Data\Human studies\TH_100324_Patient1TMC_3Day';
+    filepath = 'T:\Taras\IVFC\Acquired Data\Human studies\TH_100724_Patient1TMC_17Day';
     % Labview Conversion
     Fs=60e3;
     Window_Low= 50;
@@ -30,7 +30,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     dirinfo = dir('*TMC*');
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
-    file_range= (1:length(dirinfo));
+    file_range= (1:4);
     analysisvals=[1,2,3,6];
     sample_type= 'Blood';
     exp_num=[];
