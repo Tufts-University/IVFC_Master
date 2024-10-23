@@ -30,7 +30,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     dirinfo = dir('*Blood*');
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
-    file_range= (1:length(dirinfo));
+    file_range= (2:length(dirinfo));
     analysisvals=[1,2,3,6];
     sample_type= 'Blood';
     exp_num=[];
