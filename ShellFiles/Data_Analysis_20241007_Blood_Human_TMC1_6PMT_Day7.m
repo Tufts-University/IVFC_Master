@@ -1,4 +1,4 @@
-%% 100924_DataAnalysis
+%% 101024_DataAnalysis
 % Owner: Taras Hanulia
 % Data Type: Blood CART Cell Data from Human Patient
 % Flow Date: 10/07/24
@@ -14,8 +14,8 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     Fs=60e3;
     Window_Low= 50;
     Window_High= 10000;
-    output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-    disp(output)
+%     output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+%     disp(output)
     close all
     
     cd(filepath)
@@ -26,7 +26,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     date = exp_name(4:9);
     date = strread(date,'%2s');
     %%Peak Detection
-    outputfile= ['NEW_peak_values_',date{1},'_',date{2},'_',date{3},'_1_3'];
+    outputfile= ['NEW_peak_values_',date{1},'_',date{2},'_',date{3}];
     dirinfo = dir('*TMC*');
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..

@@ -1,15 +1,15 @@
-%% 100124_DataAnalysis
+%% 102324_DataAnalysis
 % Owner: Taras Hanulia
-% Data Type: Blood CART Cell Data from Human Patient
-% Flow Date: 09/30/24
+% Data Type: Blood Data from Human Medford control
+% Flow Date: 10/23/24
 %% Notes
-% TMC-1 Day0 Blood
+% 2nd Medford  Blood
 %% Initialization
 clear
 clc
 addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
 %% Calling Script
-    filepath = 'T:\Taras\IVFC\Acquired Data\Human studies\TH_093024_Patient1TMC_0Day';
+    filepath = 'R:\Taras\IVFC\Human Studies\2024\TH_10232024_2_Medford_Blood';
     % Labview Conversion
     Fs=60e3;
     Window_Low= 50;
@@ -27,15 +27,15 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\ivfc_master'
     date = strread(date,'%2s');
     %%Peak Detection
     outputfile= ['NEW_peak_values_',date{1},'_',date{2},'_',date{3}];
-    dirinfo = dir('*TMC*');
+    dirinfo = dir('*Blood*');
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
     file_range= (1:length(dirinfo));
-    analysisvals=(1:4);
+    analysisvals=[1,2,3,6];
     sample_type= 'Blood';
     exp_num=[];
     std_threshold=5;
-    Spectralon_tail='_2';
+    Spectralon_tail='';
     FWMH_threshold=0;
     intensity_threshold=0.1;
     bead_flag=0;
