@@ -24,6 +24,10 @@ function successmessage=SamplePeakDetection_PCA_PN_TH(filepath,outputfile,...
 % This function was change to remove the FWHM and peak area and added start
 % and end of the peak extra sorting was added to have Scattering peak with
 % FLR
+% Modifying Author:Taras Hanulia (thanul01@tufts.edu)
+% Date Modified: 11/18/2024 b
+% The definition of start and end changed (Determine Start and End Points)
+% 811-812 line
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Function details
 % Inputs:
@@ -804,8 +808,8 @@ for f=analysisvals
                             peak_data(m,:)=max(data_range); %grabs maximum which could be slightly different from channel to channel in time
                             clear data_range
                             %% Determine Start and End Points
-                            start_point = clusterpts(m, 1); % Starting point of the peak
-                            end_point = min(clusterpts(m, 2), size(M_filt, 1)); % Ending point of the peak, ensuring it does not exceed matrix size
+                            start_point = max(check_ranges(m, 1), 1); % Starting point of the peak till was 111824 start_point = max(check_ranges(m, 1) + 5, 1); 
+                            end_point = min(check_ranges(m, 2), size(M_filt, 1)); % Ending point of the peak, ensuring it does not exceed matrix size , till 11182024 was end_point = min(check_ranges(m, 2) - 5, size(M_filt, 1));
                             peak_start(m)= start_point;%[peak_start;start_point];%#ok<AGROW>
                             peak_end(m)= end_point;%[peak_end;end_point];%#ok<AGROW>
                             %% Grab FWHMs
@@ -1031,6 +1035,6 @@ if bead_flag==1
     successmessage=BeadSortingTH(filepath,file_range);
     disp(successmessage)
 end
-successmessage=PeakSortingWithFLRTH(filepath, file_range, bead_flag);
-disp(successmessage)
+% successmessage=PeakSortingWithFLRTH(filepath, file_range, bead_flag); % peak sorting of scattering peaks with and without FLR
+% disp(successmessage)
 successmessage='Completed Peak Detection';
