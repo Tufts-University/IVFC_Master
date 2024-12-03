@@ -52,7 +52,7 @@ function successmessage=SamplePeakDetection6PMTRF(filepath,outputfile,...
 %                       iRFP,E2C,RFLR,GFP), for beads [1,2,3] (Scat Only,...
 %                       FLR Only,FLR+Scat)
 %iRFP only signal from irfpchannel . E2C only signal from E2C channel, ...
-%RFL from iRFP+E2C  , GFP 
+%RFL from iRFP+E2C  , GFP only from GFP channel
 % sample_type= 'Beads';
 % exp_num=[]; %used the default value of 6000/9
 % std_threshold=3; 3*sigma(x) is used to detect a cluster event
@@ -760,7 +760,9 @@ for f=analysisvals
                         idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
                     end
                     if isempty(idx)==0
+                        channel_map = containers.Map({2, 4, 5, 6, 7}, {[4, 5, 6], [4], [6], [4, 6], [5]});
                         if ismember(f, [2, 4, 5, 6, 7])% was if f==4||f==2 when we have GFP+ data and f=1-4 
+                            channels = channel_map(f);
                             idx2=find(fwhm(idx)>FWMH_threshold  & (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold));% was idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold); % 5 for green fluorescence 4 Irfp (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold)
                             if isempty(idx2)==0
                                 peaks=peaks(idx(idx2(:)));
@@ -953,6 +955,7 @@ if bead_flag==1
     successmessage=BeadSorting_iRFP6PMT(filepath,file_range);
     disp(successmessage)
 end
+%%
 successmessage=BeadSorting_GFPwithiRFP6PMT(filepath,file_range,bead_flag);
 disp(successmessage)
 successmessage=BeadSorting_iRFPwithiGFP6PMT(filepath,file_range,bead_flag);

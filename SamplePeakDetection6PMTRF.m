@@ -760,8 +760,10 @@ for f=analysisvals
                         idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
                     end
                     if isempty(idx)==0
+                        channel_map = containers.Map({2, 4, 5, 6, 7}, {[4, 5, 6], [4], [6], [4, 6], [5]});
                         if ismember(f, [2, 4, 5, 6, 7])% was if f==4||f==2 when we have GFP+ data and f=1-4 
-                            idx2=find(fwhm(idx)>FWMH_threshold  & (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold));% was idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold); % 5 for green fluorescence 4 Irfp (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold)
+                            channels = channel_map(f);
+                            idx2 = find(fwhm(idx) > FWMH_threshold & any(peak_data(idx, channels) > intensity_threshold, 2));%idx2=find(fwhm(idx)>FWMH_threshold  & (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold));% was idx2=find(fwhm(idx)>FWMH_threshold  & peak_data(idx,5)>intensity_threshold); % 5 for green fluorescence 4 Irfp (peak_data(idx,5)>intensity_threshold | peak_data(idx,4)>intensity_threshold | peak_data(idx,6)>intensity_threshold)
                             if isempty(idx2)==0
                                 peaks=peaks(idx(idx2(:)));
                                 locs=locs(idx(idx2(:)));
@@ -954,8 +956,8 @@ if bead_flag==1
     disp(successmessage)
 end
 %%
-successmessage=BeadSorting_GFPwithiRFP6PMT(filepath,file_range,bead_flag);
-disp(successmessage)
-successmessage=BeadSorting_iRFPwithiGFP6PMT(filepath,file_range,bead_flag);
-disp(successmessage)
+% successmessage=BeadSorting_GFPwithiRFP6PMT(filepath,file_range,bead_flag);
+% disp(successmessage)
+% successmessage=BeadSorting_iRFPwithiGFP6PMT(filepath,file_range,bead_flag);
+% disp(successmessage)
 successmessage='Completed Peak Detection';
