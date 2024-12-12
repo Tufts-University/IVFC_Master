@@ -29,7 +29,7 @@ clc
 %% Default Values
 r_tube = 0.38/2; % mm (from tubing specifications)
 P_atm = 1013.25; % mbar
-Q = 1.5; % uL/min (Desired Flow Rate)
+Q = 3; % uL/min (Desired Flow Rate)
 Q = Q./60; % mm^3/sec
 height = 29;% um (channel height)
 height = height./1000; % mm
