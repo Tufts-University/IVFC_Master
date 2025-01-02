@@ -955,12 +955,9 @@ if bead_flag==1
     successmessage=BeadSorting_iRFP6PMT(filepath,file_range);
     disp(successmessage)
 end
-if analysisvals==7 
-    successmessage=BeadSorting_GFPwithiRFP6PMT(filepath,file_range,bead_flag);
-    disp(successmessage)
-end
-if analysisvals==5 
-    successmessage=BeadSorting_iRFPwithiGFP6PMT(filepath,file_range,bead_flag);
-    disp(successmessage)
-end
+%%
+successmessage=BeadSorting_GFPwithiRFP6PMT(filepath,file_range,bead_flag);
+disp(successmessage)
+successmessage=BeadSorting_iRFPwithiGFP6PMT(filepath,file_range,bead_flag);
+disp(successmessage)
 successmessage='Completed Peak Detection';

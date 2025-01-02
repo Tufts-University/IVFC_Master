@@ -1,10 +1,10 @@
-%% 12/12/24 DataAnalysis 
+%% 12/17/24 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
-% Flow Date: 12/11/2024
+% Flow Date: 12/16/2024
 %% Experiment Note
 % BiRFP and GFP 1:5 ratio 
-% Cells in Media T1-4 BiRFP, T5-10 CARTeGFP, T11-14 BiRFP_CARTeGFP
+% Cells in Media 
 %% Initialization
 clear
 clc
@@ -12,7 +12,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\IVFC_Master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'R:\Taras\IVFC\CellMedia\BiRFP_CARTeGFP\TH_121124_Cell';
+filepath = 'R:\Taras\IVFC\CellMedia\BiRFP_CARTeGFP\TH_121624_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -21,15 +21,15 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_12_11_24_11_14';
-file_range= (11:14);
-analysisvals=[4];
+outputfile= 'NEW_peak_values_12_16_24_std6';
+file_range= (1:3);
+analysisvals=[1];
 sample_type= 'Cells';
-exp_num=[540];
+exp_num=[];
 std_threshold=5;
 Spectralon_tail= '';
-FWMH_threshold=5;
-intensity_threshold= 0.25;
+FWMH_threshold=0;
+intensity_threshold= 0.2;
 bead_flag=0;
 output=SamplePeakDetection6PMTRF(filepath,outputfile,file_range,Window_Low,...
     Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
