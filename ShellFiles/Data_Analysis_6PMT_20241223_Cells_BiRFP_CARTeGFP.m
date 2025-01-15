@@ -16,13 +16,13 @@ filepath = 'R:\Taras\IVFC\CellMedia\BiRFP_CARTeGFP\TH_122324_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-disp(output)
+% output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+% disp(output)
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_12_23_24';
-file_range= (1:11);
+outputfile= 'NEW_peak_values_12_23_24_1_3_5_10';
+file_range= [1,2,3,5,6,7,8,9,10];
 analysisvals=[1,2,3,4,5,6,7];
 sample_type= 'Cells';
 exp_num=[];

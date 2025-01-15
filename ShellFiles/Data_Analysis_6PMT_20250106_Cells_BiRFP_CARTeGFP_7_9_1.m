@@ -1,10 +1,10 @@
-%% 12/20/24 DataAnalysis 
+%% 01/07/25 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
-% Flow Date: 12/19/2024
+% Flow Date: 01/06/2025
 %% Experiment Note
 % BiRFP and GFP 1:5 ratio 
-% Cells in Media 
+% Cells in Media T1-3 CARTeGFP 100k ,T4-6 CARTeGFP 1m, T7-9 BiRFP20k,T10-12 BiRFP 1m, T13-19 BiRFP_CARTeGFP
 %% Initialization
 clear
 clc
@@ -12,7 +12,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\IVFC_Master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'R:\Taras\IVFC\CellMedia\BiRFP_CARTeGFP\TH_121924_Cell';
+filepath = 'R:\Taras\IVFC\CellMedia\BiRFP_CARTeGFP\TH_010625_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -21,8 +21,8 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_12_19_24_5_8_std4exp10';
-file_range= (5:8);
+outputfile= 'NEW_peak_values_01_06_25_7_9_std4exp10';
+file_range= (7:9);
 analysisvals=[1,2,4,5,6,7];
 sample_type= 'Cells';
 exp_num=[10];
