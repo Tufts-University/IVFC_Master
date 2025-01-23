@@ -943,6 +943,7 @@ for f=analysisvals
         disp('Skipped')
     end
 end
+%%
 if bead_flag==1
     successmessage=BeadSorting6PMT(filepath,file_range);
     disp(successmessage)
