@@ -1,4 +1,4 @@
-%% 01/10/25 DataAnalysis 
+%% 01/10/25 DataAnalysis and 01/15/2025 5_7(5,6,7,10)
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
 % Flow Date: 01/09/2025
@@ -21,8 +21,8 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_01_06_25_5_10';
-file_range= (5:10);
+outputfile= 'NEW_peak_values_01_06_25_5_7';
+file_range= [5,6,7,10];
 analysisvals=[1,2,4,5,6,7];
 sample_type= 'Cells';
 exp_num=[];

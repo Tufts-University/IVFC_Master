@@ -1,4 +1,4 @@
-%% 01/10/25 DataAnalysis 
+%% 01/10/25 DataAnalysis and 1/15/2025 1_3(file1-4)
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
 % Flow Date: 01/09/2025
@@ -16,12 +16,12 @@ filepath = 'R:\Taras\IVFC\CellMedia\BiRFP_CARTeGFP\TH_010925_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-disp(output)
+% output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+% disp(output)
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_01_06_25_1_4';
+outputfile= 'NEW_peak_values_01_06_25_1_3';
 file_range= (1:4);
 analysisvals=[1,2,4,5,6,7];
 sample_type= 'Cells';

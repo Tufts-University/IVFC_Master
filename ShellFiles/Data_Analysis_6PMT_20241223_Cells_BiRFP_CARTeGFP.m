@@ -21,8 +21,8 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_12_23_24_1_3_5_10';
-file_range= [1,2,3,5,6,7,8,9,10];
+outputfile= 'NEW_peak_values_12_23_24_1_3_6_10';
+file_range= [1,2,3,6,7,8,9,10];
 analysisvals=[1,2,3,4,5,6,7];
 sample_type= 'Cells';
 exp_num=[];
