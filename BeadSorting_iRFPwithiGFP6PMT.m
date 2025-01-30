@@ -40,7 +40,7 @@ for K = 1 : length(dirinfo)
     if bead_flag == 0
         subdirinfo{K} = dir(fullfile(thisdir, '*iRFPFLR.mat'));
     else
-        subdirinfo{K} = dir(fullfile(thisdir, '*iRFPFLRAll.mat'));
+        subdirinfo{K} = dir(fullfile(thisdir, '*iRFPFLRCell.mat'));
     end
 end
 
@@ -65,9 +65,9 @@ for i=file_range
             loc1=pv1(a,8);
             wid1=pv1(a,10);
             if bead_flag == 0
-                comparisonFile = [subdirinfo{i}(1).name(1:end-11), 'GFPFLR.mat'];
+                comparisonFile = [subdirinfo{i}(1).name(1:end-15), 'GFPFLR.mat'];
             else
-                comparisonFile = [subdirinfo{i}(1).name(1:end-11), 'GFPFLRCell.mat'];
+                comparisonFile = [subdirinfo{i}(1).name(1:end-15), 'GFPFLRCell.mat'];
             end
             load(comparisonFile, 'peak_values')
             pv2=peak_values;
@@ -85,9 +85,9 @@ for i=file_range
             end
         end
         peak_values=truepeaks;
-        save([subdirinfo{i}(1).name(1:end-11),'iRFPFLR_Single.mat'],'peak_values')
+        save([subdirinfo{i}(1).name(1:end-15),'iRFPFLR_Single.mat'],'peak_values')
         peak_values=del;
-        save([subdirinfo{i}(1).name(1:end-11),'iRFPFLR_with_GFP.mat'],'peak_values')
+        save([subdirinfo{i}(1).name(1:end-15),'iRFPFLR_with_GFP.mat'],'peak_values')
     end 
 end
 
@@ -98,15 +98,15 @@ for i=file_range
     disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
     if~isempty(subdirinfo{i}(1))
         cd(subdirinfo{i}(1).folder)
-        load([subdirinfo{i}(1).name(1:end-11),'iRFPFLR_with_GFP.mat'],'peak_values')
+        load([subdirinfo{i}(1).name(1:end-15),'iRFPFLR_with_GFP.mat'],'peak_values')
         pv1=[pv1;peak_values]; %#ok<AGROW> 
-        load([subdirinfo{i}(1).name(1:end-11),'iRFPFLR_Single.mat'],'peak_values')
+        load([subdirinfo{i}(1).name(1:end-15),'iRFPFLR_Single.mat'],'peak_values')
         pv2=[pv2;peak_values]; %#ok<AGROW> 
     end
 end
 cd(mainFolder)
  peak_values=pv1;
- save([subdirinfo{i}(1).name(5:end-11),'iRFPFLR_with_GFP.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(4:end-15),'iRFPFLR_with_GFP.mat'],'peak_values')
  peak_values=pv2;
- save([subdirinfo{i}(1).name(5:end-11),'iRFPFLR_Single.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(4:end-15),'iRFPFLR_Single.mat'],'peak_values')
 successmessage='Completed Sorting iRFP Peaks With and Without GFP FLR';
