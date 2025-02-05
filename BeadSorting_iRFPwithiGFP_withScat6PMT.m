@@ -133,7 +133,7 @@ for i = file_range
 end
 cd(mainFolder)
  peak_values=pv1;
- save([subdirinfo{i}(1).name(5:end-20),'iRFPFLR_with_GFP_withScat.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(3:end-20),'iRFPFLR_with_GFP_withScat.mat'],'peak_values')
  peak_values=pv2;
- save([subdirinfo{i}(1).name(5:end-20),'iRFPFLR_with_GFP_noScat.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(3:end-20),'iRFPFLR_with_GFP_noScat.mat'],'peak_values')
 successmessage='Completed Sorting iRFP Peaks With GFP FLR With and Without Scattering';

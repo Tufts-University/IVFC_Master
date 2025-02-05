@@ -106,7 +106,7 @@ for i=file_range
 end
 cd(mainFolder)
  peak_values=pv1;
- save([subdirinfo{i}(1).name(4:end-15),'iRFPFLR_with_GFP.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(3:end-15),'iRFPFLR_with_GFP.mat'],'peak_values')
  peak_values=pv2;
- save([subdirinfo{i}(1).name(4:end-15),'iRFPFLR_Single.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(3:end-15),'iRFPFLR_Single.mat'],'peak_values')
 successmessage='Completed Sorting iRFP Peaks With and Without GFP FLR';

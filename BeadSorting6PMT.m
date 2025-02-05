@@ -45,7 +45,7 @@ subdirinfo = cell(length(dirinfo));
 
 for K = 1 : length(dirinfo)
     thisdir = dirinfo(c(K)).name;
-    subdirinfo{K} = dir(fullfile(thisdir, '*RFLR.mat'));
+    subdirinfo{K} = dir(fullfile(thisdir, '*E2CPFLR.mat'));
 end
 
 subdirinfo =  subdirinfo(~cellfun('isempty',subdirinfo));
@@ -67,7 +67,7 @@ for i=file_range
             disp(['Chunk # ',num2str(j),' of ',num2str(max(chunks))]);
             a=pv1(:,7)==j;
             loc=pv1(a,8);
-            load([subdirinfo{i}(1).name(1:end-8),'NoScatAll.mat'],'peak_values')
+            load([subdirinfo{i}(1).name(1:end-11),'NoScatAll.mat'],'peak_values')
             pv2=peak_values;
             a2=find(pv2(:,7)==j);
             loc2=pv2(a2,8);
@@ -83,9 +83,9 @@ for i=file_range
             end
         end
         peak_values=truepeaks;
-        save([subdirinfo{i}(1).name(1:end-8),'NoScatCell.mat'],'peak_values')
+        save([subdirinfo{i}(1).name(1:end-11),'NoScatCell.mat'],'peak_values')
         peak_values=del;
-        save([subdirinfo{i}(1).name(1:end-8),'NoScatBeads.mat'],'peak_values')
+        save([subdirinfo{i}(1).name(1:end-11),'NoScatBeads.mat'],'peak_values')
     end 
 end
 
@@ -96,15 +96,15 @@ for i=file_range
     disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
     if~isempty(subdirinfo{i}(1))
         cd(subdirinfo{i}(1).folder)
-        load([subdirinfo{i}(1).name(1:end-8),'NoScatBeads.mat'],'peak_values')
+        load([subdirinfo{i}(1).name(1:end-11),'NoScatBeads.mat'],'peak_values')
         pv1=[pv1;peak_values]; %#ok<AGROW> 
-        load([subdirinfo{i}(1).name(1:end-8),'NoScatCell.mat'],'peak_values')
+        load([subdirinfo{i}(1).name(1:end-11),'NoScatCell.mat'],'peak_values')
         pv2=[pv2;peak_values]; %#ok<AGROW> 
     end
 end
 cd(mainFolder)
  peak_values=pv1;
- save([subdirinfo{i}(1).name(5:end-8),'NoScatBeads.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(5:end-11),'NoScatBeads.mat'],'peak_values')
  peak_values=pv2;
- save([subdirinfo{i}(1).name(5:end-8),'NoScatCell.mat'],'peak_values')
+ save([subdirinfo{i}(1).name(5:end-11),'NoScatCell.mat'],'peak_values')
 successmessage='Completed Seperating Bead Peaks';

@@ -948,6 +948,7 @@ if bead_flag==1
     successmessage=BeadSorting6PMT(filepath,file_range);
     disp(successmessage)
 end
+%%
 if bead_flag==1
     successmessage=BeadSorting_GFP6PMT(filepath,file_range);
     disp(successmessage)
