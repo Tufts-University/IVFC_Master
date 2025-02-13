@@ -58,6 +58,10 @@ for i=file_range
         cd(subdirinfo{i}(1).folder)
         load(subdirinfo{i}(1).name)
         pv1=peak_values;
+        if isempty(pv1)
+            disp(['Skipping File # ', num2str(i), ' as it contains no peaks.']);
+            continue;
+        end
         chunks=unique(peak_values(:,7));
         for j=min(chunks):max(chunks)
             disp(['Chunk # ',num2str(j),' of ',num2str(max(chunks))]);
@@ -71,6 +75,10 @@ for i=file_range
             end
             load(comparisonFile, 'peak_values')
             pv2=peak_values;
+            if isempty(pv2)
+                disp(['Skipping File # ', num2str(i), ' as it contains no peaks.']);
+                continue;
+            end
             a2 = pv2(:, 7) == j;
             loc2=pv2(a2,8);
             wid2=pv2(a2,10);
@@ -91,22 +99,71 @@ for i=file_range
     end 
 end
 
-%% Save all sorted files
-pv1=[];
-pv2=[];
-for i=file_range
-    disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
-    if~isempty(subdirinfo{i}(1))
-        cd(subdirinfo{i}(1).folder)
-        load([subdirinfo{i}(1).name(1:end-15),'iRFPFLR_with_GFP.mat'],'peak_values')
-        pv1=[pv1;peak_values]; %#ok<AGROW> 
-        load([subdirinfo{i}(1).name(1:end-15),'iRFPFLR_Single.mat'],'peak_values')
-        pv2=[pv2;peak_values]; %#ok<AGROW> 
+% %% Save all sorted files
+% pv1=[];
+% pv2=[];
+% for i=file_range
+%     disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
+%     if~isempty(subdirinfo{i}(1))
+%         cd(subdirinfo{i}(1).folder)
+%         load([subdirinfo{i}(1).name(1:end-15),'iRFPFLR_with_GFP.mat'],'peak_values')
+%         pv1=[pv1;peak_values]; %#ok<AGROW> 
+%         load([subdirinfo{i}(1).name(1:end-15),'iRFPFLR_Single.mat'],'peak_values')
+%         pv2=[pv2;peak_values]; %#ok<AGROW> 
+%     end
+% end
+% cd(mainFolder)
+%  peak_values=pv1;
+%  save([subdirinfo{i}(1).name(4:end-15),'iRFPFLR_with_GFP.mat'],'peak_values')
+%  peak_values=pv2;
+%  save([subdirinfo{i}(1).name(4:end-15),'iRFPFLR_Single.mat'],'peak_values')
+% successmessage='Completed Sorting iRFP Peaks With and Without GFP FLR';
+%%
+pv1 = [];
+pv2 = [];
+for i = file_range
+    disp(['Evaluating File # ', num2str(i), ' of ', num2str(size(subdirinfo,1))]);
+    
+    if ~isempty(subdirinfo{i}(1))
+        cd(subdirinfo{i}(1).folder);
+
+        % Define file names
+        file_with_GFP = [subdirinfo{i}(1).name(1:end-15), 'iRFPFLR_with_GFP.mat'];
+        file_single = [subdirinfo{i}(1).name(1:end-15), 'iRFPFLR_Single.mat'];
+
+        % Check if 'iRFPFLR_with_GFP.mat' exists before loading
+        if exist(file_with_GFP, 'file')
+            load(file_with_GFP, 'peak_values');
+            pv1 = [pv1; peak_values]; %#ok<AGROW> 
+        else
+            disp(['Skipping: ', file_with_GFP, ' not found.']);
+        end
+
+        % Check if 'iRFPFLR_Single.mat' exists before loading
+        if exist(file_single, 'file')
+            load(file_single, 'peak_values');
+            pv2 = [pv2; peak_values]; %#ok<AGROW> 
+        else
+            disp(['Skipping: ', file_single, ' not found.']);
+        end
     end
 end
-cd(mainFolder)
- peak_values=pv1;
- save([subdirinfo{i}(1).name(4:end-15),'iRFPFLR_with_GFP.mat'],'peak_values')
- peak_values=pv2;
- save([subdirinfo{i}(1).name(4:end-15),'iRFPFLR_Single.mat'],'peak_values')
-successmessage='Completed Sorting iRFP Peaks With and Without GFP FLR';
+
+cd(mainFolder);
+
+% Save only if data exists
+if ~isempty(pv1)
+    peak_values = pv1;
+    save([subdirinfo{i}(1).name(4:end-15), 'iRFPFLR_with_GFP.mat'], 'peak_values');
+else
+    disp('No data found for iRFPFLR_with_GFP.mat, skipping save.');
+end
+
+if ~isempty(pv2)
+    peak_values = pv2;
+    save([subdirinfo{i}(1).name(4:end-15), 'iRFPFLR_Single.mat'], 'peak_values');
+else
+    disp('No data found for iRFPFLR_Single.mat, skipping save.');
+end
+
+successmessage = 'Completed Sorting iRFP Peaks With and Without GFP FLR';
