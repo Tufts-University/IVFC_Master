@@ -119,30 +119,91 @@ end
 %  save([subdirinfo{i}(1).name(4:end-15),'iRFPFLR_Single.mat'],'peak_values')
 % successmessage='Completed Sorting iRFP Peaks With and Without GFP FLR';
 %%
+% pv1 = [];
+% pv2 = [];
+% for i = file_range
+%     disp(['Evaluating File # ', num2str(i), ' of ', num2str(size(subdirinfo,1))]);
+%     
+%     if ~isempty(subdirinfo{i}(1))
+%         cd(subdirinfo{i}(1).folder);
+% 
+%         % Define file names
+%         file_with_GFP = [subdirinfo{i}(1).name(1:end-15), 'iRFPFLR_with_GFP.mat'];
+%         file_single = [subdirinfo{i}(1).name(1:end-15), 'iRFPFLR_Single.mat'];
+% 
+%         % Check if 'iRFPFLR_with_GFP.mat' exists before loading
+%         if exist(file_with_GFP, 'file')
+%             load(file_with_GFP, 'peak_values');
+%             pv1 = [pv1; peak_values]; %#ok<AGROW> 
+%         else
+%             disp(['Skipping: ', file_with_GFP, ' not found.']);
+%         end
+% 
+%         % Check if 'iRFPFLR_Single.mat' exists before loading
+%         if exist(file_single, 'file')
+%             load(file_single, 'peak_values');
+%             pv2 = [pv2; peak_values]; %#ok<AGROW> 
+%         else
+%             disp(['Skipping: ', file_single, ' not found.']);
+%         end
+%     end
+% end
+% 
+% cd(mainFolder);
+% 
+% % Save only if data exists
+% if ~isempty(pv1)
+%     peak_values = pv1;
+%     save([subdirinfo{i}(1).name(4:end-15), 'iRFPFLR_with_GFP.mat'], 'peak_values');
+% else
+%     disp('No data found for iRFPFLR_with_GFP.mat, skipping save.');
+% end
+% 
+% if ~isempty(pv2)
+%     peak_values = pv2;
+%     save([subdirinfo{i}(1).name(4:end-15), 'iRFPFLR_Single.mat'], 'peak_values');
+% else
+%     disp('No data found for iRFPFLR_Single.mat, skipping save.');
+% end
+% 
+% successmessage = 'Completed Sorting iRFP Peaks With and Without GFP FLR';
+%%
 pv1 = [];
 pv2 = [];
+
 for i = file_range
     disp(['Evaluating File # ', num2str(i), ' of ', num2str(size(subdirinfo,1))]);
     
     if ~isempty(subdirinfo{i}(1))
         cd(subdirinfo{i}(1).folder);
 
-        % Define file names
-        file_with_GFP = [subdirinfo{i}(1).name(1:end-15), 'iRFPFLR_with_GFP.mat'];
-        file_single = [subdirinfo{i}(1).name(1:end-15), 'iRFPFLR_Single.mat'];
+        % Extract full filename
+        full_filename = subdirinfo{i}(1).name;
 
-        % Check if 'iRFPFLR_with_GFP.mat' exists before loading
+        % Detect and extract base filename dynamically
+        cell_idx = regexp(full_filename, 'cell\d+$', 'once'); % Finds "cellX" pattern
+        if ~isempty(cell_idx)
+            base_name = full_filename(1:cell_idx-1); % Extract up to "cellX"
+        else
+            base_name = full_filename(1:end-15); % Fallback if "cellX" is missing
+        end
+
+        % Define file names
+        file_with_GFP = [base_name, 'iRFPFLR_with_GFP.mat'];
+        file_single = [base_name, 'iRFPFLR_Single.mat'];
+
+        % Load 'iRFPFLR_with_GFP.mat' if it exists
         if exist(file_with_GFP, 'file')
             load(file_with_GFP, 'peak_values');
-            pv1 = [pv1; peak_values]; %#ok<AGROW> 
+            pv1 = [pv1; peak_values]; %#ok<AGROW>
         else
             disp(['Skipping: ', file_with_GFP, ' not found.']);
         end
 
-        % Check if 'iRFPFLR_Single.mat' exists before loading
+        % Load 'iRFPFLR_Single.mat' if it exists
         if exist(file_single, 'file')
             load(file_single, 'peak_values');
-            pv2 = [pv2; peak_values]; %#ok<AGROW> 
+            pv2 = [pv2; peak_values]; %#ok<AGROW>
         else
             disp(['Skipping: ', file_single, ' not found.']);
         end
@@ -154,14 +215,18 @@ cd(mainFolder);
 % Save only if data exists
 if ~isempty(pv1)
     peak_values = pv1;
-    save([subdirinfo{i}(1).name(4:end-15), 'iRFPFLR_with_GFP.mat'], 'peak_values');
+    save_filename = fullfile(mainFolder, [base_name, 'iRFPFLR_with_GFP.mat']);
+    disp(['Saving: ', save_filename]);
+    save(save_filename, 'peak_values');
 else
     disp('No data found for iRFPFLR_with_GFP.mat, skipping save.');
 end
 
 if ~isempty(pv2)
     peak_values = pv2;
-    save([subdirinfo{i}(1).name(4:end-15), 'iRFPFLR_Single.mat'], 'peak_values');
+    save_filename = fullfile(mainFolder, [base_name, 'iRFPFLR_Single.mat']);
+    disp(['Saving: ', save_filename]);
+    save(save_filename, 'peak_values');
 else
     disp('No data found for iRFPFLR_Single.mat, skipping save.');
 end

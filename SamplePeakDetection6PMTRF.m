@@ -962,6 +962,7 @@ successmessage=BeadSorting_GFPwithiRFP6PMT(filepath,file_range,bead_flag);
 disp(successmessage)
 successmessage=BeadSorting_iRFPwithiGFP6PMT(filepath,file_range,bead_flag);
 disp(successmessage)
+%%
 successmessage=BeadSorting_iRFPwithiGFP_withScat6PMT(filepath,file_range);
 disp(successmessage)
 successmessage='Completed Peak Detection';
