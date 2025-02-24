@@ -120,19 +120,81 @@ end
 % successmessage='Completed Sorting GFP Peaks With and Without iRFP FLR';
 %%
 %%
+% pv1 = [];
+% pv2 = [];
+% for i = file_range
+%     disp(['Evaluating File # ', num2str(i), ' of ', num2str(size(subdirinfo,1))]);
+%     
+%     if ~isempty(subdirinfo{i}(1))
+%         cd(subdirinfo{i}(1).folder);
+% 
+%         % Define file names
+%         file_with_GFP = [subdirinfo{i}(1).name(1:end-14), 'GFPFLR_with_iRFP.mat'];
+%         file_single = [subdirinfo{i}(1).name(1:end-14), 'GFPFLR_Single.mat'];
+% 
+%         % Check if 'iRFPFLR_with_GFP.mat' exists before loading
+%         if exist(file_with_GFP, 'file')
+%             load(file_with_GFP, 'peak_values');
+%             pv1 = [pv1; peak_values]; %#ok<AGROW> 
+%         else
+%             disp(['Skipping: ', file_with_GFP, ' not found.']);
+%         end
+% 
+%         % Check if 'iRFPFLR_Single.mat' exists before loading
+%         if exist(file_single, 'file')
+%             load(file_single, 'peak_values');
+%             pv2 = [pv2; peak_values]; %#ok<AGROW> 
+%         else
+%             disp(['Skipping: ', file_single, ' not found.']);
+%         end
+%     end
+% end
+% 
+% cd(mainFolder);
+% 
+% % Save only if data exists
+% if ~isempty(pv1)
+%     peak_values = pv1;
+%     save([subdirinfo{i}(1).name(4:end-14), 'GFPFLR_with_iRFP.mat'], 'peak_values');
+% else
+%     disp('No data found for GFPFLR_with_iRFP.mat, skipping save.');
+% end
+% 
+% if ~isempty(pv2)
+%     peak_values = pv2;
+%     save([subdirinfo{i}(1).name(4:end-14), 'GFPFLR_Single.mat'], 'peak_values');
+% else
+%     disp('No data found for GFPFLR_Single.mat, skipping save.');
+% end
+% 
+% successmessage = 'Completed Sorting GFP Peaks With and Without iRFP FLR';
+%%
 pv1 = [];
 pv2 = [];
+
 for i = file_range
     disp(['Evaluating File # ', num2str(i), ' of ', num2str(size(subdirinfo,1))]);
-    
+
     if ~isempty(subdirinfo{i}(1))
         cd(subdirinfo{i}(1).folder);
 
-        % Define file names
-        file_with_GFP = [subdirinfo{i}(1).name(1:end-14), 'GFPFLR_with_iRFP.mat'];
-        file_single = [subdirinfo{i}(1).name(1:end-14), 'GFPFLR_Single.mat'];
+        % Get the base filename
+        base_name = subdirinfo{i}(1).name;
 
-        % Check if 'iRFPFLR_with_GFP.mat' exists before loading
+        % Ensure filename is long enough before extracting substrings
+        if length(base_name) > 18  % 4 + 14 = 18
+            save_filename1 = [base_name(4:end-14), 'GFPFLR_with_iRFP.mat'];
+            save_filename2 = [base_name(4:end-14), 'GFPFLR_Single.mat'];
+        else
+            warning(['Filename too short: ', base_name, ' Skipping file.']);
+            continue;
+        end
+
+        % Define file names for loading
+        file_with_GFP = [base_name(1:end-14), 'GFPFLR_with_iRFP.mat'];
+        file_single = [base_name(1:end-14), 'GFPFLR_Single.mat'];
+
+        % Load data if the files exist
         if exist(file_with_GFP, 'file')
             load(file_with_GFP, 'peak_values');
             pv1 = [pv1; peak_values]; %#ok<AGROW> 
@@ -140,7 +202,6 @@ for i = file_range
             disp(['Skipping: ', file_with_GFP, ' not found.']);
         end
 
-        % Check if 'iRFPFLR_Single.mat' exists before loading
         if exist(file_single, 'file')
             load(file_single, 'peak_values');
             pv2 = [pv2; peak_values]; %#ok<AGROW> 
@@ -155,14 +216,16 @@ cd(mainFolder);
 % Save only if data exists
 if ~isempty(pv1)
     peak_values = pv1;
-    save([subdirinfo{i}(1).name(4:end-14), 'GFPFLR_with_iRFP.mat'], 'peak_values');
+    save(fullfile(mainFolder, save_filename1), 'peak_values');
+    disp(['Saved: ', fullfile(mainFolder, save_filename1)]);
 else
     disp('No data found for GFPFLR_with_iRFP.mat, skipping save.');
 end
 
 if ~isempty(pv2)
     peak_values = pv2;
-    save([subdirinfo{i}(1).name(4:end-14), 'GFPFLR_Single.mat'], 'peak_values');
+    save(fullfile(mainFolder, save_filename2), 'peak_values');
+    disp(['Saved: ', fullfile(mainFolder, save_filename2)]);
 else
     disp('No data found for GFPFLR_Single.mat, skipping save.');
 end
