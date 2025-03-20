@@ -98,92 +98,27 @@ for i=file_range
     end 
 end
 
-% %% Save all sorted files
-% pv1 = [];
-% pv2 = [];
-% for i = file_range
-%     if i > length(subdirinfo) || isempty(subdirinfo{i}) % new021825
-%         warning(['Skipping file #', num2str(i), ' as it does not exist.']);% new021825
-%         continue;% new021825
-%     end% new021825
-%     disp(['Evaluating File # ', num2str(i), ' of ', num2str(size(subdirinfo, 1))]);
-%     if ~isempty(subdirinfo{i}(1))
-%         cd(subdirinfo{i}(1).folder);
-%         
-%         % Construct file paths
-%         file_with_scat = [subdirinfo{i}(1).name(1:end-20), 'iRFPFLR_with_GFP_withScat.mat'];
-%         file_no_scat = [subdirinfo{i}(1).name(1:end-20), 'iRFPFLR_with_GFP_noScat.mat'];
-%         
-%         % Load file_with_scat
-%         if isfile(file_with_scat)
-%             load(file_with_scat, 'peak_values');
-%             if exist('peak_values', 'var') && ~isempty(peak_values) && size(peak_values, 2) >= 7
-%                 pv1 = [pv1; peak_values]; %#ok<AGROW>
-%             else
-%                 warning(['File ', file_with_scat, ' does not contain valid peak_values. Skipping.']);
-%             end
-%         else
-%             warning(['File ', file_with_scat, ' not found. Skipping.']);
-%         end
-%         
-%         % Load file_no_scat
-%         if isfile(file_no_scat)
-%             load(file_no_scat, 'peak_values');
-%             if exist('peak_values', 'var') && ~isempty(peak_values) && size(peak_values, 2) >= 7
-%                 pv2 = [pv2; peak_values]; %#ok<AGROW>
-%             else
-%                 warning(['File ', file_no_scat, ' does not contain valid peak_values. Skipping.']);
-%             end
-%         else
-%             warning(['File ', file_no_scat, ' not found. Skipping.']);
-%         end
-%     end
-% end
-% cd(mainFolder)
-% % peak_values=pv1;
-% % save([subdirinfo{i}(1).name(4:end-20),'iRFPFLR_with_GFP_withScat.mat'],'peak_values')
-% % peak_values=pv2;
-% % save([subdirinfo{i}(1).name(4:end-20),'iRFPFLR_with_GFP_noScat.mat'],'peak_values')
-% if ~isempty(pv1)
-%     save([subdirinfo{i}(1).name(4:end-20),'iRFPFLR_with_GFP_withScat.mat'], 'pv1');
-% end
-% if ~isempty(pv2)
-%     save([subdirinfo{i}(1).name(4:end-20),'iRFPFLR_with_GFP_noScat.mat'], 'pv2');
-% end
-% successmessage='Completed Sorting iRFP Peaks With GFP FLR With and Without Scattering';
-%%
-mainFolder = pwd;
-
-% Initialize the variables
+%% Save all sorted files
 pv1 = [];
 pv2 = [];
-
-% Process each file in the range
 for i = file_range
-    % Ensure that i is within bounds and subdirinfo{i} is not empty
-    if i > length(subdirinfo) || isempty(subdirinfo{i})
-        warning(['Skipping file #', num2str(i), ' as it does not exist.']);
-        continue;
-    end
-    
-    disp(['Evaluating File # ', num2str(i), ' of ', num2str(length(subdirinfo))]);
-    
-    % Check for files in subdirinfo and process
-    if ~isempty(subdirinfo{i}) && ~isempty(subdirinfo{i}(1).name)
-        cd(subdirinfo{i}(1).folder);  % Change directory to the file location
+    if i > length(subdirinfo) || isempty(subdirinfo{i}) % new021825
+        warning(['Skipping file #', num2str(i), ' as it does not exist.']);% new021825
+        continue;% new021825
+    end% new021825
+    disp(['Evaluating File # ', num2str(i), ' of ', num2str(size(subdirinfo, 1))]);
+    if ~isempty(subdirinfo{i}(1))
+        cd(subdirinfo{i}(1).folder);
         
-        % Set last folder name for saving later
-        lastFolderName = subdirinfo{i}(1).name(1:end-20);  % Extract name prefix to use when saving
+        % Construct file paths
+        file_with_scat = [subdirinfo{i}(1).name(1:end-20), 'iRFPFLR_with_GFP_withScat.mat'];
+        file_no_scat = [subdirinfo{i}(1).name(1:end-20), 'iRFPFLR_with_GFP_noScat.mat'];
         
-        % Define file names
-        file_with_scat = [lastFolderName, 'iRFPFLR_with_GFP_withScat.mat'];
-        file_no_scat = [lastFolderName, 'iRFPFLR_with_GFP_noScat.mat'];
-        
-        % Load and process the file with scattering
+        % Load file_with_scat
         if isfile(file_with_scat)
             load(file_with_scat, 'peak_values');
             if exist('peak_values', 'var') && ~isempty(peak_values) && size(peak_values, 2) >= 7
-                pv1 = [pv1; peak_values];  %#ok<AGROW>
+                pv1 = [pv1; peak_values]; %#ok<AGROW>
             else
                 warning(['File ', file_with_scat, ' does not contain valid peak_values. Skipping.']);
             end
@@ -191,47 +126,32 @@ for i = file_range
             warning(['File ', file_with_scat, ' not found. Skipping.']);
         end
         
-        % Load and process the file without scattering
+        % Load file_no_scat
         if isfile(file_no_scat)
             load(file_no_scat, 'peak_values');
             if exist('peak_values', 'var') && ~isempty(peak_values) && size(peak_values, 2) >= 7
-                pv2 = [pv2; peak_values];  %#ok<AGROW>
+                pv2 = [pv2; peak_values]; %#ok<AGROW>
             else
                 warning(['File ', file_no_scat, ' does not contain valid peak_values. Skipping.']);
             end
         else
             warning(['File ', file_no_scat, ' not found. Skipping.']);
         end
-    else
-        warning(['Subdirectory info for file #', num2str(i), ' is empty. Skipping.']);
     end
 end
-
-% Extract the parent folder (one level up from the last subfolder)
-parentFolder = fileparts(mainFolder);  % This gives the parent folder of mainFolder
-
-disp(['Parent Folder: ', parentFolder]);  % Debug message to check the parent path
-
-% Ensure saving is done in the parent folder
-% Check if pv1 (with scattering) is not empty and save as peak_values
+cd(mainFolder)
 if ~isempty(pv1)
-    peak_values = pv1;  % Assign pv1 to peak_values
-    fullPath = fullfile(parentFolder, [lastFolderName, 'iRFPFLR_with_GFP_withScat.mat']);
-    disp(['Saving to: ', fullPath]);  % Debug message to check the save location
-    save(fullPath, 'peak_values');
+    save([subdirinfo{i}(1).name(4:end-20),'iRFPFLR_with_GFP_withScat.mat'],'peak_values')
+else
+    disp('pv1 is empty, skipping save.');
 end
 
-% Check if pv2 (without scattering) is not empty and save as peak_values
 if ~isempty(pv2)
-    peak_values = pv2;  % Assign pv2 to peak_values
-    fullPath = fullfile(parentFolder, [lastFolderName, 'iRFPFLR_with_GFP_noScat.mat']);
-    disp(['Saving to: ', fullPath]);  % Debug message to check the save location
-    save(fullPath, 'peak_values');
+    save([subdirinfo{i}(1).name(4:end-20),'iRFPFLR_with_GFP_noScat.mat'],'peak_values')
+else
+    disp('pv2 is empty, skipping save.');
 end
-
-% Final success message
-successmessage = 'Completed Sorting iRFP Peaks With GFP FLR With and Without Scattering';
-
+successmessage='Completed Sorting iRFP Peaks With GFP FLR With and Without Scattering';
 % function successmessage = BeadSorting_iRFPwithiGFP_withScat6PMT(filepath, file_range)
 % % Function to sort iRFP Peaks with GFP, with and without Scattering
 % % Written By: Taras Hanulia (thanul01@tufts.edu)

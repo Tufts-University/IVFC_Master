@@ -1,9 +1,10 @@
-%% 02/20/25 DataAnalysis 
+%% 02/18/25 DataAnalysis 
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
-% Flow Date: 02/20/2025
+% Flow Date: 02/14/2025
 %% Experiment Note
-% BiRFP+CARTeGFP Cells in Blood +  beads 
+% BiRFP with CARTeGFP Cells in Blood +  beads
+% 'NEW_peak_values_02_18_25';std3 was4
 % Cells in Blood
 %% Initialization
 clear
@@ -12,7 +13,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\IVFC_Master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'R:\Taras\IVFC\Blood Cell Data\2025\Tests\TH_022025_Blood_Cell';
+filepath = 'R:\Taras\IVFC\Blood Cell Data\2025\TH_021425_Blood_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -21,11 +22,11 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_02_24_25';
-file_range=(1:6);
-analysisvals=[1];
+outputfile= 'NEW_peak_values_02_18_25';
+file_range=(1:13);
+analysisvals=[1,2,4,5,6,7];
 sample_type= 'Blood';
-exp_num=[75];
+exp_num=[];
 std_threshold=3;
 Spectralon_tail= '';
 FWMH_threshold=0;

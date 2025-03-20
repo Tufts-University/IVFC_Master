@@ -1,4 +1,4 @@
-function successmessage=BeadSorting_GFPwithiRFP6PMT(filepath,file_range,bead_flag)
+function successmessage=BeadSorting_GFPwithiRFP6PMT_FLR_loc(filepath,file_range,bead_flag)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % file:BeadSorting_GFP6PMT.m
 % ***Description***:
@@ -6,7 +6,9 @@ function successmessage=BeadSorting_GFPwithiRFP6PMT(filepath,file_range,bead_fla
 % Currently this function is run from within SamplePeakDetection6PMTRF.m function
 % Written By: Taras Hanulia (thanul01@tufts.edu) for 6PMT
 % Date Written: 11/14/2024
-
+% Date modified: 03/20/2025
+% The width for compared peak search in fluorescence width not in
+% cummulation as before
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Function details
 % Inputs:
@@ -67,7 +69,7 @@ for i=file_range
             disp(['Chunk # ',num2str(j),' of ',num2str(max(chunks))]);
             a = find(pv1(:, 7) == j);
             loc1=pv1(a,8);
-            wid1=pv1(a,10);
+            wid1=pv1(a,20);
             if bead_flag == 0
                 comparisonFile = [subdirinfo{i}(1).name(1:end-14), 'iRFPFLR.mat'];
             else
@@ -81,7 +83,7 @@ for i=file_range
             end
             a2 = pv2(:, 7) == j;
             loc2=pv2(a2,8);
-            wid2=pv2(a2,10);
+            wid2=pv2(a2,22);
             for k=1:length(loc1)
                 l1=loc1(k);
                 match=find(loc2>=l1-wid1(k).*1.5 & loc2<=l1+wid1(k).*1.5,1);

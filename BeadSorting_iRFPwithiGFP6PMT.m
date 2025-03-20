@@ -168,6 +168,117 @@ end
 % 
 % successmessage = 'Completed Sorting iRFP Peaks With and Without GFP FLR';
 %%
+% pv1 = [];
+% pv2 = [];
+% 
+% for i = file_range
+%     disp(['Evaluating File # ', num2str(i), ' of ', num2str(size(subdirinfo, 1))]);
+% 
+%     if ~isempty(subdirinfo{i}(1))
+%         cd(subdirinfo{i}(1).folder);
+% 
+% 
+%         % Ensure filename is long enough before extracting substrings
+%         base_name = subdirinfo{i}(1).name;
+%         if length(base_name) > 18  % Adjusted length check for safety
+%             save_filename1 = [base_name(4:end-15), 'iRFPFLR_with_GFP.mat'];
+%             save_filename2 = [base_name(4:end-15), 'iRFPFLR_Single.mat'];
+%         else
+%             warning(['Filename too short: ', base_name, ' Skipping file.']);
+%             continue;
+%         end
+% 
+%         % Define file names for loading
+%         file_with_GFP = [base_name(1:end-15), 'iRFPFLR_with_GFP.mat'];
+%         file_single = [base_name(1:end-15), 'iRFPFLR_Single.mat'];
+% 
+%         % Load data if the files exist
+% 
+%         % Extract full filename
+%         full_filename = subdirinfo{i}(1).name;
+% 
+%         % Detect and extract base filename dynamically
+%         cell_idx = regexp(full_filename, 'cell\d+$', 'once'); % Finds "cellX" pattern
+%         if ~isempty(cell_idx)
+%             base_name = full_filename(1:cell_idx-1); % Extract up to "cellX"
+%         else
+%             base_name = full_filename(1:end-15); % Fallback if "cellX" is missing
+%         end
+% 
+%         % Define file names
+%         file_with_GFP = [base_name, 'iRFPFLR_with_GFP.mat'];
+%         file_single = [base_name, 'iRFPFLR_Single.mat'];
+% 
+% 
+%         if exist(file_with_GFP, 'file')
+%             load(file_with_GFP, 'peak_values');
+%             pv1 = [pv1; peak_values]; %#ok<AGROW>
+%         else
+%             disp(['Skipping: ', file_with_GFP, ' not found.']);
+%         end
+% 
+% 
+% 
+%         % Load 'iRFPFLR_Single.mat' if it exists
+% 
+%         if exist(file_single, 'file')
+%             load(file_single, 'peak_values');
+%             pv2 = [pv2; peak_values]; %#ok<AGROW>
+%         else
+%             disp(['Skipping: ', file_single, ' not found.']);
+%         end
+%     end
+% end
+% 
+% cd(mainFolder);
+% 
+% % Ensure subdirinfo{i} is within bounds before using it
+% if ~isempty(subdirinfo) && i <= length(subdirinfo)
+%     base_name = subdirinfo{i}(1).name;
+%     if length(base_name) > 18  % Ensure the filename is long enough
+%         save_filename1 = [base_name(4:end-15), 'iRFPFLR_with_GFP.mat'];
+%         save_filename2 = [base_name(4:end-15), 'iRFPFLR_Single.mat'];
+%     else
+%         warning('Filename too short, skipping save.');
+%         return;
+%     end
+% else
+%     warning('subdirinfo index out of bounds, skipping save.');
+%     return;
+% end
+% 
+% % Save only if data exists
+% if ~isempty(pv1)
+%     peak_values = pv1;
+% 
+%     save(fullfile(mainFolder, save_filename1), 'peak_values');
+%     disp(['Saved: ', fullfile(mainFolder, save_filename1)]);
+% 
+%     save_filename = fullfile(mainFolder, [base_name, 'iRFPFLR_with_GFP.mat']);
+%     disp(['Saving: ', save_filename]);
+%     save(save_filename, 'peak_values');
+% 
+% else
+%     disp('No data found for iRFPFLR_with_GFP.mat, skipping save.');
+% end
+% 
+% if ~isempty(pv2)
+%     peak_values = pv2;
+% 
+%     save(fullfile(mainFolder, save_filename2), 'peak_values');
+%     disp(['Saved: ', fullfile(mainFolder, save_filename2)]);
+% 
+%     save_filename = fullfile(mainFolder, [base_name, 'iRFPFLR_Single.mat']);
+%     disp(['Saving: ', save_filename]);
+%     save(save_filename, 'peak_values');
+% 
+% else
+%     disp('No data found for iRFPFLR_Single.mat, skipping save.');
+% end
+% 
+% successmessage = 'Completed Sorting iRFP Peaks With and Without GFP FLR';
+
+%%
 pv1 = [];
 pv2 = [];
 
@@ -177,21 +288,25 @@ for i = file_range
     if ~isempty(subdirinfo{i}(1))
         cd(subdirinfo{i}(1).folder);
 
-        % Ensure filename is long enough before extracting substrings
+        % Get the base filename
         base_name = subdirinfo{i}(1).name;
-        if length(base_name) > 18  % Adjusted length check for safety
-            save_filename1 = [base_name(4:end-15), 'iRFPFLR_with_GFP.mat'];
-            save_filename2 = [base_name(4:end-15), 'iRFPFLR_Single.mat'];
+
+        % Extract base name dynamically, considering "cellX" pattern
+        cell_idx = regexp(base_name, 'cell\d+$', 'once'); % Finds "cellX" pattern
+        if ~isempty(cell_idx)
+            trimmed_name = base_name(1:cell_idx-1); % Extract up to "cellX"
+        elseif length(base_name) > 18  % Fallback extraction
+            trimmed_name = base_name(1:end-15);
         else
             warning(['Filename too short: ', base_name, ' Skipping file.']);
             continue;
         end
 
         % Define file names for loading
-        file_with_GFP = [base_name(1:end-15), 'iRFPFLR_with_GFP.mat'];
-        file_single = [base_name(1:end-15), 'iRFPFLR_Single.mat'];
+        file_with_GFP = [trimmed_name, 'iRFPFLR_with_GFP.mat'];
+        file_single = [trimmed_name, 'iRFPFLR_Single.mat'];
 
-        % Load data if the files exist
+        % Load 'iRFPFLR_with_GFP.mat' if it exists
         if exist(file_with_GFP, 'file')
             load(file_with_GFP, 'peak_values');
             pv1 = [pv1; peak_values]; %#ok<AGROW>
@@ -199,6 +314,7 @@ for i = file_range
             disp(['Skipping: ', file_with_GFP, ' not found.']);
         end
 
+        % Load 'iRFPFLR_Single.mat' if it exists
         if exist(file_single, 'file')
             load(file_single, 'peak_values');
             pv2 = [pv2; peak_values]; %#ok<AGROW>
@@ -210,34 +326,29 @@ end
 
 cd(mainFolder);
 
-% Ensure subdirinfo{i} is within bounds before using it
-if ~isempty(subdirinfo) && i <= length(subdirinfo)
-    base_name = subdirinfo{i}(1).name;
-    if length(base_name) > 18  % Ensure the filename is long enough
-        save_filename1 = [base_name(4:end-15), 'iRFPFLR_with_GFP.mat'];
-        save_filename2 = [base_name(4:end-15), 'iRFPFLR_Single.mat'];
-    else
-        warning('Filename too short, skipping save.');
-        return;
-    end
-else
-    warning('subdirinfo index out of bounds, skipping save.');
+% Ensure filename is correctly formatted for saving
+if isempty(trimmed_name)
+    warning('No valid filenames processed, skipping save.');
     return;
 end
+
+% Define filenames for saving
+save_filename1 = fullfile(mainFolder, [trimmed_name(4:end), 'iRFPFLR_with_GFP.mat']);
+save_filename2 = fullfile(mainFolder, [trimmed_name(4:end), 'iRFPFLR_Single.mat']);
 
 % Save only if data exists
 if ~isempty(pv1)
     peak_values = pv1;
-    save(fullfile(mainFolder, save_filename1), 'peak_values');
-    disp(['Saved: ', fullfile(mainFolder, save_filename1)]);
+    save(save_filename1, 'peak_values');
+    disp(['Saved: ', save_filename1]);
 else
     disp('No data found for iRFPFLR_with_GFP.mat, skipping save.');
 end
 
 if ~isempty(pv2)
     peak_values = pv2;
-    save(fullfile(mainFolder, save_filename2), 'peak_values');
-    disp(['Saved: ', fullfile(mainFolder, save_filename2)]);
+    save(save_filename2, 'peak_values');
+    disp(['Saved: ', save_filename2]);
 else
     disp('No data found for iRFPFLR_Single.mat, skipping save.');
 end

@@ -1,10 +1,10 @@
-%% 02/20/25 DataAnalysis 
+%% 03/14/25 DataAnalysis 
 % Owner: Taras Hanulia
-% Data Type: Cells   Measurements
-% Flow Date: 02/20/2025
+% Data Type: Blood only
+% Flow Date: 03/07/2025
 %% Experiment Note
-% BiRFP+CARTeGFP Cells in Blood +  beads 
-% Cells in Blood
+% Blood 
+% No Cells in Blood
 %% Initialization
 clear
 clc
@@ -12,7 +12,7 @@ addpath 'C:\Users\thanul01\Documents\MATLAB\IVFC_Master'
 %% Calling Script
 %% Bead Calibration
 % Labview Conversion
-filepath = 'R:\Taras\IVFC\Blood Cell Data\2025\Tests\TH_022025_Blood_Cell';
+filepath = 'R:\Taras\IVFC\Blood Cell Data\2025\Blood only\TH_030725_Blood';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
@@ -21,16 +21,16 @@ Window_High= 6000;
 close all
 %%
 %Peak Detection
-outputfile= 'NEW_peak_values_02_24_25';
-file_range=(1:6);
-analysisvals=[1];
+outputfile= 'NEW_peak_values_03_07_25';
+file_range=(1:2);
+analysisvals=[1,2,4,5,6,7];
 sample_type= 'Blood';
-exp_num=[75];
+exp_num=[];
 std_threshold=3;
 Spectralon_tail= '';
 FWMH_threshold=0;
-intensity_threshold= 0.2;
-bead_flag=1;
+intensity_threshold= 0.25;
+bead_flag=0;
 output=SamplePeakDetection6PMTRF(filepath,outputfile,file_range,Window_Low,...
     Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
     Spectralon_tail,FWMH_threshold,intensity_threshold,bead_flag);
