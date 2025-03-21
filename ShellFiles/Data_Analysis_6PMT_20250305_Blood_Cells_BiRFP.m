@@ -1,4 +1,4 @@
-%% 03/06/25 DataAnalysis 
+%% 03/06/25 DataAnalysis and 03/20/25
 % Owner: Taras Hanulia
 % Data Type: Cells   Measurements
 % Flow Date: 03/05/2025
@@ -17,8 +17,8 @@ filepath = 'R:\Taras\IVFC\Blood Cell Data\2025\BiRFP\TH_030525_Blood_Cell';
 Fs=60e3;
 Window_Low= 50;
 Window_High= 6000;
-output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
-disp(output)
+% output=Labview_convert_rawdata_batch_6PMT(filepath,Fs,Window_Low,Window_High);
+% disp(output)
 close all
 %%
 %Peak Detection
