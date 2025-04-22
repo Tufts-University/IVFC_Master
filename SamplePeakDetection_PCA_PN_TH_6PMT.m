@@ -1,0 +1,1061 @@
+function successmessage=SamplePeakDetection_PCA_PN_TH_6PMT(filepath,outputfile,...
+    file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,...
+    exp_num,std_threshold,Spectralon_tail,FWMH_threshold,...
+    intensity_threshold,bead_flag)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% file:SamplePeakDetection.m
+% ***Description***:
+% This function serves automatically search for peaks in .mat files in 1.5
+% minute chunks. The user must specify the sample type in order to ensure
+% the correct thresholds are used. This algorithm is set up for mouse data,
+% blood data, bead data, and cell data. Please read the input carefully as
+% there are many ways to use this code!
+% Written By: Nilay Vora (nvora01@tufts.edu)
+% Date Written: 10/01/2021
+% Modifying Author:Nilay Vora
+% Date Modified: 01/13/2022
+% Latest Revision: Added a new flag to seperate bead peaks from cell peaks
+% in mixed blood samples.
+% Modifying Author:Nilay Vora
+% Date Modified: 06/06/2022
+% Latest Revision: Changed the Green FLR FWHM measure script for peak
+% equalization
+% Date Modified: 08/21/2024 by Taras Hanulia (thanul01@tufts.edu)
+% This function was change to remove the FWHM and peak area and added start
+% and end of the peak extra sorting was added to have Scattering peak with
+% FLR
+% Modifying Author:Taras Hanulia (thanul01@tufts.edu)
+% Date Modified: 11/18/2024 b
+% The definition of start and end changed (Determine Start and End Points)
+% 811-812 line
+%Modifying Author:Taras Hanulia (thanul01@tufts.edu)
+% Date Modified: 04/09/2025
+% modifided for 6 PMT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Function details
+% Inputs:
+%   filepath = Location of all main folder where all subfolders are
+%   outputfile = Base name of all output files
+%   file_range = Which files do you want to analyze in a specific day
+%   Window_Low = Low frequency cutoff of Butterworth filter window
+%   Window_High = High frequency cutoff of Butterworth filter window
+%   Fs = Sample frequency used during acquisition
+%   analysisvals = Which detection methods do you want to use
+%   sample_type = (sting) Sample type (i.e. 'Cells','Blood','Beads',
+%                  'Animal')
+%   exp_num = Expected number of events in 1.5 minute chunk
+%   std_threshold = Cluster cutoff value
+%   Spectralon_tail= Tail format of Spectralon file
+%   FWMH_threshold = Minimum peak width allowe do be detected
+%   intensity_threshold= Minimum peak intensity for detection
+%   bead_flag=Indicator that seperated beads from cell peaks in blood data
+% Outputs:
+%   successmessage = a string that indicates the completion of the code
+%
+% Usage SamplePeakDetection(filepath,outputfile,file_range,Window_Low,...
+% Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
+% Spectralon_tail,FWMH_threshold,intensity_threshold)
+% Example:
+% filepath = 'U:\Nilay\IVFC\Acquired Data\Blood Data\NV_092821_Blood_LNPs';
+% outputfile= 'NEW_peak_values_09_28_21';
+% file_range= [1:3];
+% Window_Low= 50; % removes frequencies below 50/30000 Hz
+% Window_High= 6000; % removes frequencies above 6000/30000 Hz
+% Fs=60e3; %60,000 samples per second
+% analysisvals=[1:2]; %For cells we may want [1:4] (Scat Only,FLR Only,...
+%                       FLR+Scat,RFLR), for beads [1:3] (Scat Only,...
+%                       FLR Only,FLR+Scat)
+% sample_type= 'Beads';
+% exp_num=[]; %used the default value of 6000/9
+% std_threshold=3; 3*sigma(x) is used to detect a cluster event
+% Spectralon_tail= '_1'; %in most cases there is a tail value, if there is
+%                         none leave blank;
+% FWMH_threshold=0; Usually kept at 0 and is inactive
+% intensity_threshold= 0.1; Currently only used for FLR analysis!
+% bead_flag=0;
+% output=SamplePeakDetection(filepath,outputfile,file_range,Window_Low,...
+% Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
+% Spectralon_tail,FWMH_threshold,intensity_threshold,0)
+
+%% Checking inputs
+if isempty(sample_type)
+    disp('Sample Type is not specified, please chose one of the options below');
+    prompt = 'What Sample are you analyzing: Cells,Blood,Beads,Animal?';
+    sample_type = input(prompt,'s');
+end
+
+if isempty(file_range)
+    disp('File Range is not specified, please input range below');
+    prompt = 'What is your File Range?';
+    frange = input(prompt,'s');
+    file_range=str2num(frange); %#ok<ST2NM>
+end
+
+if isempty(exp_num)
+    exp_num=6000/9;
+end
+
+if isempty(outputfile)
+    disp('Output File name is not specified, please input the name below');
+    prompt = 'What is your Output file name?';
+    outputfile = input(prompt,'s');
+end
+
+if isempty(filepath)
+    disp('Using Current Directory');
+    filepath=pwd;
+end
+% if isempty(bead_flag) || strcmp(sample_type,'Blood')==0
+%     bead_flag=0;
+% else
+%     bead_flag=1;
+% end
+%% Modifying Evaluation Parameters
+% switch sample_type
+%     case 'Cells'
+%         if nargin==13
+%         else
+%             if nargin < 13
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 12
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 11
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 10
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 9
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 7
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 6
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 5
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 4
+%                 Window_Low= 50; % removes frequencies below 50/30000 Hz
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             end
+%         end
+%     case 'Blood'
+%         if nargin==13
+%         else
+%             if nargin < 13
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 12
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 11
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 10
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 9
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 7
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 6
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 5
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 4
+%                 Window_Low= 50; % removes frequencies below 50/30000 Hz
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=3; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             end
+%         end
+%     case 'Beads'
+%         if nargin==13
+%         else
+%             if nargin < 13
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 12
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 11
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 10
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 9
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 7
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 6
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 5
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             elseif nargin < 4
+%                 Window_Low= 50; % removes frequencies below 50/30000 Hz
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:3); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=4; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= ''; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.25; %Currently only used for FLR analysis!
+%             end
+%         end
+%     case 'Animal'
+%         if nargin==13
+%         else
+%             if nargin < 13
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 12
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 11
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 10
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 9
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 7
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 6
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 5
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             elseif nargin < 4
+%                 Window_Low= 50; % removes frequencies below 50/30000 Hz
+%                 Window_High= 6000; % removes frequencies above 6000/30000 Hz
+%                 Fs=60e3; %60,000 samples per second
+%                 analysisvals=(1:4); % Assumes Cells in blood with beads
+%                 exp_num=6000/9; %Expected number of clusters
+%                 std_threshold=5; %3*sigma(x) is used to detect a cluster event
+%                 Spectralon_tail= '_1'; %in most cases there is a tail value, if there
+%                 % is none leave blank;
+%                 FWMH_threshold=0; %Usually kept at 0 and is inactive
+%                 intensity_threshold= 0.1; %Currently only used for FLR analysis!
+%             end
+%         end
+% end
+%% Main Code
+% Finding Folders with Files
+mainFolder=filepath;
+fileName=outputfile;
+cd(mainFolder)
+
+dirinfo = dir();
+dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
+
+dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
+[~,c]=natsortfiles({dirinfo.name});
+subdirinfo = cell(length(dirinfo));
+
+for K = 1 : length(dirinfo)
+    thisdir = dirinfo(c(K)).name;
+    subdirinfo{K} = dir(fullfile(thisdir, '*_1_raw.mat'));
+end
+
+subdirinfo =  subdirinfo(~cellfun('isempty',subdirinfo));
+
+Wn=[Window_Low Window_High]./(Fs/2);%Cutoff frequencies divided by Nyquist frequency
+[b,a]=butter(2,Wn);
+types={'Scattering Only';'FLR Only';'Cumulative';'RFLR'};
+% Initialzing and pre-allocating
+for f=analysisvals
+    all_peaks=zeros(1,1);
+    all_locs=zeros(1,1);
+    widths_cum=zeros(1,1);
+    peak_area_cum=zeros(1,1);
+    all_chunks=zeros(1,1);
+    peak_values=zeros(1,6);
+    all_fwhm_405=zeros(1,1); all_fwhm_488=zeros(1,1); all_fwhm_633=zeros(1,1); all_fwhm_fl1=zeros(1,1); all_fwhm_fl2=zeros(1,1);all_fwhm_fl3=zeros(1,1);
+    all_peak_area_405=zeros(1,1); all_peak_area_488=zeros(1,1); all_peak_area_633=zeros(1,1); all_peak_area_fl1=zeros(1,1); all_peak_area_fl2=zeros(1,1);all_peak_area_fl3=zeros(1,1);
+    all_file_num=zeros(1,1);
+
+    all_peaks_Store=zeros(1,1);
+    all_locs_Store=zeros(1,1);
+    widths_cum_Store=zeros(1,1);
+    peak_area_cum_Store=zeros(1,1);
+    all_chunks_Store=zeros(1,1);
+    peak_values_Store=zeros(1,6);
+    all_fwhm_405_Store=zeros(1,1); all_fwhm_488_Store=zeros(1,1); all_fwhm_633_Store=zeros(1,1); all_fwhm_fl1_Store=zeros(1,1); all_fwhm_fl2_Store=zeros(1,1);all_fwhm_fl3_Store=zeros(1,1);
+    all_peak_area_405_Store=zeros(1,1); all_peak_area_488_Store=zeros(1,1); all_peak_area_633_Store=zeros(1,1); all_peak_area_fl1_Store=zeros(1,1); all_peak_area_fl2_Store=zeros(1,1);all_peak_area_fl3_Store=zeros(1,1);
+    all_file_num_Store=zeros(1,1);
+
+    peak_start =zeros(1,1); all_peak_start=zeros(1,1);all_peak_start_Store=zeros(1,1); % for peak start
+    peak_end =zeros(1,1); all_peak_end=zeros(1,1);all_peak_end_Store=zeros(1,1);% for peak end
+
+    disp(['Current evaluation based on ',types{f},' Data']);
+    for i=file_range
+        disp(['Evaluating File # ',num2str(i),' of ',num2str(size(subdirinfo,1))]);
+        tic
+        if~isempty(subdirinfo{i})
+            scatpath = subdirinfo{i}.folder;
+            %spec_file =[subdirinfo{1}.name(1:end-4),'_Spectralon_Avg',Spectralon_tail,'.csv'];
+            if subdirinfo{1}.name(end-10)=='l'
+                spec_file =[subdirinfo{1}.name(1:end-10),'_Spectralon_Avg',Spectralon_tail,'.csv'];
+            elseif subdirinfo{1}.name(end-11)=='l'
+                spec_file =[subdirinfo{1}.name(1:end-11),'_Spectralon_Avg',Spectralon_tail,'.csv'];
+            else 
+                spec_file =[subdirinfo{1}.name(1:end-10),'_Spectralon_Avg',Spectralon_tail,'.csv'];
+            end
+            % Spectralon loading
+            cd(mainFolder)
+            folders = strsplit(mainFolder,'\');
+            %folders(6) = [];
+            folders = strjoin(folders,'\');
+            spec_path = [folders,'\',spec_file];
+            fid=fopen(spec_path);
+            if fid<0
+                folders = strsplit(mainFolder,'\');
+                folders(6) = [];
+                folders = strjoin(folders,'\');
+                spec_path = [folders,'\',spec_file];
+                fid=fopen(spec_path);
+            end
+            spec=textscan(fid,'%f %f %f %f %f %f %f %f %f','Delimiter',',');
+            spec=cell2mat(spec);
+            fclose(fid);
+
+            cd(scatpath)
+            data_type=subdirinfo{i}.name(1:end-10);
+            cd(subdirinfo{i}.folder)
+            dirinfo2 = dir('*_raw.mat');
+            num_chunks=length(dirinfo2);
+            % Select detection scheme
+            if f==1
+                flr_detect_1 = 0; % iRFP red Fluorescence
+                flr_detect_2 = 0; % Green Fluorescence
+                flr_detect_3 = 0; % E2C red Fluorescence
+                fileN=[fileName,'_NoFLR'];
+            elseif f==2
+                flr_detect_1 = 0; % iRFP red Fluorescence
+                flr_detect_2 = 1; % Green Fluorescence
+                flr_detect_3 = 0; % E2C red Fluorescence
+                if strcmp(sample_type,'Blood')==1 && bead_flag==1  % removed strcmp(sample_type,'Blood') && 
+
+%                 if strcmp(sample_type,'Blood') && bead_flag==1 
+
+                    fileN=[fileName,'_NoScatAll'];
+                else
+                    fileN=[fileName,'_NoScat'];
+                end
+            elseif f==3
+                flr_detect_1 = 1; % iRFP red Fluorescence
+                flr_detect_2 = 1; % Green Fluorescence
+                flr_detect_3 = 1; % E2C red Fluorescence
+                fileN=[fileName]; %#ok<NBRAK>
+            else
+                flr_detect_1 = 1; % iRFP red Fluorescence
+                flr_detect_2 = 0; % Green Fluorescence
+                flr_detect_3 = 1; % E2C red Fluorescence
+                fileN=[fileName,'_RFLR'];
+            end
+            % Load Standard Deviations
+            load([folders,'\',data_type,'\',data_type,'_sigmas.mat'],'sigmas_final'); % variable is sigmas_final
+
+           %% Determine expected cell count
+            exp_num=floor(exp_num); %dimensionless number of cells.
+
+            for ii=1:num_chunks
+                %% Loading data
+                disp([num2str(ii),' of ',num2str(num_chunks)])
+                load([data_type,'_',num2str(ii),'_raw.mat'],'M') % variable =M %
+                if isempty(M)
+
+                else
+                    %% Remove Clumps
+                    cum=sum(M(:,1:3),2);
+                    cum_std=std(cum);
+                    stop = 0;
+                    while 1
+                        if cum_std<1.75 || stop == 3
+                            break
+                        end
+                        for o=1:3
+                            mean_clump=movmean(M(:,o),[250,250]);
+                            %         clumps=zeros([length(M),1]);
+                            %         clumps(mean_clump>5*std(mean_clump))=mean_clump(mean_clump>5*std(mean_clump));
+                            M(:,o)=M(:,o)-mean_clump+mean(mean_clump);
+                            %M(M(:,i)<-2*std(M(:,i)),i)=0;
+                        end
+                        disp('I ran')
+                        cum=sum(M(:,1:3),2);
+                        cum_std=std(cum);
+                        stop = stop + 1;
+                    end
+                    %%%%%%%%%%%%%%%%%%%% 11/22 Edit %%%%%%%%%%%%%%%%%%%%%%%
+                    %% Load Bead data if available:
+                    % Check for bead file:
+%                     bead_file = dir('*Beads.mat');
+%                     if ~isempty(bead_file)
+%                         M = bead_removal(ii, M, bead_file(1).name);
+%                     end
+                    M_filt(:,1)=filtfilt(b,a,M(:,1))./abs(spec(1));
+                    M_filt(:,2)=filtfilt(b,a,M(:,2))./abs(spec(2));
+                    M_filt(:,3)=filtfilt(b,a,M(:,3))./abs(spec(3));
+                    M_filt(:,4)=filtfilt(b,a,M(:,4));
+                    M_filt(:,5)=filtfilt(b,a,M(:,5));
+                    M_filt(:,6)=filtfilt(b,a,M(:,6));
+
+                    M_filt(:,1)=(M_filt(:,1)-mean(M_filt(:,1)));
+                    M_filt(:,2)=(M_filt(:,2)-mean(M_filt(:,2)));
+                    M_filt(:,3)=(M_filt(:,3)-mean(M_filt(:,3)));
+                    M_filt(:,4)=(M_filt(:,4)-mean(M_filt(:,4)));
+                    M_filt(:,5)=(M_filt(:,5)-mean(M_filt(:,5)));
+                    M_filt(:,6)=(M_filt(:,6)-mean(M_filt(:,6)));
+                    clear M
+                    %% Normalizing by standard deviation
+
+                    SN_405=(M_filt(:,1)-mean(M_filt(:,1)))./sigmas_final(1);
+                    SN_488=(M_filt(:,2)-mean(M_filt(:,2)))./sigmas_final(2);
+                    SN_633=(M_filt(:,3)-mean(M_filt(:,3)))./sigmas_final(3);
+                    SN_Red=(M_filt(:,4)-mean(M_filt(:,4)));
+                    SN_Green=(M_filt(:,5)-mean(M_filt(:,5)));
+                    SN_Red2=(M_filt(:,6)-mean(M_filt(:,6)));
+                    SN_Green(SN_Green<0) = 0;
+                    SN_Red(SN_Red<0) = 0;
+                    SN_Red2(SN_Red2<0) = 0;
+                    M = [SN_405,SN_488,SN_633,SN_Red,SN_Green,SN_Red2];
+                    signal_max = 11;
+                    %% Normalization
+                    M2 = (M-min(M))./(max(M)-min(M));
+                    %% Sensor cleaning
+                    [~,~,~,tsquared,~,~] = pca(M2(:,1:3));
+                    %% Normalization of the data set
+                    M2(:,4:6) = [SN_Red,SN_Green,SN_Red2]./signal_max;
+                    norm = tsquared;
+                    if flr_detect_1==1 && flr_detect_2==1 && flr_detect_3==1 %ALL Channels
+                        cumulative_det=SN_405+SN_488+SN_633+SN_Green;
+                        cumulative=SN_405+SN_488+SN_633;
+                        scat_norm = norm;
+                    elseif flr_detect_1==1 && flr_detect_2==0 && flr_detect_3==1 %Scattering and red FL (FL1 and FL3)
+                        cumulative_det=SN_Red+SN_Red2;
+                        cumulative=SN_405+SN_488+SN_633;
+                        scat_norm = norm;
+                    elseif flr_detect_1==0 && flr_detect_2==1 && flr_detect_3==0 %Scattering and FL1 +FL2 + FL3
+                        cumulative_det=SN_Green+SN_Red+SN_Red2;
+                        cumulative=SN_405+SN_488+SN_633;
+                        scat_norm = norm;
+                    else % ONLY SCATTERING
+                        cumulative=SN_405+SN_488+SN_633;
+                        cumulative_det=norm;
+                        scat_norm = norm;
+                    end
+%                     if f==1||f==3
+%                         for row=1:length(cumulative)
+%                             if cumulative(row)<0
+%                                 cumulative(row)=0;
+%                                 cumulative_det(row)=0;
+%                             end
+%                         end
+%                     end
+
+                    cum_std(ii) = std(cumulative); 
+                    cum_avg(ii) = mean(cumulative); %#ok<AGROW>
+                    if f == 1
+                        cum_det_std(ii) = 10./std_threshold; %#ok<AGROW>
+                    else
+                        cum_det_std(ii)=std(cumulative_det);%#ok<AGROW>
+                    end
+                    %% Peak Finding %%
+                    %MINPEAKDISTANCE= specified how many points past the peak the next peak must be. Based on observations typical peak is 5 so choose 10
+                    %NPEAKS= 3 times the expected number per chunk.  This is to protect against possibility that expected number varies from chunk to chunk
+                    %
+                    %[~,locs]=findpeaks(cumulative_det,'NPeaks',10*exp_num,'SortStr','descend');
+                    if flr_detect_1==0 && flr_detect_2==1 && flr_detect_3==0 
+                        [~,locs]=findpeaks(cumulative_det,'NPeaks',5*exp_num,'SortStr','descend');
+                    else
+                        [~,locs]=findpeaks(cumulative_det,'NPeaks',20*exp_num,'SortStr','descend');
+                    end
+                    locs=sort(locs,'ascend');
+                    peaks=cumulative(locs);
+                    peaks_det=cumulative_det(locs);
+                    %% Clips peaks near edges
+                    dist_left_edge=find(locs-100<101);
+                    if length(dist_left_edge)>=1
+                        peaks(dist_left_edge)=[];
+                        peaks_det(dist_left_edge)=[];
+                        locs(dist_left_edge)=[];
+                    end
+
+                    dist_right_edge=find(length(cumulative)-locs<101);
+                    if length(dist_right_edge)>=1
+                        peaks(dist_right_edge)=[];
+                        peaks_det(dist_right_edge)=[];
+                        locs(dist_right_edge)=[];
+                    end
+                    clear dist_left_edge dist_right_edge
+
+                    %% Catch Clusters(round 1)
+                    endpt1=find(cumulative_det(1:end-1)>1*cum_det_std(ii) & cumulative_det(2:end) < 1*cum_det_std(ii));
+                    startpt1=find(cumulative_det(1:end-1)<1*cum_det_std(ii) & cumulative_det(2:end)> 1*cum_det_std(ii));
+                    if length(startpt1)==length(endpt1)
+                        ranges=[startpt1,endpt1];
+                    elseif length(startpt1)>length(endpt1)
+                        if startpt1(end)>endpt1(end)
+                            startpt1(end)=[];
+                        end
+                        ranges=[startpt1,endpt1];
+                    elseif length(startpt1)<length(endpt1)
+                        if startpt1(1)>endpt1(1)
+                            endpt1(1)=[];
+                        end
+                        ranges=[startpt1,endpt1];
+                    end
+                    save_locs=[];
+                    for m=1:size(ranges,1)
+                        if ranges(m,2)<ranges(m,1)
+                            n=m+1;
+                        else
+                            n=m;
+                        end
+                        if n>size(ranges,1)
+
+                        else
+                            pt1=ranges(m,1);
+                            pt2=ranges(n,2);
+                            locs_clusters=locs(locs>=pt1 & locs<=pt2);
+                            if ~isempty(locs_clusters)
+                                save_locs=[save_locs;locs_clusters]; %#ok<AGROW>
+                            end
+                        end
+                    end
+                    p_store=[];
+                    p_store2=[];
+                    l_store=[];
+                    for n=1:length(save_locs)
+                        ind=find(locs==save_locs(n));
+                        p_store=[p_store;peaks(ind)]; %#ok<AGROW>
+                        p_store2=[p_store2;peaks_det(ind)]; %#ok<AGROW>
+                        l_store=[l_store;locs(ind)]; %#ok<AGROW>
+                    end
+                    peaks=p_store;
+                    peaks_det=p_store2;
+                    locs=l_store;
+
+                    clear p_store l_store save_lcos locs_clusters pt1 pt2 ranges pstore2
+                    %% Catch Clusters
+                    endpt=find(cumulative_det(1:end-1)>std_threshold*cum_det_std(ii) & cumulative_det(2:end) < std_threshold*cum_det_std(ii));
+                    startpt=find(cumulative_det(1:end-1)<std_threshold*cum_det_std(ii) & cumulative_det(2:end)>std_threshold*cum_det_std(ii));
+
+                    if length(startpt)==length(endpt)
+                        ranges=[startpt,endpt];
+                    elseif length(startpt)>length(endpt)
+                        if startpt(end)>endpt(end)
+                            startpt(end)=[];
+                        end
+                        ranges=[startpt,endpt];
+                    elseif length(startpt)<length(endpt)
+                        if startpt(1)>endpt(1)
+                            endpt(1)=[];
+                        end
+                        ranges=[startpt,endpt];
+                    end
+                    tossed_peak=0;
+                    clusterpts=[];
+                    save_locs=[];
+                    for m=1:size(ranges,1)
+                        if ranges(m,2)<ranges(m,1)
+                            n=m+1;
+                        else
+                            n=m;
+                        end
+                        if n>size(ranges,1)
+
+                        else
+                            pt1=ranges(m,1);
+                            pt2=ranges(n,2);
+                            locs_clusters=locs(locs>=pt1 & locs<=pt2);
+                            if ~isempty(locs_clusters)
+                                [~,I] = max(cumulative(locs_clusters));
+                                save_locs=[save_locs;locs_clusters(I)]; %#ok<AGROW>
+                                locs_clusters(I)=[];
+                                tossed_peak=[tossed_peak;locs_clusters]; %#ok<AGROW>
+                                clusterpts=[clusterpts;[pt1,pt2]]; %#ok<AGROW>
+                            end
+                        end
+                    end
+                    p_store=[];
+                    l_store=[];
+                    p_store2=[];
+                    for n=1:length(save_locs)
+                        ind=find(locs==save_locs(n));
+                        p_store=[p_store;peaks(ind)]; %#ok<AGROW>
+                        p_store2=[p_store2;peaks_det(ind)]; %#ok<AGROW>
+                        l_store=[l_store;locs(ind)]; %#ok<AGROW>
+                    end
+                    peaks=p_store;
+                    locs=l_store;
+
+                    clear p_store l_store
+                    %% Throws out peaks that are too close
+                    % Peaks are sorted descending so that peaks that are thrown away start
+                    % from the largest peak I.E. the most likely peaks
+                    bad_peaks=0; %initializing
+                    for k=1:length(locs)
+                        peak_dist=abs(locs-locs(k)); %distances between all peaks and ith peak
+                        close_peaks=find(peak_dist<=10); %distance is 5 pts between peaks
+                        if length(close_peaks)>1 %peak will identify itself as less than 5 pts away
+                            [~,idx]=sort(peaks(close_peaks),'descend');
+                            cp_sorted=close_peaks(idx);
+                            for j=2:length(close_peaks)
+                                bad_peak=cp_sorted(j);
+                                bad_peaks=[bad_peaks,bad_peak]; %#ok<AGROW>
+                            end
+                            clear bad_peak
+                        end
+                        clear close_peaks peak_dist
+                    end
+                    bad_peaks(1)=[]; % removing initial 0
+                    peaks(bad_peaks)=[];
+                    locs(bad_peaks)=[];
+                    clusterpts(bad_peaks,:)=[]; %#ok<AGROW>
+                    clear bad_peaks % reduces memory footprint
+                    if length(locs)<1
+                        disp([9 'No Peaks Found'])
+                    else
+                    %% Set cluster range for interrogation based on closeness
+                        if size(clusterpts,1)<2
+                            check_ranges = [clusterpts(:,1)-5, clusterpts(:,2)+5];
+                        else
+                            close_peaks = find(clusterpts(2:end,1)-clusterpts(1:end-1,2)<5);
+                            check_ranges = [clusterpts(:,1)-5, clusterpts(:,2)+5];
+                            for pts = 1:size(close_peaks,1)
+                                check_ranges(close_peaks(pts),2) = clusterpts(close_peaks(pts)+1,1);
+                                check_ranges(close_peaks(pts)+1,1) = clusterpts(close_peaks(pts),2);
+                            end
+                            close_peaks = find(clusterpts(2:end,2)-clusterpts(1:end-1,1)<5);
+                            for pts = 1:size(close_peaks,1)
+                                check_ranges(close_peaks(pts),1) = clusterpts(close_peaks(pts)-1,2);
+                                check_ranges(close_peaks(pts)-1,2) = clusterpts(close_peaks(pts),1);
+                            end
+                        end
+                        if check_ranges(1,1)<0
+                            check_ranges(1,1) = 1;
+                        elseif check_ranges(end,2) > length(M_filt)
+                            check_ranges(end,2) = length(M_filt);
+                        end
+                        
+                        %% Merge Peaks (last cleaning step)
+                        m = 1;
+                        n = size(check_ranges,1);
+                        while 1
+                            int = m + 1;
+                            if int >= n
+                                break
+                            end
+                            if check_ranges(m,2)>check_ranges(int,1)
+                                while 1
+                                    check_ranges(m,2) = check_ranges(int,2);
+                                    check_ranges(int,:) = [];
+                                    if peaks(int) < peaks(m)
+                                        del_row = int;
+                                    else
+                                        del_row = m;
+                                    end
+                                    peaks(del_row) = [];
+                                    locs(del_row) = [];
+                                    n = n-1;
+                                    if m>=n
+                                        break
+                                    end
+                                    if check_ranges(m,2)<check_ranges(int,1)
+                                        break
+                                    end
+                                end
+                            end
+                            m = m+1;
+                            if m >= n
+                                break
+                            end
+                        end
+                        %% FWHM finding & Grabbing True Maximums
+                        %FWHMs are found from the filtered peaks
+                        fwhm=zeros(length(peaks),1);
+                        peak_area_405=zeros(length(peaks),1); peak_area_488=zeros(length(peaks),1); peak_area_633=zeros(length(peaks),1); peak_area_fl1=zeros(length(peaks),1); peak_area_fl2=zeros(length(peaks),1); peak_area_fl3=zeros(length(peaks),1);
+                        fwhm_405=zeros(length(peaks),1); fwhm_488=zeros(length(peaks),1); fwhm_633=zeros(length(peaks),1); fwhm_fl1=zeros(length(peaks),1); fwhm_fl2=zeros(length(peaks),1);fwhm_fl3=zeros(length(peaks),1);
+                        peak_data=zeros(length(locs),6);
+                        for m=1:length(peaks)
+                            %% Grab True Maximums
+                            data_range=M2(check_ranges(m,1):check_ranges(m,2),:); %grabs full cluster width by 5 matrix around peak
+                            peak_data(m,:)=max(data_range); %grabs maximum which could be slightly different from channel to channel in time
+                            clear data_range
+                            %% Determine Start and End Points
+                            start_point = max(check_ranges(m, 1), 1); % Starting point of the peak till was 111824 start_point = max(check_ranges(m, 1) + 5, 1); 
+                            end_point = min(check_ranges(m, 2), size(M_filt, 1)); % Ending point of the peak, ensuring it does not exceed matrix size , till 11182024 was end_point = min(check_ranges(m, 2) - 5, size(M_filt, 1));
+                            peak_start(m)= start_point;%[peak_start;start_point];%#ok<AGROW>
+                            peak_end(m)= end_point;%[peak_end;end_point];%#ok<AGROW>
+                            %% Grab FWHMs
+                            peak_height=M_filt(locs(m),:);% locs(m)
+                            if clusterpts(m,2)+10>5400000
+                                data_fwhm=M_filt(check_ranges(m,1):end,:);
+                                data_fwhm_cum=scat_norm(clusterpts(m,1)-10:end);
+                            else
+                                data_fwhm=M_filt(check_ranges(m,1):check_ranges(m,2),:);
+                                data_fwhm_cum=scat_norm(check_ranges(m,1):check_ranges(m,2));
+                            end
+                            peak_height_cum=scat_norm(locs(m)); % locs(m)
+                            %405
+                            [fwhm_405(m),peak_area_405(m)]=NV_101719_fwhm_measure(data_fwhm(:,1),peak_height(1));
+                            %488
+                            [fwhm_488(m),peak_area_488(m)]=NV_101719_fwhm_measure(data_fwhm(:,2),peak_height(2));
+                            %633
+                            [fwhm_633(m),peak_area_633(m)]=NV_101719_fwhm_measure(data_fwhm(:,3),peak_height(3));
+                            %Fl1
+                            [fwhm_fl1(m),peak_area_fl1(m)]=NV_101719_fwhm_measure(data_fwhm(:,4),peak_height(4));
+                            %Fl2
+                            [fwhm_fl2(m),peak_area_fl2(m)]=NV_052322_fwhm_measure(data_fwhm(:,5),peak_height(5));
+                            %Fl3
+                            [fwhm_fl3(m),peak_area_fl3(m)]=NV_052322_fwhm_measure(data_fwhm(:,6),peak_height(6));
+                            %cum
+                            [fwhm(m),peak_area(m)]=NV_052322_fwhm_measure(data_fwhm_cum,peak_height_cum); %#ok<AGROW>
+                            % Get rid of zeros
+                        end
+                        %% Preparing for next iteration of loop
+                        if strcmp(sample_type,'Beads') == 1 %#ok<BDSCA>
+                            idx=find(fwhm>0 & sum(peak_data,2)>2);
+                        else
+                            idx=find(fwhm>FWMH_threshold);% & peaks>0); % Was 4.0 on blood 2.5 for beads
+                        end
+                        if isempty(idx)==0
+                            channel_map = containers.Map({2, 4}, {[4,5,6], [4,6]});
+                            if ismember(f, [2, 4]) 
+                                channels = channel_map(f);
+                                idx2 = find(fwhm(idx) > FWMH_threshold & any(peak_data(idx, channels) > intensity_threshold, 2));
+                                if isempty(idx2)==0
+                                    peaks=peaks(idx(idx2(:)));
+                                    locs=locs(idx(idx2(:)));
+                                    peak_start = peak_start(idx(idx2(:)));
+                                    peak_end = peak_end(idx(idx2(:)));
+                                    fwhm=fwhm(idx(idx2(:)));
+                                    peak_data= peak_data(idx(idx2(:)),:);
+                                    peak_area=peak_area(idx(idx2(:)));
+%                                     fwhm_405=fwhm_405(idx(idx2(:)));
+%                                     fwhm_488=fwhm_488(idx(idx2(:)));
+%                                     fwhm_633=fwhm_633(idx(idx2(:)));
+%                                     fwhm_fl1=fwhm_fl1(idx(idx2(:)));
+%                                     fwhm_fl2=fwhm_fl2(idx(idx2(:)));
+%                                     fwhm_fl3=fwhm_fl3(idx(idx2(:)));
+%                                     peak_area_405=peak_area_405(idx(idx2(:)));
+%                                     peak_area_488=peak_area_488(idx(idx2(:)));
+%                                     peak_area_633=peak_area_633(idx(idx2(:)));
+%                                     peak_area_fl1=peak_area_fl1(idx(idx2(:)));
+%                                     peak_area_fl2=peak_area_fl2(idx(idx2(:)));
+%                                     peak_area_fl3=peak_area_fl3(idx(idx2(:)));
+                                    File_num=repmat(i,size(peak_data,1),1);
+    
+                                    all_peaks=[all_peaks,peaks']; %#ok<AGROW>
+                                    all_locs=[all_locs,locs'];%#ok<AGROW>
+                                    all_peak_start=[all_peak_start,peak_start];%#ok<AGROW>
+                                    all_peak_end=[all_peak_end,peak_end];%#ok<AGROW>
+                                    all_chunks=[all_chunks,(ones(1,length(locs))*ii)];%#ok<AGROW>
+                                    widths_cum=[widths_cum,fwhm'];%#ok<AGROW>
+                                    peak_area_cum=[peak_area_cum,peak_area];%#ok<AGROW>
+                                    peak_values=[peak_values;peak_data];%#ok<AGROW>
+%                                     all_fwhm_405=[all_fwhm_405;fwhm_405];%#ok<AGROW>
+%                                     all_fwhm_488=[all_fwhm_488;fwhm_488];%#ok<AGROW>
+%                                     all_fwhm_633=[all_fwhm_633;fwhm_633]; %#ok<AGROW>
+%                                     all_fwhm_fl1=[all_fwhm_fl1;fwhm_fl1]; %#ok<AGROW>
+%                                     all_fwhm_fl2=[all_fwhm_fl2;fwhm_fl2];%#ok<AGROW>
+%                                     all_peak_area_405=[all_peak_area_405;peak_area_405]; %#ok<AGROW>
+%                                     all_peak_area_488=[all_peak_area_488;peak_area_488]; %#ok<AGROW>
+%                                     all_peak_area_633=[all_peak_area_633;peak_area_633]; %#ok<AGROW>
+%                                     all_peak_area_fl1=[all_peak_area_fl1;peak_area_fl1]; %#ok<AGROW>
+%                                     all_peak_area_fl2=[all_peak_area_fl2;peak_area_fl2];%#ok<AGROW>
+                                    all_file_num=[all_file_num;File_num];%#ok<AGROW>
+                                end
+                            else
+                                peaks=peaks(idx(:));
+                                locs=locs(idx(:));
+                                peak_start = peak_start(idx(:));
+                                peak_end = peak_end(idx(:));
+                                fwhm=fwhm(idx(:));
+                                peak_data= peak_data(idx(:),:);
+                                peak_area=peak_area(idx(:));
+%                                 fwhm_405=fwhm_405(idx(:));
+%                                 fwhm_488=fwhm_488(idx(:));
+%                                 fwhm_633=fwhm_633(idx(:));
+%                                 fwhm_fl1=fwhm_fl1(idx(:));
+%                                 fwhm_fl2=fwhm_fl2(idx(:));
+%                                 peak_area_405=peak_area_405(idx(:));
+%                                 peak_area_488=peak_area_488(idx(:));
+%                                 peak_area_633=peak_area_633(idx(:));
+%                                 peak_area_fl1=peak_area_fl1(idx(:));
+%                                 peak_area_fl2=peak_area_fl2(idx(:));
+                                File_num=repmat(i,size(peak_data,1),1);
+    
+                                all_peaks=[all_peaks,peaks'];%#ok<AGROW>
+                                all_locs=[all_locs,locs'];%#ok<AGROW>
+                                all_peak_start=[all_peak_start,peak_start];%#ok<AGROW>
+                                all_peak_end=[all_peak_end,peak_end];%#ok<AGROW>
+                                all_chunks=[all_chunks,(ones(1,length(locs))*ii)];%#ok<AGROW>
+                                widths_cum=[widths_cum,fwhm'];%#ok<AGROW>
+                                peak_area_cum=[peak_area_cum,peak_area];%#ok<AGROW>
+                                peak_values=[peak_values;peak_data];%#ok<AGROW>
+%                                 all_fwhm_405=[all_fwhm_405;fwhm_405]; %#ok<AGROW>
+%                                 all_fwhm_488=[all_fwhm_488;fwhm_488]; %#ok<AGROW>
+%                                 all_fwhm_633=[all_fwhm_633;fwhm_633]; %#ok<AGROW>
+%                                 all_fwhm_fl1=[all_fwhm_fl1;fwhm_fl1]; %#ok<AGROW>
+%                                 all_fwhm_fl2=[all_fwhm_fl2;fwhm_fl2];%#ok<AGROW>
+%                                 all_peak_area_405=[all_peak_area_405;peak_area_405]; %#ok<AGROW>
+%                                 all_peak_area_488=[all_peak_area_488;peak_area_488]; %#ok<AGROW>
+%                                 all_peak_area_633=[all_peak_area_633;peak_area_633]; %#ok<AGROW>
+%                                 all_peak_area_fl1=[all_peak_area_fl1;peak_area_fl1]; %#ok<AGROW>
+%                                 all_peak_area_fl2=[all_peak_area_fl2;peak_area_fl2];%#ok<AGROW>
+                                all_file_num=[all_file_num;File_num];%#ok<AGROW>
+                            end
+                        end
+                    end
+                    clear M2 peaks locs cumulative peak_data tsquared M_filt
+                    clear fwhm fwhm_405 fwhm_488 fwhm_633 fwhm_fl1 fwhm_fl2 fwhm_fl3
+                    clear peak_area peak_area_405 peak_area_488 peak_area_633 peak_area_fl1 peak_area_fl2 peak_area_fl3 File_num
+                    clear peak_start peak_end
+                    toc
+                end
+            end
+            all_peaks_Store=[all_peaks_Store,all_peaks];%#ok<AGROW>
+            all_locs_Store=[all_locs_Store,all_locs];%#ok<AGROW>
+            all_peak_start_Store=[all_peak_start_Store,all_peak_start];%#ok<AGROW>
+            all_peak_end_Store=[all_peak_end_Store,all_peak_end];%#ok<AGROW>
+            all_chunks_Store=[all_chunks_Store,all_chunks];%#ok<AGROW>
+            widths_cum_Store=[widths_cum_Store,widths_cum,];%#ok<AGROW>
+            peak_area_cum_Store=[peak_area_cum_Store,peak_area_cum];%#ok<AGROW>
+            peak_values_Store=[peak_values_Store;peak_values];%#ok<AGROW>
+%             all_fwhm_405_Store=[all_fwhm_405_Store;all_fwhm_405];%#ok<AGROW>
+%             all_fwhm_488_Store=[all_fwhm_488_Store;all_fwhm_488];%#ok<AGROW>
+%             all_fwhm_633_Store=[all_fwhm_633_Store;all_fwhm_633];%#ok<AGROW>
+%             all_fwhm_fl1_Store=[all_fwhm_fl1_Store;all_fwhm_fl1];%#ok<AGROW>
+%             all_fwhm_fl2_Store=[all_fwhm_fl2_Store;all_fwhm_fl2];%#ok<AGROW>
+%             all_peak_area_405_Store=[all_peak_area_405_Store;all_peak_area_405];%#ok<AGROW>
+%             all_peak_area_488_Store=[all_peak_area_488_Store;all_peak_area_488];%#ok<AGROW>
+%             all_peak_area_633_Store=[all_peak_area_633_Store;all_peak_area_633];%#ok<AGROW>
+%             all_peak_area_fl1_Store=[all_peak_area_fl1_Store;all_peak_area_fl1];%#ok<AGROW>
+%             all_peak_area_fl2_Store=[all_peak_area_fl2_Store;all_peak_area_fl2];%#ok<AGROW>
+            all_file_num_Store=[all_file_num_Store;all_file_num];%#ok<AGROW>
+
+
+            peak_values(:,7)=all_chunks; %chunck location
+            peak_values(:,8)=all_locs;   %location within chunk
+            peak_values(:,9)=all_peaks;  %Cumulative height
+            peak_values(:,10)=widths_cum; %Cumulative Width
+%             peak_values(:,11)=peak_area_cum;
+%             peak_values(:,12)=all_fwhm_405; peak_values(:,13)=all_peak_area_405;
+%             peak_values(:,14)=all_fwhm_488; peak_values(:,15)=all_peak_area_488;
+%             peak_values(:,16)=all_fwhm_633; peak_values(:,17)=all_peak_area_633;
+%             peak_values(:,18)=all_fwhm_fl1; peak_values(:,20)=all_peak_area_fl1;
+%             peak_values(:,20)=all_fwhm_fl2; peak_values(:,21)=all_peak_area_fl2;
+            peak_values(:,13)=all_file_num;
+            peak_values(:,11)=all_peak_start;%location peak start within chunk
+            peak_values(:,12)=all_peak_end;%location peak end within chunk
+            peak_values(1,:)=[];
+            peak_values=sortrows(peak_values,7);
+            cd(subdirinfo{i}.folder)
+            fileN2=['T',num2str(i),'-',fileN];
+            save(fileN2,'peak_values');
+            clear all_peaks all_locs all_chunks peak_values widths_cum
+            clear all_fwhm_405 all_fwhm_488 all_fwhm_633 all_fwhm_fl1 all_fwhm_fl2
+            clear peak_area_cum all_peak_area_405 all_peak_area_488 all_peak_area_633 all_peak_area_fl1 all_peak_area_fl2 all_file_num
+            clear all_peak_start all_peak_end
+
+            all_peaks=zeros(1,1);
+            all_locs=zeros(1,1);
+            all_peak_start=zeros(1,1);
+            all_peak_end=zeros(1,1);
+            widths_cum=zeros(1,1);
+            peak_area_cum=zeros(1,1);
+            all_chunks=zeros(1,1);
+            peak_values=zeros(1,6);
+            all_fwhm_405=zeros(1,1); all_fwhm_488=zeros(1,1); all_fwhm_633=zeros(1,1); all_fwhm_fl1=zeros(1,1); all_fwhm_fl2=zeros(1,1);
+            all_peak_area_405=zeros(1,1); all_peak_area_488=zeros(1,1); all_peak_area_633=zeros(1,1); all_peak_area_fl1=zeros(1,1); all_peak_area_fl2=zeros(1,1);
+            all_file_num=zeros(1,1);
+        end
+    end
+    if ~isempty(peak_values_Store)
+        peak_values=[]; %#ok<NASGU>
+        peak_values=peak_values_Store;
+        peak_values(:,7)=all_chunks_Store; %chunck location
+        peak_values(:,8)=all_locs_Store;   %location within chunk
+        peak_values(:,9)=all_peaks_Store;  %Cumulative height
+        peak_values(:,10)=widths_cum_Store; %Cumulative Width
+%         peak_values(:,10)=peak_area_cum_Store;
+%         peak_values(:,11)=all_fwhm_405_Store; peak_values(:,12)=all_peak_area_405_Store;
+%         peak_values(:,13)=all_fwhm_488_Store; peak_values(:,14)=all_peak_area_488_Store;
+%         peak_values(:,15)=all_fwhm_633_Store; peak_values(:,16)=all_peak_area_633_Store;
+%         peak_values(:,17)=all_fwhm_fl1_Store; peak_values(:,18)=all_peak_area_fl1_Store;
+%         peak_values(:,19)=all_fwhm_fl2_Store; peak_values(:,20)=all_peak_area_fl2_Store;
+        peak_values(:,13)=all_file_num_Store;
+        peak_values(:,11)=all_peak_start_Store;%location peak start within chunk
+        peak_values(:,12)=all_peak_end_Store;%location peak end within chunk 
+        % Sorting peaks
+        peak_values=sortrows(peak_values,7);
+        delrow=peak_values(:,13)==0;
+        peak_values(delrow,:)=[];
+
+        clear cumulative
+
+        % - - - - - - %
+        %   S A V E   %
+        % - - - - - - %
+
+        cd(mainFolder)
+
+        save(fileN,'peak_values');
+
+        % Save standard deviation and mean of cumulative channel
+        cumulative.avg = mean(cum_avg);
+        cumulative.stdev = mean(cum_std);
+        save(strcat(data_type, '_', 'cumulative_peak_data'), 'cumulative');
+
+    else
+        disp('Skipped')
+    end
+end
+
+if bead_flag==1
+    successmessage=BeadSortingTH6PMT(filepath,file_range);
+    disp(successmessage)
+end
+% successmessage=PeakSortingWithFLRTH(filepath, file_range, bead_flag); % peak sorting of scattering peaks with and without FLR
+% disp(successmessage)
+successmessage='Completed Peak Detection';
