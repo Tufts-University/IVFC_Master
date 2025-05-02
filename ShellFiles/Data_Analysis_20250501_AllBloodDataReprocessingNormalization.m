@@ -1,14 +1,14 @@
-%% 042225_DataAnalysis
+%% 050125_DataAnalysis
 % Owner: Taras Hanulia
-% Data Type: BiRFP with CARTeGFP Data Reprocessing for normalization of raw data
+% Data Type: Blood Data Reprocessing for normalization of raw data
 % of the peak
 %% Initialization
 clear
 clc
 %% Calling Script
-data_path = 'R:\Taras\IVFC\Blood Cell Data\2025\BiRFP_with_CARTeGFP';
+data_path = 'R:\Taras\IVFC\Blood Cell Data\2025\Blood only';
 cd(data_path)
-T = readtable("TH_04222025_DatasetSummary_BiRFP_CARTeGFP.xlsx");
+T = readtable("TH_04302025_DatasetsummaryBlood.xlsx");
 fname_dict = T.FolderName;
 fname_dict = cellfun(@(x) x(2:end-1), fname_dict, 'UniformOutput', false);
 MouseFlag = T.MouseFlag;
@@ -17,7 +17,7 @@ idx = find(MouseFlag==1 & T.inc==1);
 Final_Fname = {fname_dict{idx}}';
 Final_BeadFlag = BeadFlag(idx);
 
-mainpath = 'R:\Taras\IVFC\Blood Cell Data\2025\BiRFP_with_CARTeGFP';
+mainpath = 'R:\Taras\IVFC\Blood Cell Data\2025\Blood only';
 cd(mainpath)
 
 parfor i=1:length(Final_Fname)
@@ -33,7 +33,7 @@ parfor i=1:length(Final_Fname)
     date = strread(date,'%2s');
     %% Peak Detection
 %     outputfile= ['NTH_peak_values_',date{1},'_',date{2},'_',date{3}];
-    dirinfo = dir('*Cell*');
+    dirinfo = dir('*Blood*');
     dirinfo(~[dirinfo.isdir]) = [];  %remove non-directories
     dirinfo(ismember( {dirinfo.name}, {'.', '..'})) = [];  %remove . and ..
     file_range= (1:length(dirinfo));
