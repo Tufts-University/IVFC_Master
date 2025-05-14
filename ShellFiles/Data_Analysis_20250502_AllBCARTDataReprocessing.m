@@ -20,6 +20,21 @@ Final_BeadFlag = BeadFlag(idx);
 mainpath = 'R:\Taras\IVFC\Blood Cell Data\2025\BiRFP_with_CARTeGFP';
 cd(mainpath)
 
+% %% === Attach required function files from IVFC_Master ===
+% pool = gcp();  % Start or get the current parallel pool
+% 
+% % Path where your functions are stored
+% functionPath = 'C:\Users\thanul01\Documents\MATLAB\IVFC_Master';
+% 
+% % List the specific functions you need
+% requiredFiles = {
+%     fullfile(functionPath, 'SamplePeakDetection6PMTRF_PSE.m'),
+%     fullfile(functionPath, 'check_ranges.m')
+% };
+% 
+% % Attach to parallel workers
+% addAttachedFiles(pool, requiredFiles);
+
 parfor i=1:length(Final_Fname)
     disp(['Reprocessing Day ',num2str(i),' of ',num2str(length(Final_Fname))])
     exp_name=Final_Fname{i};
@@ -39,14 +54,15 @@ parfor i=1:length(Final_Fname)
     file_range= (1:length(dirinfo));
     analysisvals=[1,2,4,5,6,7];
     sample_type= 'Blood';
-    exp_num=round(150);
+    exp_num=[150];
     std_threshold=3;
     Spectralon_tail= '';
     FWMH_threshold=0;
     intensity_threshold= 0.2;
     bead_flag = Final_BeadFlag(i);
-    output=SamplePeakDetection6PMTRF_PSE(filepath,outputfile,file_range,Window_Low,...
-        Window_High,Fs,analysisvals,sample_type,exp_num,std_threshold,...
-        Spectralon_tail,FWMH_threshold,intensity_threshold,bead_flag);
+    output=SamplePeakDetection6PMTRF_PSE(filepath,outputfile,...
+    file_range,Window_Low,Window_High,Fs,analysisvals,sample_type,...
+    exp_num,std_threshold,Spectralon_tail,FWMH_threshold,...
+    intensity_threshold,bead_flag);
     disp(output)
 end
